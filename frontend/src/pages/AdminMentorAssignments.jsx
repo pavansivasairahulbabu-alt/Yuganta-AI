@@ -139,7 +139,10 @@ export default function AdminMentorAssignments() {
             <div className="w-1 h-8 bg-gradient-to-b from-[#8B5CF6] to-[#EC4899] rounded-full"></div>
             <p className="text-sm font-semibold text-[#A855F7]">Admin Panel</p>
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-[#C7C3D6] to-[#9A93B5] bg-clip-text text-transparent">
+            Mentor Assignments
+          </h1>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-[#C7C3D6] to-[#9A93B5] bg-clip-text text-transparent">
             Mentor Assignments
           </h1>
           <p className="text-[#9A93B5] text-lg">
@@ -218,7 +221,12 @@ export default function AdminMentorAssignments() {
             {/* View by Mentor - CLEAR MENTOR ASSIGNMENTS */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-               <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+               <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-[#C7C3D6] bg-clip-text text-transparent flex items-center gap-3">
+                  <span className="text-4xl">👨‍🏫</span>
+                  Active Mentor Assignments
+                </h2>
+               <div className="flex items-center justify-between">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-[#C7C3D6] bg-clip-text text-transparent flex items-center gap-3">
                   <span className="text-4xl">👨‍🏫</span>
                   Active Mentor Assignments
                 </h2>
@@ -313,7 +321,7 @@ export default function AdminMentorAssignments() {
             {stats.unassigned > 0 && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-[#C7C3D6] bg-clip-text text-transparent flex items-center gap-3">
                     <span className="text-4xl">⚠️</span>
                     Students Awaiting Mentor Assignment
                   </h2>
@@ -371,6 +379,7 @@ export default function AdminMentorAssignments() {
             {/* Detailed List View */}
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Students & Their Mentors</h2>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-[#C7C3D6] bg-clip-text text-transparent">Students & Their Mentors</h2>
               {filteredAssignments.length === 0 ? (
                 <div className="bg-[rgba(22,11,46,0.4)] backdrop-blur-xl border border-[rgba(139,92,246,0.2)] rounded-2xl p-8 text-center shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
                   <p className="text-[#9A93B5]">No results found</p>
@@ -414,6 +423,7 @@ export default function AdminMentorAssignments() {
                 </div>
               )}
             </div>
+          </div>
           </div>
         )}
       </div>

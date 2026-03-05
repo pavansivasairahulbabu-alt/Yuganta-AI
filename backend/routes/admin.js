@@ -375,7 +375,7 @@ router.post("/assign-instructor", verifyAdmin, async (req, res) => {
 // Create instructor (admin adds instructor)
 router.post("/instructors", verifyAdmin, async (req, res) => {
 	try {
-		const { name, email, expertise, bio, avatar, photo, company } = req.body;
+		const { name, email, expertise, bio, photo, company, avatar } = req.body;
 		if (!name || !email || !expertise || !bio || !photo || !company) {
 			return res.status(400).json({ message: "Name, email, expertise, bio, photo, and company are required" });
 		}
@@ -407,6 +407,7 @@ router.post("/instructors", verifyAdmin, async (req, res) => {
 				name: instructor.name,
 				email: instructor.email,
 				expertise: instructor.expertise,
+
 				photo: instructor.photo,
 				company: instructor.company,
 				bio: instructor.bio,
@@ -414,9 +415,9 @@ router.post("/instructors", verifyAdmin, async (req, res) => {
 				approved: instructor.approved,
 			},
 		});
-	} catch (error) {
+	} catch (error) {	
 		console.error("Create instructor error:", error);
-		res.status(500).json({ message: "Server error" });
+		res.status(500).json({ message: "Server error", details: error.message });
 	}
 });
 

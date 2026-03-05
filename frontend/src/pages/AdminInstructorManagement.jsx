@@ -58,7 +58,7 @@ export default function AdminInstructorManagement() {
       toast.error("All fields are required: name, expertise, email, bio, photo, company");
       return;
     }
-    
+
     try {
       const token = localStorage.getItem("adminToken");
       const response = await fetch(`${API_URL}/api/admin/instructors`, {
@@ -80,9 +80,9 @@ export default function AdminInstructorManagement() {
       }
 
       const data = await response.json();
-      setInstructors((prev) => [data.instructor, ...prev]);
+      setInstructors((prev) => [data.instructor || data, ...prev]);
       setForm({ name: "", expertise: "", email: "", bio: "", photo: "", company: "" });
-      toast.success("Instructor created successfully! They can now setup their password using the forgot password link.");
+      toast.success("Instructor created successfully! They can now set their password using the forgot password link.");
     } catch (error) {
       console.error("Add error:", error);
       toast.error(error.message || "Failed to add instructor");
@@ -101,11 +101,6 @@ export default function AdminInstructorManagement() {
     setActionLoading((prev) => ({ ...prev, [id]: true }));
     try {
       const token = localStorage.getItem("adminToken");
-      if (!token) {
-        handleLogout();
-        return;
-      }
-
       const response = await fetch(`${API_URL}/api/admin/instructors/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -124,7 +119,7 @@ export default function AdminInstructorManagement() {
       toast.success("Instructor deleted successfully");
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error("Failed to delete instructor");
+      toast.error(error.message || "Failed to delete instructor");
     } finally {
       setActionLoading((prev) => ({ ...prev, [id]: false }));
     }
@@ -182,6 +177,17 @@ export default function AdminInstructorManagement() {
     navigate("/admin/login", { replace: true });
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-24 md:pt-28 pb-16">
+        <AdminNavbar />
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <p className="text-[#C7C3D6]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-24 md:pt-28 pb-16">
       <AdminNavbar />
@@ -219,37 +225,34 @@ export default function AdminInstructorManagement() {
                 <path fillRule='evenodd' d='M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 3.062v6.648a3.066 3.066 0 01-3.062 3.062H9.231A9.065 9.065 0 007.000 16.89a9.065 9.065 0 00-2.231.274H4.267a3.066 3.066 0 01-3.062-3.062V6.517a3.066 3.066 0 012.812-3.062zM9 12a1 1 0 11-2 0 1 1 0 012 0z' clipRule='evenodd' />
               </svg>
             </div>
-            <div className='text-4xl font-bold text-transparent bg-gradient-to-r from-[#A855F7] to-[#D946EF] bg-clip-text'>{stats.active}</div>
+            <div className='text-3xl font-bold text-[#A855F7]'>{stats.active}</div>
           </div>
           <div className="bg-gradient-to-br from-[rgba(236,72,153,0.15)] to-[rgba(236,72,153,0.05)] border border-[rgba(236,72,153,0.25)] rounded-2xl p-6 hover:shadow-[0_8px_32px_rgba(236,72,153,0.2)] hover:-translate-y-1 transition-all duration-300">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-[#C7C3D6] font-semibold">Inactive</p>
-              <svg className='w-6 h-6 text-[#9A93B5] opacity-50' fill='currentColor' viewBox='0 0 20 20'>
-                <path fillRule='evenodd' d='M13.477 14.89A6 6 0 015.11 2.527a6 6 0 008.367 8.368z' clipRule='evenodd' />
+              <p className="text-sm text-[#C7C3D6] font-semibold">Approved</p>
+              <svg className='w-6 h-6 text-[#EC4899] opacity-50' fill='currentColor' viewBox='0 0 20 20'>
+                <path fillRule='evenodd' d='M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z' clipRule='evenodd' />
               </svg>
             </div>
-            <div className='text-4xl font-bold text-transparent bg-gradient-to-r from-[#9A93B5] to-[#A855F7] bg-clip-text'>{stats.total - stats.active}</div>
+            <div className='text-3xl font-bold text-[#EC4899]'>{stats.approved}</div>
           </div>
         </div>
 
-        {/* Add Form */}
-        <div className="bg-[var(--card-bg)] border border-[rgba(139,92,246,0.2)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white mb-1">Add New Instructor</h2>
-            <p className="text-[#C7C3D6] text-sm">Create a new instructor account for your courses</p>
-          </div>
-          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        {/* Add New Instructor */}
+        <div className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
+          <h2 className="text-2xl font-bold text-white mb-6">Add Instructor</h2>
+          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <input
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
+              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
               placeholder="Full Name"
               required
             />
             <input
               value={form.expertise}
               onChange={(e) => setForm((f) => ({ ...f, expertise: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
+              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
               placeholder="Expertise/Subject"
               required
             />
@@ -257,30 +260,29 @@ export default function AdminInstructorManagement() {
               type="email"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
+              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
               placeholder="Email Address"
               required
             />
             <input
               value={form.company}
               onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
+              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
               placeholder="Company"
               required
             />
             <input
               value={form.photo}
               onChange={(e) => setForm((f) => ({ ...f, photo: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
+              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
               placeholder="Photo URL"
               required
             />
             <input
               value={form.bio}
               onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Bio"
-              required
+              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
+              placeholder="Bio (optional)"
             />
             <button
               type="submit"
@@ -294,12 +296,11 @@ export default function AdminInstructorManagement() {
         </div>
 
         {/* List */}
-        <div className="bg-[var(--card-bg)] border border-[rgba(139,92,246,0.2)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
+        <div className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-white mb-1">All Instructors</h2>
             <p className="text-[#C7C3D6] text-sm">{instructors.length} instructor{instructors.length !== 1 ? 's' : ''} on platform</p>
           </div>
-          
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin">
@@ -310,12 +311,12 @@ export default function AdminInstructorManagement() {
               <p className="text-[#C7C3D6] mt-3">Loading...</p>
             </div>
           ) : (
-            <div className="space-y-0 divide-y divide-[rgba(139,92,246,0.1)]">
+            <div className="space-y-0">
               {instructors.length === 0 ? (
                 <p className="text-center py-12 text-[#9A93B5]">No instructors yet. Add one above to get started.</p>
               ) : (
                 instructors.map((item) => (
-                  <div key={item._id || Math.random()} className="py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[rgba(139,92,246,0.05)] px-4 rounded-lg transition duration-300">
+                  <div key={item._id} className="py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[rgba(139,92,246,0.05)] px-4 rounded-lg transition duration-300">
                     <div className="flex-1 min-w-0">
                       <p className="text-lg font-semibold text-white truncate">{item.name}</p>
                       <p className="text-sm text-[#A855F7] font-medium">{item.expertise}</p>
