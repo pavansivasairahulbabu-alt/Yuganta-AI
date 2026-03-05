@@ -1,0 +1,8 @@
+# robots.txt for YuganthaAI
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /instructor/
+
+# Sitemap
+Sitemap: https://yuganthaai.com/sitemap.xml
