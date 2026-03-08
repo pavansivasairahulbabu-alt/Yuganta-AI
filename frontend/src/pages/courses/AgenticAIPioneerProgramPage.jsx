@@ -1,18 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import API_URL from "../../config/api";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { LayoutGrid, Clock, Code2, ClipboardList, Users, CheckCircle } from "lucide-react";
 
 export default function AgenticAIPioneerProgramPage() {
   const { theme } = useTheme();
+  const { isAuthenticated, user, token } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
   const [whatsapp, setWhatsapp] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const [openWeek, setOpenWeek] = useState(null);
   const [instructors, setInstructors] = useState([]);
   const [loadingInstructors, setLoadingInstructors] = useState(true);
+
+  const AGENTIC_SLUG = "agentic-ai-pioneer-program";
+  const AGENTIC_TITLE = "Agentic AI Pioneer Program";
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -117,31 +126,139 @@ export default function AgenticAIPioneerProgramPage() {
     })();
   }, []);
 
+  useEffect(() => {
+    const fullName = user?.fullName || user?.user?.fullName || "";
+    const email = user?.email || user?.user?.email || "";
+
+    if (fullName || email) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || fullName,
+        email: prev.email || email,
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setIsEnrolled(false);
+      return;
+    }
+
+    const fetchEnrollmentStatus = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/users/enrolled`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) return;
+        const data = await response.json();
+
+        const found = Array.isArray(data) && data.some((item) => {
+          const course = item?.courseId;
+          const title = (course?.title || "").toLowerCase();
+          const id = course?._id || "";
+          return title.includes("agentic ai pioneer") || id === AGENTIC_SLUG;
+        });
+
+        setIsEnrolled(found);
+      } catch {
+        setIsEnrolled(false);
+      }
+    };
+
+    fetchEnrollmentStatus();
+  }, [isAuthenticated, token]);
+
+  const findAgenticCourseId = async () => {
+    const response = await fetch(`${API_URL}/api/courses`);
+    if (!response.ok) return null;
+    const courses = await response.json();
+    if (!Array.isArray(courses)) return null;
+
+    const match = courses.find((course) =>
+      (course?.title || "").toLowerCase().includes("agentic ai pioneer")
+    );
+
+    return match?._id || null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isEnrolled) {
+      toast.success("You are already enrolled in this program.");
+      return;
+    }
     if (!form.name || !form.phone || !form.email) return;
+    if (!agree) {
+      toast.error("Please accept Terms & Conditions to continue.");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast("Please sign up or log in to enroll.");
+      navigate("/signup");
+      return;
+    }
+
     setSubmitting(true);
+
     try {
-      const res = await fetch(`${API_URL}/api/leads`, {
+      const leadRes = await fetch(`${API_URL}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
           email: form.email,
-          courseId: "agentic-ai-pioneer-program",
-          courseName: "Agentic AI Pioneer Program",
+          courseId: AGENTIC_SLUG,
+          courseName: AGENTIC_TITLE,
           type: "Enrollment",
           agreeTerms: agree,
           whatsappUpdates: whatsapp,
         }),
       });
-      if (!res.ok) {
-        // soft-fail: keep UX inline without backend changes
-        console.warn("Lead submit failed");
+
+      const leadData = await leadRes.json().catch(() => ({}));
+
+      if (leadData?.alreadyEnrolled) {
+        setForm({ name: "", phone: "", email: "" });
+        setIsEnrolled(true);
+        toast.success("Already enrolled with this phone number or email.");
+        return;
       }
+
+      // Persist enrollment to user account so button can reliably show "Enrolled" for this user
+      const courseId = await findAgenticCourseId();
+      if (courseId) {
+        const enrollRes = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!enrollRes.ok) {
+          const enrollData = await enrollRes.json().catch(() => ({}));
+          const message = (enrollData?.message || "").toLowerCase();
+          if (message.includes("already enrolled")) {
+            toast.success("You are already enrolled in this program.");
+          } else {
+            console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
+            toast.error(enrollData?.message || "Enrollment failed. Please try again.");
+          }
+        } else {
+          toast.success("Successfully enrolled!");
+        }
+      }
+
+      setForm({ name: "", phone: "", email: "" });
+      setIsEnrolled(true);
     } catch (err) {
       console.error("Lead submit error", err);
+      toast.error("Unable to complete enrollment right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -159,12 +276,25 @@ export default function AgenticAIPioneerProgramPage() {
               <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
               <a href="#testimonials" className="text-[#C7C3D6] hover:text-white font-semibold">Testimonials</a>
             </div>
-            <Link
-              to="/signup"
-              className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] text-white font-semibold shadow-[0_4px_16px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.6)] transition-all"
-            >
-              Enroll Now
-            </Link>
+            {isEnrolled ? (
+              <span className="px-5 py-2.5 rounded-lg border border-[var(--border-primary)] text-[var(--text-color)] font-semibold">
+                Enrolled
+              </span>
+            ) : isAuthenticated ? (
+              <a
+                href="#agentic-enroll-form"
+                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] transition-all"
+              >
+                Enroll Now
+              </a>
+            ) : (
+              <Link
+                to="/signup"
+                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] transition-all"
+              >
+                Enroll Now
+              </Link>
+            )}
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -203,7 +333,7 @@ export default function AgenticAIPioneerProgramPage() {
               </div>
             </div>
 
-            <div className="w-full max-w-lg">
+            <div id="agentic-enroll-form" className="w-full max-w-lg">
               <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
                 <h3 className="text-xl font-bold mb-4">Become a GenAI and Agentic AI Expert: Start Now</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -241,10 +371,10 @@ export default function AgenticAIPioneerProgramPage() {
                   </div>
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] disabled:opacity-60"
+                    disabled={submitting || isEnrolled}
+                    className="w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.5)] disabled:opacity-60"
                   >
-                    {submitting ? "Submitting..." : "Enroll Now"}
+                    {submitting ? "Submitting..." : isEnrolled ? "Enrolled" : "Enroll Now"}
                   </button>
                 </form>
               </div>
@@ -522,7 +652,7 @@ export default function AgenticAIPioneerProgramPage() {
                 ))}
               </div>
               <div className="mt-6">
-                <a href="/curriculum.pdf" className="block text-center w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-xl font-semibold px-6 py-3 transition-all">
+                <a href="/curriculum.pdf" className="block text-center w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-xl font-semibold px-6 py-3 transition-all">
                   Download Free Curriculum
                 </a>
               </div>
@@ -603,7 +733,7 @@ export default function AgenticAIPioneerProgramPage() {
           <div className="mt-8 flex justify-center">
             <a
               href="/tools-pack.pdf"
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white font-semibold transition-all"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold transition-all"
             >
               Download Tools Pack
             </a>
@@ -896,12 +1026,25 @@ export default function AgenticAIPioneerProgramPage() {
                 ))}
               </ul>
               <div className="mt-8">
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#EF4444] via-[#F43F5E] to-[#3B82F6] text-white font-semibold py-3"
-                >
-                  Enroll Now
-                </Link>
+                {isEnrolled ? (
+                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
+                    Enrolled
+                  </span>
+                ) : isAuthenticated ? (
+                  <a
+                    href="#agentic-enroll-form"
+                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                  >
+                    Enroll Now
+                  </a>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                  >
+                    Enroll Now
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -926,12 +1069,25 @@ export default function AgenticAIPioneerProgramPage() {
                 ))}
               </ul>
               <div className="mt-8">
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#EF4444] via-[#F43F5E] to-[#3B82F6] text-white font-semibold py-3"
-                >
-                  Enroll Now
-                </Link>
+                {isEnrolled ? (
+                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
+                    Enrolled
+                  </span>
+                ) : isAuthenticated ? (
+                  <a
+                    href="#agentic-enroll-form"
+                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                  >
+                    Enroll Now
+                  </a>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                  >
+                    Enroll Now
+                  </Link>
+                )}
               </div>
             </div>
           </div>

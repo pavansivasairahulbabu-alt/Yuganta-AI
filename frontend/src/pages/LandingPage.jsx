@@ -1,30 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import StructuredData from "../components/StructuredData";
-import API_URL from "../config/api";
 
 export default function LandingPage() {
 	const [email, setEmail] = useState("");
-	const [courses, setCourses] = useState([]);
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		fetchCourses();
-	}, []);
-
-	const fetchCourses = async () => {
-		try {
-			const response = await fetch(`${API_URL}/api/courses`);
-			if (response.ok) {
-				const data = await response.json();
-				setCourses(data.slice(0, 3)); // Show top 3 courses
-			}
-		} catch (error) {
-			console.error("Error fetching homepage courses:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
 
 	const handleNewsletterSubmit = (e) => {
 		e.preventDefault();
@@ -174,48 +153,42 @@ export default function LandingPage() {
 						</h2>
 					</div>
 
-					{loading ? (
-						<div className="text-center text-white py-12">Loading courses...</div>
-					) : courses.length === 0 ? (
-						<div className="text-center py-12 border-2 border-dashed border-white/10 rounded-3xl bg-white/5">
-							<div className="text-6xl mb-4">📚</div>
-							<h3 className="text-2xl font-bold text-white mb-2">New Courses Coming Soon!</h3>
-							<p className="text-gray-400">Stay tuned for our upcoming curriculum updates.</p>
+					<div className="max-w-sm mx-auto">
+						<div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl">
+							<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
+								<img
+									src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=900&h=650&fit=crop"
+									alt="Agentic AI Pioneer Program"
+									className="w-full h-full object-cover"
+								/>
+							</div>
+
+							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
+								<span>150 Hours</span>
+								<span>•</span>
+								<span>15 Courses</span>
+							</div>
+
+							<h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-4 leading-tight">
+								Agentic AI Pioneer Program
+							</h3>
+
+							<div className="flex flex-wrap gap-2 mb-6">
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">AI Agents</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">RAG</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">LangChain</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">AutoGen</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">CrewAI</span>
+							</div>
+
+							<Link
+								to="/courses/agentic-ai-pioneer-program"
+								className="block w-full text-center py-3.5 rounded-2xl border border-blue-300/70 text-base text-[var(--text-color)] font-semibold hover:border-blue-500 hover:text-blue-500 transition-colors"
+							>
+								Enroll Now
+							</Link>
 						</div>
-					) : (
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-							{courses.map((course) => (
-								<Link
-										key={course._id}
-										to={`/course-details/${course._id}`}
-										className="bg-[var(--card-bg)] border border-transparent rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-blue-500/50 group"
-									>
-									<div className="mb-6 h-48 overflow-hidden rounded-2xl">
-										{course.thumbnail ? (
-											<img
-												src={course.thumbnail}
-												alt={course.title}
-												className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-											/>
-										) : (
-											<div className="w-full h-full bg-gray-200 flex items-center justify-center text-4xl">
-												📘
-											</div>
-										)}
-									</div>
-										<h3 className="text-2xl font-bold text-[var(--text-color)] mb-4 transition-colors line-clamp-2">
-										{course.title}
-									</h3>
-										<p className="text-[var(--text-muted)] leading-relaxed transition-colors line-clamp-3">
-										{course.description}
-									</p>
-										<div className="mt-6 pt-4 border-t border-[var(--border-color)] flex items-center justify-between">
-											<span className="text-sm font-semibold text-blue-500">View Details &rarr;</span>
-									</div>
-								</Link>
-							))}
-						</div>
-					)}
+					</div>
 				</div>
 			</div>
 

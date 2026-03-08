@@ -43,8 +43,10 @@ const adminAuth = async (req, res, next) => {
 router.post("/", async (req, res) => {
 	try {
 		const { name, email, phone, courseId, courseName, type } = req.body;
+		const normalizedEmail = String(email || "").trim().toLowerCase();
+		const normalizedPhone = String(phone || "").trim();
 
-		if (!name || !email || !phone || !courseId) {
+		if (!name || !normalizedEmail || !normalizedPhone || !courseId) {
 			return res.status(400).json({ message: "All fields are required" });
 		}
 
@@ -55,7 +57,7 @@ router.post("/", async (req, res) => {
 
 		if (leadType === "Brochure") {
 			const existingLead = await Lead.findOne({
-				phone,
+				phone: normalizedPhone,
 				courseId,
 				type: "Brochure",
 			});
@@ -69,10 +71,26 @@ router.post("/", async (req, res) => {
 			}
 		}
 
+		if (leadType === "Enrollment") {
+			const existingEnrollment = await Lead.findOne({
+				courseId,
+				type: "Enrollment",
+				$or: [{ email: normalizedEmail }, { phone: normalizedPhone }],
+			});
+
+			if (existingEnrollment) {
+				return res.status(200).json({
+					message: "Already enrolled with this phone number or email for this course.",
+					lead: existingEnrollment,
+					alreadyEnrolled: true,
+				});
+			}
+		}
+
 		const newLead = new Lead({
 			name,
-			email,
-			phone,
+			email: normalizedEmail,
+			phone: normalizedPhone,
 			courseId,
 			courseName,
 			type: leadType,

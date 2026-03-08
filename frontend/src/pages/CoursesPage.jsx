@@ -128,6 +128,33 @@ export default function CoursesPage() {
 		"https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400",
 	];
 
+	const getCourseTopics = (course) => {
+		const title = (course?.title || "").toLowerCase();
+
+		if (title.includes("agentic")) {
+			return ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"];
+		}
+
+		if (title.includes("mern")) {
+			return ["MongoDB", "Express", "React", "Node.js"];
+		}
+
+		if (title.includes("astra")) {
+			return ["LLMs", "Transformers", "RAG", "Agents"];
+		}
+
+		if (title.includes("aiml") || title.includes("machine learning")) {
+			return ["AI Basics", "ML", "Deep Learning", "Projects"];
+		}
+
+		return ["Hands-on", "Projects", "Mentorship"];
+	};
+
+	const isAgenticCourse = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		return title.includes("agentic") && title.includes("pioneer");
+	};
+
 	return (
 		<div className='min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-20 transition-colors duration-300'>
 			{/* Hero Section */}
@@ -314,16 +341,24 @@ export default function CoursesPage() {
 									</p>
 								</div>
 							) : (
-								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7'>
 									{filteredCourses.map((course) => (
+										(() => {
+											const isAgentic = isAgenticCourse(course);
+											const courseTitle = isAgentic ? "Agentic AI Pioneer Program" : course.title;
+											const coursePath = isAgentic ? "/courses/agentic-ai-pioneer-program" : `/course-details/${course._id}`;
+											const durationText = isAgentic ? "150 Hours" : (course.duration || "150 Hours");
+											const countText = isAgentic ? "15 Courses" : `${course.modules?.length || course.lessons || 15} Courses`;
+
+											return (
 										<div
 											key={course._id}
-											className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg overflow-hidden hover:shadow-[0_8px_32px_rgba(139,92,246,0.3)] hover:border-[rgba(139,92,246,0.4)] transition-all duration-300 group'>
+											className='bg-[var(--card-bg)] border border-[var(--border-color)]/80 rounded-2xl overflow-hidden hover:shadow-[0_12px_36px_rgba(139,92,246,0.22)] hover:border-[rgba(139,92,246,0.45)] transition-all duration-300 group backdrop-blur-sm'>
 											{/* Video/Thumbnail Section */}
-											<div className='relative h-48 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900'>
+											<div className='relative h-44 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900'>
 												{course.videoUrl ? (
 													<video
-														className='w-full h-full object-cover'
+														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
 														muted
 														loop
 														playsInline
@@ -338,47 +373,41 @@ export default function CoursesPage() {
 													<img
 														src={course.thumbnail}
 														alt={course.title}
-														className='w-full h-full object-cover'
+														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
 													/>
 												) : (
 													<div className='w-full h-full flex items-center justify-center text-6xl'>
 														📚
 													</div>
 												)}
-												{/* Duration Badge */}
-												<div className='absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded text-xs'>
-													{course.duration || "Self-paced"}
-												</div>
 											</div>
 
 											{/* Course Info */}
-											<div className='p-5'>
-												{/* Duration and Lessons */}
-												<div className='flex items-center gap-4 text-gray-400 text-sm mb-3'>
-													<span>{course.duration || "Self-paced"}</span>
+											<div className='p-5 md:p-6'>
+												{/* Duration and Count */}
+												<div className='flex items-center gap-3 text-[var(--text-muted)] text-sm mb-3'>
+													<span>{durationText}</span>
 													<span>•</span>
-													<span>{course.modules?.length || course.lessons || 0} Lessons</span>
+													<span>{countText}</span>
 												</div>
 
 												{/* Title */}
-												<Link to={`/course-details/${course._id}`}>
-													<h3 className='font-bold text-lg mb-3 text-[var(--text-color)] line-clamp-2 min-h-[3.5rem] hover:text-[#A855F7] transition-colors'>
-														{course.title}
+												<Link to={coursePath}>
+													<h3 className='font-bold text-2xl mb-4 text-[var(--text-color)] line-clamp-2 min-h-[4rem] hover:text-[#A855F7] transition-colors'>
+														{courseTitle}
 													</h3>
 												</Link>
 
-												{/* Rating and Students */}
-												<div className='flex items-center justify-between mb-4'>
-													<div className='flex items-center gap-2 text-sm'>
-														<span className='text-gray-400'>👤</span>
-														<span className='text-gray-300'>{course.students || 0}</span>
-													</div>
-													<div className='flex items-center gap-1'>
-														<span className='text-yellow-400'>★</span>
-														<span className='text-gray-300 text-sm'>
-															{course.rating ? course.rating.toFixed(1) : '4.5'}
+												{/* Topics */}
+												<div className='flex flex-wrap gap-2 mb-5 min-h-[4.5rem] content-start'>
+													{getCourseTopics(course).map((topic) => (
+														<span
+															key={`${course._id}-${topic}`}
+															className='px-3 py-1.5 text-sm font-semibold rounded-md border border-[var(--border-color)] text-[var(--text-color)] bg-[var(--bg-secondary)]'
+														>
+															{topic}
 														</span>
-													</div>
+													))}
 												</div>
 
 												{/* Enroll Button */}
@@ -386,19 +415,21 @@ export default function CoursesPage() {
 													const isEnrolled = enrolledCourseIds.includes(course._id);
 													return (
 														<Link
-															to={isEnrolled ? "/my-learning" : `/course-details/${course._id}`}
-															className={`block w-full text-center py-3 rounded-lg font-semibold transition duration-300 ${
+															to={isEnrolled ? "/my-learning" : coursePath}
+															className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 ${
 																isEnrolled
 																	? "bg-blue-500 text-white hover:bg-blue-600"
-																	: "border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white"
+																	: "border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
 															}`}
 														>
-															{isEnrolled ? "Resume Learning" : "View Roadmap"}
+															{isEnrolled ? "Resume Learning" : "Enroll Now"}
 														</Link>
 													);
 												})()}
 											</div>
 										</div>
+											);
+										})()
 									))}
 								</div>
 							)}
