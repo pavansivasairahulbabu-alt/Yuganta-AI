@@ -50,6 +50,7 @@ import AIAgentAvatarPage from "./pages/projects/AIAgentAvatarPage";
 import HVACAgentPage from "./pages/projects/HVACAgentPage";
 import AILearningPlatformPage from "./pages/projects/AILearningPlatformPage";
 import InstructorsPage from "./pages/InstructorsPage";
+import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
 
 function CoursesHomePage() {
 	return (
@@ -210,6 +211,14 @@ export default function App() {
 										element={
 											<CoursesLayout>
 												<CourseDetailPage />
+											</CoursesLayout>
+										}
+									/>
+									<Route
+										path='/courses/agentic-ai-pioneer-program'
+										element={
+											<CoursesLayout>
+												<AgenticAIPioneerProgramPage />
 											</CoursesLayout>
 										}
 									/>

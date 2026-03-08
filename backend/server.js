@@ -40,15 +40,17 @@ const app = express();
 connectDB();
 
 // CORS configuration
-const allowedOrigins = (process.env.FRONTEND_URL || '').split(',').map(url => url.trim()).filter(Boolean);
+const envOrigins = (process.env.FRONTEND_URL || '')
+	.split(',')
+	.map(url => url.trim())
+	.filter(Boolean);
+const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const prodDefaultOrigins = ['https://yuganthaai.vercel.app', 'https://yuganthaai.com'];
+
 const corsOptions = {
 	origin: process.env.NODE_ENV === 'production'
-		? [
-			...allowedOrigins,
-			'https://yuganthaai.vercel.app',
-			'https://yuganthaai.com',
-		]
-		: (process.env.FRONTEND_URL || 'http://localhost:5173').split(',').map(url => url.trim()),
+		? [...prodDefaultOrigins, ...envOrigins]
+		: [...defaultDevOrigins, ...envOrigins],
 	credentials: true,
 	optionsSuccessStatus: 200
 };

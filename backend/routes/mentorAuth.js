@@ -91,6 +91,11 @@ router.post(
 
 			console.log("✅ Mentor found:", mentor.name);
 
+			// Ensure required fields have safe defaults (for old records)
+			if (!mentor.photo) mentor.photo = "https://via.placeholder.com/150";
+			if (!mentor.bio) mentor.bio = "Professional mentor at YuganthaAI";
+			if (!mentor.company) mentor.company = "YuganthaAI";
+
 			// Generate OTP for password reset
 			const otp = Math.floor(100000 + Math.random() * 900000).toString();
 			const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
