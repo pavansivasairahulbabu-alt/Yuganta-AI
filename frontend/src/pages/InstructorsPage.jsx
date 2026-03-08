@@ -4,7 +4,6 @@ import API_URL from "../config/api";
 export default function InstructorsPage() {
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -66,31 +65,14 @@ export default function InstructorsPage() {
         setLoading(true);
         let list = [];
 
-        // Try fetching instructors (admin endpoint, optional token)
+        // Public instructors endpoint (no admin token required)
         try {
-          const adminToken = localStorage.getItem("adminToken");
-          const res = await fetch(`${API_URL}/api/admin/instructors`, {
-            headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
-          });
+          const res = await fetch(`${API_URL}/api/courses/instructors/public`);
           if (res.ok) {
             const data = await res.json();
             list = Array.isArray(data) ? data : [];
           }
         } catch { void 0; }
-
-        // If no instructors, try mentors list (admin endpoint, optional token)
-        if (!list.length) {
-          try {
-            const adminToken = localStorage.getItem("adminToken");
-            const res = await fetch(`${API_URL}/api/admin/mentors`, {
-              headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
-            });
-            if (res.ok) {
-              const data = await res.json();
-              list = Array.isArray(data) ? data : [];
-            }
-          } catch { void 0; }
-        }
 
         // Fallback: derive instructors from courses (public endpoint)
         if (!list.length) {
@@ -124,7 +106,7 @@ export default function InstructorsPage() {
         }));
         setInstructors(normalized);
       } catch {
-        setError("Failed to load instructors");
+        setInstructors([]);
       } finally {
         setLoading(false);
       }
@@ -144,17 +126,7 @@ export default function InstructorsPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="instructors-page min-h-screen pt-28 pb-16">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center py-20">
-            <p className="text-sm text-red-500">{error}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  
 
   return (
     <div className="instructors-page min-h-screen pt-28 pb-20">

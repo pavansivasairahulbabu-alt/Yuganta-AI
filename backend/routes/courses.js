@@ -19,6 +19,17 @@ router.get("/", async (req, res) => {
 	}
 });
 
+// Public: list instructors (safe fields only)
+router.get("/instructors/public", async (req, res) => {
+	try {
+		const instructors = await Instructor.find({})
+			.select("name email expertise bio photo company experience avatar approved createdAt");
+		res.json(instructors);
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
 // @route   GET /api/courses/instructor/:instructorId
 // @desc    Get all courses for a specific instructor
 // @access  Public
