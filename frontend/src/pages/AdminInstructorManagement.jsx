@@ -7,9 +7,11 @@ import API_URL from "../config/api";
 export default function AdminInstructorManagement() {
   const navigate = useNavigate();
   const [instructors, setInstructors] = useState([]);
-  const [form, setForm] = useState({ name: "", expertise: "", email: "", bio: "", photo: "", company: "" });
+  const [form, setForm] = useState({ name: "", expertise: "", email: "", bio: "", photo: "", company: "", experience: "" });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   useEffect(() => {
     const authed = localStorage.getItem("adminAuthed") === "true";
@@ -52,6 +54,33 @@ export default function AdminInstructorManagement() {
     return { active, approved, total };
   }, [instructors]);
 
+  const handlePhotoUpload = async (file) => {
+    if (!file) return;
+    const localPreview = URL.createObjectURL(file);
+    setPhotoPreview(localPreview);
+    setPhotoUploading(true);
+    try {
+      const token = localStorage.getItem("adminToken");
+      const formData = new FormData();
+      formData.append("photo", file);
+      const res = await fetch(`${API_URL}/api/admin/upload-instructor-photo`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      setForm((f) => ({ ...f, photo: data.url }));
+      toast.success("Photo uploaded!");
+    } catch (err) {
+      toast.error("Photo upload failed. Try again.");
+      setPhotoPreview("");
+      setForm((f) => ({ ...f, photo: "" }));
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!form.name || !form.expertise || !form.email || !form.bio || !form.photo || !form.company) {
@@ -81,7 +110,8 @@ export default function AdminInstructorManagement() {
 
       const data = await response.json();
       setInstructors((prev) => [data.instructor || data, ...prev]);
-      setForm({ name: "", expertise: "", email: "", bio: "", photo: "", company: "" });
+      setForm({ name: "", expertise: "", email: "", bio: "", photo: "", company: "", experience: "" });
+      setPhotoPreview("");
       toast.success("Instructor created successfully! They can now set their password using the forgot password link.");
     } catch (error) {
       console.error("Add error:", error);
@@ -271,22 +301,106 @@ export default function AdminInstructorManagement() {
               placeholder="Company"
               required
             />
+            {/* Photo Upload */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-[#C7C3D6] mb-2">Instructor Photo</label>
+              <div
+                onClick={() => document.getElementById("instructor-photo-input").click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.type.startsWith("image/")) handlePhotoUpload(file);
+                }}
+                className={`relative flex items-center gap-5 cursor-pointer rounded-xl border-2 border-dashed transition-all duration-300 px-6 py-5 group
+                  ${photoPreview
+                    ? "border-[#8B5CF6] bg-[rgba(139,92,246,0.08)]"
+                    : "border-[var(--border-primary)] hover:border-[#8B5CF6] hover:bg-[rgba(139,92,246,0.05)]"
+                  }`}
+              >
+                <input
+                  id="instructor-photo-input"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) handlePhotoUpload(file);
+                  }}
+                />
+                {/* Preview or placeholder */}
+                {photoPreview ? (
+                  <div className="relative shrink-0">
+                    <img
+                      src={photoPreview}
+                      alt="Preview"
+                      className="w-20 h-20 rounded-full object-cover border-4 border-[#8B5CF6] shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                    />
+                    {photoUploading && (
+                      <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                        <svg className="w-6 h-6 animate-spin text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="shrink-0 w-20 h-20 rounded-full bg-gradient-to-br from-[rgba(139,92,246,0.2)] to-[rgba(236,72,153,0.2)] border-2 border-dashed border-[rgba(139,92,246,0.4)] flex items-center justify-center group-hover:from-[rgba(139,92,246,0.3)] group-hover:to-[rgba(236,72,153,0.3)] transition-all duration-300">
+                    <svg className="w-8 h-8 text-[#A855F7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  {photoUploading ? (
+                    <p className="text-sm font-semibold text-[#A855F7]">Uploading photo...</p>
+                  ) : photoPreview ? (
+                    <>
+                      <p className="text-sm font-semibold text-[#A855F7]">Photo uploaded successfully</p>
+                      <p className="text-xs text-[#9A93B5] mt-0.5">Click or drag to replace</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-semibold text-[var(--text-color)] group-hover:text-[#A855F7] transition-colors">Upload instructor photo</p>
+                      <p className="text-xs text-[#9A93B5] mt-0.5">Click to browse or drag & drop · JPG, PNG, WEBP</p>
+                    </>
+                  )}
+                </div>
+                {photoPreview && !photoUploading && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPhotoPreview("");
+                      setForm((f) => ({ ...f, photo: "" }));
+                    }}
+                    className="shrink-0 w-8 h-8 rounded-full bg-[rgba(236,72,153,0.15)] hover:bg-[rgba(236,72,153,0.3)] text-[#EC4899] flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
             <input
-              value={form.photo}
-              onChange={(e) => setForm((f) => ({ ...f, photo: e.target.value }))}
+              value={form.experience}
+              onChange={(e) => setForm((f) => ({ ...f, experience: e.target.value }))}
               className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Photo URL"
-              required
+              placeholder="Experience (e.g. 5+ years in Web Dev)"
             />
-            <input
+            <textarea
               value={form.bio}
               onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Bio (optional)"
+              rows={3}
+              className="md:col-span-2 bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300 resize-none"
+              placeholder="Bio — short description about the instructor"
+              required
             />
             <button
               type="submit"
-              className="bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] hover:scale-105 active:scale-100 whitespace-nowrap group flex items-center justify-center gap-2">
+              disabled={photoUploading}
+              className="bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] hover:scale-105 active:scale-100 whitespace-nowrap group flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100">
               <svg className='w-5 h-5 group-hover:rotate-90 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M12 4v16m8-8H4' />
               </svg>

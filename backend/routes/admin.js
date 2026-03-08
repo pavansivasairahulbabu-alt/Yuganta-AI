@@ -8,6 +8,10 @@ import Blog from "../models/Blog.js";
 import MentorshipSession from "../models/MentorshipSession.js";
 import sgMail from "../config/mailer.js";
 import upload from "../middleware/upload.js";
+import multer from "multer";
+
+// In-memory multer for instructor photo (no Cloudinary required)
+const memStorage = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
 
@@ -375,7 +379,7 @@ router.post("/assign-instructor", verifyAdmin, async (req, res) => {
 // Create instructor (admin adds instructor)
 router.post("/instructors", verifyAdmin, async (req, res) => {
 	try {
-		const { name, email, expertise, bio, photo, company, avatar } = req.body;
+		const { name, email, expertise, bio, photo, company, avatar, experience } = req.body;
 		if (!name || !email || !expertise || !bio || !photo || !company) {
 			return res.status(400).json({ message: "Name, email, expertise, bio, photo, and company are required" });
 		}
@@ -393,6 +397,7 @@ router.post("/instructors", verifyAdmin, async (req, res) => {
 			photo,
 			company,
 			avatar: avatar || "",
+			experience: experience || "",
 			active: true,
 			approved: true, // Admin-created instructors are pre-approved
 			// No password, no OTP - instructor will set password when they first login
@@ -407,10 +412,10 @@ router.post("/instructors", verifyAdmin, async (req, res) => {
 				name: instructor.name,
 				email: instructor.email,
 				expertise: instructor.expertise,
-
 				photo: instructor.photo,
 				company: instructor.company,
 				bio: instructor.bio,
+				experience: instructor.experience,
 				active: instructor.active,
 				approved: instructor.approved,
 			},
@@ -719,6 +724,21 @@ router.put("/blogs/:id/toggle-featured", verifyAdmin, async (req, res) => {
 	} catch (error) {
 		console.error("Toggle featured error:", error);
 		res.status(500).json({ message: "Server error" });
+	}
+});
+
+// Upload instructor profile photo (memory storage → base64 data URL, no Cloudinary needed)
+router.post("/upload-instructor-photo", verifyAdmin, memStorage.single("photo"), async (req, res) => {
+	try {
+		if (!req.file) {
+			return res.status(400).json({ message: "No photo file provided" });
+		}
+		const b64 = req.file.buffer.toString("base64");
+		const dataUrl = `data:${req.file.mimetype};base64,${b64}`;
+		res.json({ url: dataUrl, message: "Photo uploaded successfully" });
+	} catch (error) {
+		console.error("Instructor photo upload error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
 	}
 });
 
