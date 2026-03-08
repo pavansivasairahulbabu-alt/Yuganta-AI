@@ -384,43 +384,53 @@ router.post("/instructors", verifyAdmin, async (req, res) => {
 			return res.status(400).json({ message: "Name, email, expertise, bio, photo, and company are required" });
 		}
 
-		const existingInstructor = await Instructor.findOne({ email });
+		const normalizedEmail = String(email).trim().toLowerCase();
+
+		const existingInstructor = await Instructor.findOne({ email: normalizedEmail });
 		if (existingInstructor) {
-			return res.status(400).json({ message: "Instructor with this email already exists" });
+			return res.status(409).json({ message: "Instructor with this email already exists" });
 		}
 
 		const instructor = new Instructor({
-			name,
-			email,
-			expertise,
-			bio,
-			photo,
-			company,
-			avatar: avatar || "",
-			experience: experience || "",
+			name: String(name).trim(),
+			email: normalizedEmail,
+			expertise: String(expertise).trim(),
+			bio: String(bio).trim(),
+			photo: String(photo).trim(),
+			company: String(company).trim(),
+			avatar: avatar ? String(avatar).trim() : "",
+			experience: experience ? String(experience).trim() : "",
 			active: true,
 			approved: true, // Admin-created instructors are pre-approved
 			// No password, no OTP - instructor will set password when they first login
 		});
 
 		await instructor.save();
+		const savedInstructor = await Instructor.findById(instructor._id).select("-password");
+
+		if (!savedInstructor) {
+			return res.status(500).json({ message: "Instructor save verification failed" });
+		}
 
 		res.status(201).json({
 			message: "Instructor created successfully. They can now set their password using the forgot password option.",
 			instructor: {
-				_id: instructor._id,
-				name: instructor.name,
-				email: instructor.email,
-				expertise: instructor.expertise,
-				photo: instructor.photo,
-				company: instructor.company,
-				bio: instructor.bio,
-				experience: instructor.experience,
-				active: instructor.active,
-				approved: instructor.approved,
+				_id: savedInstructor._id,
+				name: savedInstructor.name,
+				email: savedInstructor.email,
+				expertise: savedInstructor.expertise,
+				photo: savedInstructor.photo,
+				company: savedInstructor.company,
+				bio: savedInstructor.bio,
+				experience: savedInstructor.experience,
+				active: savedInstructor.active,
+				approved: savedInstructor.approved,
 			},
 		});
-	} catch (error) {	
+	} catch (error) {
+		if (error?.code === 11000) {
+			return res.status(409).json({ message: "Instructor with this email already exists" });
+		}
 		console.error("Create instructor error:", error);
 		res.status(500).json({ message: "Server error", details: error.message });
 	}

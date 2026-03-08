@@ -2,18 +2,10 @@ import express from "express";
 import { body, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import sgMail from "@sendgrid/mail";
+import sgMail from "../config/mailer.js";
 import Instructor from "../models/Instructor.js";
 
 const router = express.Router();
-
-// Initialize SendGrid
-if (process.env.SENDGRID_API_KEY) {
-	sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-	console.log('✅ SendGrid API key configured');
-} else {
-	console.log('❌ SENDGRID_API_KEY not set');
-}
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -58,6 +50,10 @@ const sendOTPEmail = async (email, otp, instructorName = "Instructor") => {
 		return true;
 	} catch (error) {
 		console.error(`❌ Failed to send OTP email to ${email}:`, error.message);
+		const sgErrors = error?.response?.body?.errors;
+		if (Array.isArray(sgErrors) && sgErrors.length > 0) {
+			console.error("📮 SendGrid response errors:", sgErrors.map((item) => item.message).join(" | "));
+		}
 		throw new Error(`Failed to send OTP email: ${error.message}`);
 	}
 };
@@ -78,20 +74,27 @@ router.post(
 			return res.status(400).json({ errors: errors.array() });
 		}
 
-		const { name, email, expertise } = req.body;
+		const { name, email, expertise, bio, photo, company, experience, avatar } = req.body;
+		const normalizedEmail = String(email).trim().toLowerCase();
 
 		try {
 			// Check if instructor exists
-			const instructorExists = await Instructor.findOne({ email });
+			const instructorExists = await Instructor.findOne({ email: normalizedEmail });
 			if (instructorExists) {
-				return res.status(400).json({ message: "Instructor already exists" });
+				return res.status(409).json({ message: "Instructor with this email already exists" });
 			}
 
-			// Create instructor without password (will be set via forgot password)
+			// Create instructor without password (will be set via forgot password).
+			// Keep safe defaults for required profile fields if not provided at registration time.
 			const instructor = await Instructor.create({
-				name,
-				email,
-				expertise,
+				name: String(name).trim(),
+				email: normalizedEmail,
+				expertise: String(expertise).trim(),
+				bio: bio ? String(bio).trim() : "Instructor profile pending update.",
+				photo: photo ? String(photo).trim() : "https://via.placeholder.com/300x300.png?text=Instructor",
+				company: company ? String(company).trim() : "YugantaAI",
+				experience: experience ? String(experience).trim() : "",
+				avatar: avatar ? String(avatar).trim() : "",
 				approved: false,
 			});
 
@@ -106,7 +109,7 @@ router.post(
 				await instructor.save();
 
 				// Send OTP email
-				await sendOTPEmail(email, otp);
+				await sendOTPEmail(normalizedEmail, otp);
 
 				res.status(201).json({
 					message: "Registration successful. Check your email for OTP to set password.",
@@ -115,6 +118,9 @@ router.post(
 				});
 			}
 		} catch (error) {
+			if (error?.code === 11000) {
+				return res.status(409).json({ message: "Instructor with this email already exists" });
+			}
 			res.status(500).json({
 				message: "Server error",
 				error: error.message,

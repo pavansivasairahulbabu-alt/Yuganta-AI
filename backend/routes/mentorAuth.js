@@ -2,18 +2,10 @@ import express from "express";
 import { body, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import sgMail from "@sendgrid/mail";
+import sgMail from "../config/mailer.js";
 import Mentor from "../models/Mentor.js";
 
 const router = express.Router();
-
-// Initialize SendGrid
-if (process.env.SENDGRID_API_KEY) {
-	sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-	console.log('✅ SendGrid API key configured');
-} else {
-	console.log('❌ SENDGRID_API_KEY not set');
-}
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -63,6 +55,10 @@ const sendOTPEmail = async (email, otp, mentorName = "Mentor") => {
 		console.error(`❌ Failed to send OTP email to ${email}`);
 		console.error(`Error Code: ${error.code}`);
 		console.error(`Error Message: ${error.message}`);
+		const sgErrors = error?.response?.body?.errors;
+		if (Array.isArray(sgErrors) && sgErrors.length > 0) {
+			console.error("📮 SendGrid response errors:", sgErrors.map((item) => item.message).join(" | "));
+		}
 		console.error(`Full Error:`, error);
 		throw new Error(`Failed to send OTP email: ${error.message}`);
 	}
@@ -102,12 +98,20 @@ router.post(
 			console.log(`📝 Generating OTP: ${otp}`);
 			mentor.resetToken = otp;
 			mentor.resetTokenExpiry = otpExpiry;
-			const savedMentor = await mentor.save();
+			await mentor.save();
 			console.log("✅ OTP saved to database");
 
 			// Send OTP email
 			console.log(`📤 Sending OTP email to ${email}...`);
-			await sendOTPEmail(email, otp, mentor.name);
+			try {
+				await sendOTPEmail(email, otp, mentor.name);
+			} catch (mailError) {
+				console.error("❌ Email service error in forgot-password:", mailError.message);
+				return res.status(502).json({
+					message: "Unable to send OTP email right now. Please try again in a minute.",
+					error: process.env.NODE_ENV === "development" ? mailError.message : undefined,
+				});
+			}
 
 			console.log(`✅ OTP email sent successfully to ${email}`);
 			res.json({

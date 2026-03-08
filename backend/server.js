@@ -83,8 +83,24 @@ app.use((err, req, res, next) => {
 	});
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT || 5000);
+const MAX_PORT_RETRIES = 10;
 
-app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`);
-});
+const startServer = (port, retriesLeft = MAX_PORT_RETRIES) => {
+	const server = app.listen(port, () => {
+		console.log(`Server running on port ${port}`);
+	});
+
+	server.on("error", (error) => {
+		if (error.code === "EADDRINUSE" && retriesLeft > 0) {
+			console.warn(`⚠️ Port ${port} is already in use. Trying port ${port + 1}...`);
+			startServer(port + 1, retriesLeft - 1);
+			return;
+		}
+
+		console.error("❌ Failed to start server:", error.message);
+		process.exit(1);
+	});
+};
+
+startServer(PORT);

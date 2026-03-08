@@ -19,19 +19,27 @@ export default function MentorForgotPasswordPage() {
 		setLoading(true);
 
 		try {
-			const response = await fetch(
-				`${API_URL}/api/mentor-auth/forgot-password`,
-				{
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ email }),
-				}
-			);
+			const response = await fetch(`${API_URL}/api/mentor-auth/forgot-password`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email }),
+			});
 
-			const data = await response.json();
+			const rawBody = await response.text();
+			let data = {};
+			if (rawBody) {
+				try {
+					data = JSON.parse(rawBody);
+				} catch {
+					data = { message: rawBody };
+				}
+			}
 
 			if (!response.ok) {
-				setError(data.message || "Failed to send OTP");
+				setError(
+					data.message ||
+					`Failed to send OTP (HTTP ${response.status}). Please try again.`
+				);
 				setLoading(false);
 				return;
 			}
@@ -41,7 +49,7 @@ export default function MentorForgotPasswordPage() {
 			);
 			setStep(2);
 		} catch (err) {
-			setError("Network error. Please try again.");
+			setError("Network error. Backend may be down or blocked. Please try again.");
 			console.error("Forgot password error:", err);
 		} finally {
 			setLoading(false);
@@ -88,19 +96,27 @@ export default function MentorForgotPasswordPage() {
 		setLoading(true);
 
 		try {
-			const response = await fetch(
-				`${API_URL}/api/mentor-auth/reset-password`,
-				{
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ email, otp: otp.trim(), password }),
-				}
-			);
+			const response = await fetch(`${API_URL}/api/mentor-auth/reset-password`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email, otp: otp.trim(), password }),
+			});
 
-			const data = await response.json();
+			const rawBody = await response.text();
+			let data = {};
+			if (rawBody) {
+				try {
+					data = JSON.parse(rawBody);
+				} catch {
+					data = { message: rawBody };
+				}
+			}
 
 			if (!response.ok) {
-				setError(data.message || "Failed to reset password");
+				setError(
+					data.message ||
+					`Failed to reset password (HTTP ${response.status}). Please try again.`
+				);
 				setLoading(false);
 				return;
 			}
@@ -110,7 +126,7 @@ export default function MentorForgotPasswordPage() {
 				navigate("/mentor/login");
 			}, 2000);
 		} catch (err) {
-			setError("Network error. Please try again.");
+			setError("Network error. Backend may be down or blocked. Please try again.");
 			console.error("Reset password error:", err);
 		} finally {
 			setLoading(false);
