@@ -277,25 +277,7 @@ export default function AgenticAICrashCoursePage() {
               <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
               <a href="#testimonials" className="text-[#C7C3D6] hover:text-white font-semibold">Testimonials</a>
             </div>
-            {isEnrolled ? (
-              <span className="px-5 py-2.5 rounded-lg border border-[var(--border-primary)] text-[var(--text-color)] font-semibold">
-                Enrolled
-              </span>
-            ) : isAuthenticated ? (
-              <a
-                href="#agentic-enroll-form"
-                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] transition-all"
-              >
-                Enroll Now
-              </a>
-            ) : (
-              <Link
-                to="/signup"
-                className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] transition-all"
-              >
-                Enroll Now
-              </Link>
-            )}
+         
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
