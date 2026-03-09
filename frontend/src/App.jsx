@@ -52,6 +52,7 @@ import AILearningPlatformPage from "./pages/projects/AILearningPlatformPage";
 import InstructorsPage from "./pages/InstructorsPage";
 import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
+import DsaMlProgramPage from "./pages/courses/DsaMlProgramPage";
 
 function CoursesHomePage() {
 	return (
@@ -228,6 +229,14 @@ export default function App() {
 										element={
 											<CoursesLayout>
 												<AgenticAIPioneerProgramPage />
+											</CoursesLayout>
+										}
+									/>
+									<Route
+										path='/courses/dsa-machine-learning'
+										element={
+											<CoursesLayout>
+												<DsaMlProgramPage />
 											</CoursesLayout>
 										}
 									/>
