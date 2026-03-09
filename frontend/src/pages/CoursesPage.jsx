@@ -152,7 +152,17 @@ export default function CoursesPage() {
 
 	const isAgenticCourse = (course) => {
 		const title = (course?.title || "").toLowerCase();
+		return title.includes("agentic") && (title.includes("pioneer") || title.includes("crash"));
+	};
+
+	const isPioneerCourse = (course) => {
+		const title = (course?.title || "").toLowerCase();
 		return title.includes("agentic") && title.includes("pioneer");
+	};
+
+	const isCrashCourse = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		return title.includes("agentic") && (title.includes("crash") || title.includes("crash course page"));
 	};
 
 	return (
@@ -345,8 +355,18 @@ export default function CoursesPage() {
 									{filteredCourses.map((course) => (
 										(() => {
 											const isAgentic = isAgenticCourse(course);
-											const courseTitle = isAgentic ? "Agentic AI Pioneer Program" : course.title;
-											const coursePath = isAgentic ? "/courses/agentic-ai-pioneer-program" : `/course-details/${course._id}`;
+											const pioneer = isPioneerCourse(course);
+											const crash = isCrashCourse(course);
+											const courseTitle = pioneer
+												? "Agentic AI Pioneer Program"
+												: crash
+													? "AgenticAI Crash Course Page"
+													: course.title;
+											const coursePath = pioneer
+												? "/courses/agentic-ai-pioneer-program"
+												: crash
+													? "/courses/agentic-ai-crash-course-page"
+													: `/course-details/${course._id}`;
 											const durationText = isAgentic ? "150 Hours" : (course.duration || "150 Hours");
 											const countText = isAgentic ? "15 Courses" : `${course.modules?.length || course.lessons || 15} Courses`;
 

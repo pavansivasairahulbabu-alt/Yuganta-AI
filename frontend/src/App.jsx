@@ -50,13 +50,14 @@ import AIAgentAvatarPage from "./pages/projects/AIAgentAvatarPage";
 import HVACAgentPage from "./pages/projects/HVACAgentPage";
 import AILearningPlatformPage from "./pages/projects/AILearningPlatformPage";
 import InstructorsPage from "./pages/InstructorsPage";
+import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
 
 function CoursesHomePage() {
 	return (
 		<>
 			<Hero />
-			<FreeCourses />
+			
 			<LearningPaths />
 		</>
 	);
@@ -215,6 +216,14 @@ export default function App() {
 										}
 									/>
 									<Route
+										path='/courses/agentic-ai-crash-course-page'
+										element={
+											<CoursesLayout>
+												<AgenticAICrashCoursePage />
+											</CoursesLayout>
+										}
+									/>
+									<Route
 										path='/courses/agentic-ai-pioneer-program'
 										element={
 											<CoursesLayout>
@@ -222,6 +231,7 @@ export default function App() {
 											</CoursesLayout>
 										}
 									/>
+
 									{/* New Course Details Route */}
 									<Route
 										path='/course-details/:courseId'

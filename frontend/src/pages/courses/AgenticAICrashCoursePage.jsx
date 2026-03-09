@@ -7,7 +7,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { LayoutGrid, Clock, Code2, ClipboardList, Users, CheckCircle } from "lucide-react";
 
-export default function AgenticAIPioneerProgramPage() {
+export default function AgenticAICrashCoursePage() {
   const { theme } = useTheme();
   const { isAuthenticated, user, token } = useAuth();
   const navigate = useNavigate();
@@ -19,10 +19,9 @@ export default function AgenticAIPioneerProgramPage() {
   const [openWeek, setOpenWeek] = useState(null);
   const [instructors, setInstructors] = useState([]);
   const [loadingInstructors, setLoadingInstructors] = useState(true);
-  const [showAllTools, setShowAllTools] = useState(false);
 
-  const PIONEER_SLUG = "agentic-ai-pioneer-program";
-  const PIONEER_TITLE = "Agentic AI Pioneer Program";
+  const AGENTIC_SLUG = "agentic-ai-crash-course-page";
+  const AGENTIC_TITLE = "AgenticAI Crash Course Page";
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -159,7 +158,7 @@ export default function AgenticAIPioneerProgramPage() {
           const course = item?.courseId;
           const title = (course?.title || "").toLowerCase();
           const id = course?._id || "";
-          return title.includes("agentic ai pioneer program") || title.includes("agentic ai pioneer") || id === PIONEER_SLUG;
+          return title.includes("agenticai crash course page") || title.includes("agentic ai crash course") || id === AGENTIC_SLUG;
         });
 
         setIsEnrolled(found);
@@ -171,15 +170,15 @@ export default function AgenticAIPioneerProgramPage() {
     fetchEnrollmentStatus();
   }, [isAuthenticated, token]);
 
-  const findPioneerCourseId = async () => {
+  const findAgenticCourseId = async () => {
     const response = await fetch(`${API_URL}/api/courses`);
     if (!response.ok) return null;
     const courses = await response.json();
     if (!Array.isArray(courses)) return null;
 
     const match = courses.find((course) =>
-      (course?.title || "").toLowerCase().includes("agentic ai pioneer program") ||
-      (course?.title || "").toLowerCase().includes("agentic ai pioneer")
+      (course?.title || "").toLowerCase().includes("agenticai crash course page") ||
+      (course?.title || "").toLowerCase().includes("agentic ai crash course")
     );
 
     return match?._id || null;
@@ -214,8 +213,8 @@ export default function AgenticAIPioneerProgramPage() {
           name: form.name,
           phone: form.phone,
           email: form.email,
-          courseId: PIONEER_SLUG,
-          courseName: PIONEER_TITLE,
+          courseId: AGENTIC_SLUG,
+          courseName: AGENTIC_TITLE,
           type: "Enrollment",
           agreeTerms: agree,
           whatsappUpdates: whatsapp,
@@ -232,7 +231,7 @@ export default function AgenticAIPioneerProgramPage() {
       }
 
       // Persist enrollment to user account so button can reliably show "Enrolled" for this user
-      const courseId = await findPioneerCourseId();
+      const courseId = await findAgenticCourseId();
       if (courseId) {
         const enrollRes = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
           method: "POST",
@@ -284,7 +283,7 @@ export default function AgenticAIPioneerProgramPage() {
               </span>
             ) : isAuthenticated ? (
               <a
-                href="#pioneer-enroll-form"
+                href="#agentic-enroll-form"
                 className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-semibold shadow-[0_4px_16px_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.6)] transition-all"
               >
                 Enroll Now
@@ -305,16 +304,16 @@ export default function AgenticAIPioneerProgramPage() {
               ? "text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-color)]"
               : "text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#60A5FA]"
             }>
-              Agentic AI Pioneer Program
+              AgenticAI Crash Course Page
             </h1>
             <p className="text-lg md:text-xl text-[var(--text-muted)] max-w-2xl">
-              An advanced, mentor-led track to design, evaluate, and deploy production-ready
-              agent ecosystems for enterprise and startup use cases.
+              A structured journey to master agentic AI systems, from core foundations to
+              production-grade autonomous agents, with hands-on mentorship and capstone projects.
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">180+</div>
+                <div className="text-2xl font-extrabold text-[#3B82F6]">150+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
@@ -324,9 +323,8 @@ export default function AgenticAIPioneerProgramPage() {
                 <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
               </div>
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#F59E0B]">14+</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Industry Project</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Builds</div>
+                <div className="text-2xl font-extrabold text-[#F59E0B]">100%</div>
+                <div className="mt-1 text-sm text-[var(--text-color)]">Placement Assistance</div>
               </div>
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#22C55E]">30+</div>
@@ -336,7 +334,7 @@ export default function AgenticAIPioneerProgramPage() {
               </div>
             </div>
 
-            <div id="pioneer-enroll-form" className="w-full max-w-lg">
+            <div id="agentic-enroll-form" className="w-full max-w-lg">
               <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
                 <h3 className="text-xl font-bold mb-4">Become a GenAI and Agentic AI Expert: Start Now</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -396,14 +394,14 @@ export default function AgenticAIPioneerProgramPage() {
                   : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA]"
               }
             >
-              How does the Agentic AI Pioneer Program Accelerate Your Career?
+              How does the AgenticAI Crash Course Page Help You?
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                180+ Hours of Advanced Learning
+                150+ Hours of Immersive Learning
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Master advanced Agentic AI systems with LangChain, LangGraph, and CrewAI through hands-on projects.</li>
@@ -413,7 +411,7 @@ export default function AgenticAIPioneerProgramPage() {
 
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                14+ Industry-Aligned Projects
+                10+ Industry-Aligned Projects
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Real-world projects that connect theory with practice.</li>
@@ -453,7 +451,7 @@ export default function AgenticAIPioneerProgramPage() {
                 <LayoutGrid className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">14+ Projects</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">10+ Projects</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   Hands-on learning with industry-relevant challenges.
                 </p>
@@ -465,7 +463,7 @@ export default function AgenticAIPioneerProgramPage() {
                 <Clock className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">180+ Hours</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">150+ Hours</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   In-depth GenAI and Agentic AI learning to transform your career.
                 </p>
@@ -530,7 +528,7 @@ export default function AgenticAIPioneerProgramPage() {
 
           <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
             <img
-              src={theme === "light-theme" ? "/pioneer-light.png" : "/pioneer-dark.png"}
+              src={theme === "light-theme" ? "/roadmap-light.png" : "/roadmap-dark.png"}
               alt="Program Personalized Roadmap"
               className="w-full h-auto object-contain"
               loading="lazy"
@@ -557,7 +555,7 @@ export default function AgenticAIPioneerProgramPage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {["14+ Projects","180+ Hours","50+ Tools","40+ Assignments"].map((chip) => (
+            {["10+ Projects","150+ Hours","40+ Tools","30+ Assignments"].map((chip) => (
               <span key={chip} className="px-3 py-1.5 rounded-full text-sm border border-[var(--border-primary)] bg-[var(--card-bg)]">
                 {chip}
               </span>
@@ -568,40 +566,41 @@ export default function AgenticAIPioneerProgramPage() {
             <div className="space-y-4">
               {[
                 {
-                  title: "Month 1: DATA STRUCTURES & ALGORITHMS",
+                  title: "WEEK 1: Introduction to LangChain and RAG Essentials",
                   items: [
-                    
-                    { text:"ARRAYS & LINKEDLISTS",sub: ["Static Arrays, Dynamic Arrays, Singly & Doubly Linked Lists"]},
-                    {text:"STACKS & QUEUES , SEARCHING", sub:["Stack Operations", "Queue Operations", "Linear Search", "Binary Search"]},
-                    { text: "SORTING & HASHING", sub: ["Sorting Algorithms", "Bubble sort, Insertion sort, Selection sort,Merge Sort,Quick Sort", "Hash Functions","Hash Functions, Collision Handling"] },
-                     { text: "TREES & GRAPHS", sub: ["Tree Traversals", "Graph Representation", "Graph Types (Directed, Undirected)"] }
+                    "Introduction to the LangChain Ecosystem",
+                    "Essentials of LCEL",
+                    "Introduction to RAG Systems",
+                    { text: "Building Retrieval Systems", sub: ["Data Loading, Splitting & Chunking"] },
+                    "Implementing Vector Databases and Retrievers"
                   ]
                 },
                 {
-                  title: "Month 2: MACHINE LEARNING & DEEP LEARNING",
+                  title: "WEEK 2: Agentic AI System Architectures & Design Patterns",
                   items: [
-                    { text:"WEEK 1: Introduction to ML & Supervised Learning", sub: ["Introduction to ML, Types of ML", "Supervised learning", "Classification", "Regression (Linear, Multivariable, Logistic)", "Decision Trees", "Hands on Projects"]},
-                    { text:"WEEK 2: From Classical ML to Deep Learning", sub: ["Random Forest", "Clustering Techniques (KNN, Hierarchical, DBSCAN)", "Intro to DL, ANN", "Optimization for Deep Learning"]},
-                    { text:"WEEK 3: Advanced Deep Learning Architectures", sub: ["Recurrent Neural Networks", "LSTM, GRU, Bidirectional LSTM", "CNN, ResNet, VGG-16, 19", "Hands on Project"]},
-                    { text:"WEEK 4: Prompt Engineering", sub: ["Chain of thoughts, Self-consistency prompting", "Tree of thoughts", "Graph of Thoughts", "ReAct"]}
+                    "Introduction to Agentic Design Patterns",
+                    "The Reflection Pattern",
+                    "The Tool Use Pattern",
+                    "The Planning Pattern",
+                    "The Multi Agent Pattern"
                   ]
                 },
                 {
-                  title: "Month 3: REINFORCEMENT LEARNING & ADVANCED DSA",
+                  title: "WEEK 3: Building Advanced AI Agents with LangGraph",
                   items: [
-                    { text:"WEEK 1: Advanced DSA", sub: ["Recursion", "Searching, BFS, DFS", "Solving problems on algorithms", "Dynamic programming", "Problems on DP", "Miscellaneous problems"]},
-                    { text:"WEEK 2: Reinforcement Learning Fundamentals", sub: ["Markov Decision Process", "Monte Carlo & Temporal Difference", "Model-Free Control", "PPO and DDPG", "RLHF and DPO", "Hands on projects"]},
-                    { text:"WEEK 3: Advanced Reinforcement Learning", sub: ["Deep Reinforcement Learning", "Policy Gradient Methods", "Actor-Critic Algorithms", "Applied RL Projects"]},
-                    { text:"WEEK 4: Transformers & LLM's", sub: ["Attention Mechanism, transformers", "Getting started with LLM's", "Current State of the Art in LLM's", "Generative AI", "Working with Commercial & Open Source LLM APIs"]}
+                    "Core Components of Agentic Systems & LangGraph",
+                    "Building Tool Use Agentic AI Systems",
+                    "Project: Build a Financial Analyst Tool Use AI Agent",
+                    "Memory & Conversational Agentic AI System"
                   ]
                 },
                 {
-                  title: "Month 4: AGENTIC AI & FRAMEWORKS",
+                  title: "WEEK 4: Building Your Advanced AI Agent with CrewAI",
                   items: [
-                    { text:"WEEK 1: Introduction to LangChain and RAG Essentials", sub: ["Introduction to the LangChain Ecosystem", "Essentials of LCEL", "Introduction to RAG Systems", "Building Retrieval Systems: Data Loading, Splitting & Chunking", "Implementing Vector Databases and Retrievers"]},
-                    { text:"WEEK 2: Agentic AI System Architectures & Design Patterns", sub: ["Introduction to Agentic Design Patterns", "The Reflection Pattern", "The Tool Use Pattern", "The Planning Pattern", "The Multi Agent Pattern"]},
-                    { text:"WEEK 3: Building Advanced AI Agents with LangGraph", sub: ["Core Components of Agentic Systems & LangGraph", "Building Tool Use Agentic AI Systems", "Project: Build a Financial Analyst Tool Use AI Agent", "Memory & Conversational Agentic AI System"]},
-                    { text:"WEEK 4: Building your Advanced AI Agent with CrewAI", sub: ["Introduction to CrewAI", "Core Components of CrewAI", "Building Advanced Agents", "Assembling Complex Crew"]}
+                    "Introduction to CrewAI",
+                    "Core Components of CrewAI",
+                    "Building Advanced Agents",
+                    "Assembling Complex Crew"
                   ]
                 }
               ].map((mod, idx) => (
@@ -647,7 +646,7 @@ export default function AgenticAIPioneerProgramPage() {
 
             <div className="rounded-2xl p-6 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-primary)] border border-[var(--border-primary)]">
               <div className="grid grid-cols-2 gap-3 mb-6">
-                {["LangChain","CrewAI","LangGraph","AutoGen","PyTorch","Hugging Face","OpenAI","PEFT","Claude","Gemini"].map((lib) => (
+                {["Adobe Firefly","AutoGen","LangGraph","Hugging Face","PyTorch","Diffusers","CrewAI","PEFT","harness","LangChain"].map((lib) => (
                   <div key={lib} className="px-3 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm text-[var(--text-color)] text-center">
                     {lib}
                   </div>
@@ -694,35 +693,36 @@ export default function AgenticAIPioneerProgramPage() {
               "Gemini",
               "OpenAI GPT-4",
               "Chroma",
-              "LangSmith",
               "Redis",
               "Hugging Face",
               "PEFT",
+              "huggingface_hub",
+              "LlamaIndex",
+              "Accelerate",
+              "Diffusers",
+              "OpenAI Gym",
               "DALL·E",
               "harness",
               "PyTorch",
-              "Diffusers",
-              "huggingface_hub",
               "CLIPTokenizer",
-              "CIVITAI",
+              "Civitai",
               "stability.ai",
               "BlueWillow",
               "Designer",
               "Lexica",
               "Chainlit",
-              "Stripe",
-              "Meta",
-              "Claude",
-              "n8n",
               "Whisper",
               "Docker",
+              "Claude",
+              "n8n",
               "gradio",
               "Pinecone",
               "tavily",
-              "LOCUST",
+              "Locust",
               "kubernetes",
-              "Langfuse"
-            ].slice(0, showAllTools ? undefined : 18).map((name) => (
+              "Langfuse",
+              "Adobe Firefly"
+            ].map((name) => (
               <div
                 key={name}
                 className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] shadow-[0_4px_24px_rgba(139,92,246,0.08)]"
@@ -731,16 +731,14 @@ export default function AgenticAIPioneerProgramPage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
-            <button
-              onClick={() => setShowAllTools(!showAllTools)}
-              className="px-6 py-3 rounded-xl border-2 border-[#2563EB] text-[#2563EB] font-semibold hover:bg-[#2563EB] hover:text-white transition-all"
+          <div className="mt-8 flex justify-center">
+            <a
+              href="/tools-pack.pdf"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold transition-all"
             >
-              {showAllTools ? "Show Less" : "Display All Tools"}
-            </button>
-            
+              Download Tools Pack
+            </a>
           </div>
-         
         </div>
       </section>
       <section id="instructors" className="instructors-page py-16 md:py-20">
@@ -1010,50 +1008,14 @@ export default function AgenticAIPioneerProgramPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Plan A */}
             <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
-              <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">Agentic-AI-Crash Course</h3>
-              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹2,999</div>
+              <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">Agentic AI Pioneer program</h3>
+              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹12,999</div>
               <ul className="space-y-3 text-[var(--text-color)]">
                 {[
-                  "4 Weeks of Power Learning",
-                  
-                  "80+ Hours of Hands-On Workshops",
-                  "Industry-Grade Projects",
-                  "300+ Hours of Structured Curriculum",
-                  "30+ Industry-Aligned Assignments",
-                  "AV Certificate | Fractal Certificate | WSU Certificate",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[#22C55E] mt-0.5 shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8">
-                {isEnrolled ? (
-                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
-                    Enrolled
-                  </span>
-                ) : (
-                  <Link
-                    to="/courses/agentic-ai-crash-course-page#agentic-enroll-form"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            {/* Plan B */}
-            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
-              <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">Agentic AI Pioneer Program</h3>
-              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹12,000</div>
-              <ul className="space-y-3 text-[var(--text-color)]">
-                {[
-                  "4 Months of Continuous Access",
-                  " Deep-Dive Mentorship Sessions",
+                  "4 Months of Power Learning",
+                  "25+ Deep-Dive Mentorship Sessions",
                   "150+ Hours of Hands-On Workshops",
-                  " Industry-Grade Projects",
+                  "10+ Industry-Grade Projects",
                   "300+ Hours of Structured Curriculum",
                   "30+ Industry-Aligned Assignments",
                   "AV Certificate | Fractal Certificate | WSU Certificate",
@@ -1071,7 +1033,50 @@ export default function AgenticAIPioneerProgramPage() {
                   </span>
                 ) : isAuthenticated ? (
                   <a
-                    href="#pioneer-enroll-form"
+                    href="agentic-ai-pioneer-program"
+                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                  >
+                    Enroll Now
+                  </a>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                  >
+                    Enroll Now
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Plan B */}
+            <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
+              <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">AgenticAI Crash Course Page</h3>
+              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹2,999</div>
+              <ul className="space-y-3 text-[var(--text-color)]">
+                {[
+                  "4 Weeks of Continuous Access",
+                
+                  "10 Hours of Hands-On Workshops",
+                  
+                  "100+ Hours of Structured Curriculum",
+                  "30+ Industry-Aligned Assignments",
+                  "AV Certificate ",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-[#22C55E] mt-0.5 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8">
+                {isEnrolled ? (
+                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
+                    Enrolled
+                  </span>
+                ) : isAuthenticated ? (
+                  <a
+                    href="#agentic-enroll-form"
                     className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
                   >
                     Enroll Now
@@ -1093,6 +1098,5 @@ export default function AgenticAIPioneerProgramPage() {
     </div>
   );
 }
-
 
 

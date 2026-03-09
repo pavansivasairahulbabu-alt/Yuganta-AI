@@ -428,9 +428,9 @@ export default function MyLearningPage() {
 													? "Review"
 													: "Continue"}
 										</Link>
-										{(course.title || "").toLowerCase() === "agentic ai pioneer program" && (
+										{["agenticai crash course page", "agentic ai pioneer program"].includes((course.title || "").toLowerCase()) && (
 											<Link
-												to="/courses/agentic-ai-pioneer-program"
+												to={(course.title || "").toLowerCase() === "agentic ai pioneer program" ? "/courses/agentic-ai-pioneer-program" : "/courses/agentic-ai-crash-course-page"}
 												className="mt-3 block w-full px-4 py-3 rounded-lg text-center font-semibold transition border border-[#8B5CF6] text-[#A855F7] bg-transparent hover:bg-[rgba(139,92,246,0.1)]"
 											>
 												Roadmap

@@ -11,7 +11,7 @@ export default function ProgramSection() {
 			gradient: "from-blue-600 to-purple-700",
 		},
 		{
-			title: "Agentic AI Pioneer Program",
+			title: "AgenticAI Crash Course Page",
 			features: [
 				"1:1 Mentorship with Leading AI Experts",
 				"150+ Hours of Comprehensive learning",
