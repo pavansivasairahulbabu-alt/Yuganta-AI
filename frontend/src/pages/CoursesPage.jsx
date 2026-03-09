@@ -112,12 +112,20 @@ export default function CoursesPage() {
 		}
 	};
 
-	// Filter courses based on search query
-	const filteredCourses = courses.filter((course) =>
-		course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-		course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-		(course.instructor && course.instructor.toLowerCase().includes(searchQuery.toLowerCase()))
-	);
+	// Filter courses based on search query and exclude specific courses
+	const coursesToExclude = ["AIML", "ASTRA AI", "MERN MASTERY PROGRAM"];
+	const filteredCourses = courses.filter((course) => {
+		// Exclude specific courses
+		if (coursesToExclude.includes(course.title)) {
+			return false;
+		}
+		// Apply search filter
+		return (
+			course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			(course.instructor && course.instructor.toLowerCase().includes(searchQuery.toLowerCase()))
+		);
+	});
 
 	// Animated images for the slider
 	const sliderImages = [

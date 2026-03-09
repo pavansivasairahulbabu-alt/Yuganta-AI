@@ -17,6 +17,7 @@ export default function CoursesNavbar() {
 			label: "Program Dashboard",
 			to: isAuthenticated ? "/my-learning" : "/login",
 		},
+		// { label: "Instructors", to: "/instructors" },
 	];
 
 	const handleNavClick = () => {

@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Lead from "../models/Lead.js";
 import { protect } from "../middleware/auth.js"; // Standard user auth if needed, but for public POST usually no auth
 // We need admin auth for fetching leads. Let's see how admin auth is implemented.
@@ -129,12 +130,20 @@ router.get("/", async (req, res) => {
 // @access  Protected
 router.put("/:id", async (req, res) => {
 	try {
+		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+			return res.status(400).json({ message: "Invalid lead id" });
+		}
+
 		const { status } = req.body;
 		const lead = await Lead.findByIdAndUpdate(
 			req.params.id,
 			{ status },
 			{ new: true },
 		);
+
+		if (!lead) {
+			return res.status(404).json({ message: "Lead not found" });
+		}
 
 		// If status is changed to "Enrolled", automatically enroll the user if they have an account
 		if (status === "Enrolled") {
