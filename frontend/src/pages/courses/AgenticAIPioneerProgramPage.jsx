@@ -653,11 +653,7 @@ export default function AgenticAIPioneerProgramPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6">
-                <a href="/curriculum.pdf" className="block text-center w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-xl font-semibold px-6 py-3 transition-all">
-                  Download Free Curriculum
-                </a>
-              </div>
+              
             </div>
           </div>
         </div>

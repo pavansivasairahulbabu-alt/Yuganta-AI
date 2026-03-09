@@ -19,7 +19,7 @@ export default function LoginPage() {
 		const result = await login(email, password);
 
 		if (result.success) {
-			navigate("/profile");
+			navigate("/");
 		} else {
 			setError(result.error);
 		}

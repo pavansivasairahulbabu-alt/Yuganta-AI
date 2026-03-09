@@ -40,7 +40,7 @@ export default function SignupPage() {
 		);
 
 		if (result.success) {
-			navigate("/profile");
+			navigate("/");
 		} else {
 			setError(result.error);
 		}

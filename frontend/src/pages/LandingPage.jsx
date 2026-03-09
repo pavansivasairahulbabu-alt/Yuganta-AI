@@ -170,7 +170,7 @@ export default function LandingPage() {
 							</div>
 
 							<h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-4 leading-tight">
-								AgenticAI Crash Course Page
+								Agentic AI Crash Course 
 							</h3>
 
 							<div className="flex flex-wrap gap-2 mb-6">

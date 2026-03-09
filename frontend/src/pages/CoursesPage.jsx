@@ -115,6 +115,23 @@ export default function CoursesPage() {
 	// Filter courses based on search query and exclude specific courses
 	const coursesToExclude = ["AIML", "ASTRA AI", "MERN MASTERY PROGRAM"];
 	const filteredCourses = courses.filter((course) => {
+		const normalizedTitle = (course?.title || "")
+			.toLowerCase()
+			.replace(/\s+/g, " ")
+			.trim();
+		const hasMedia =
+			typeof course?.thumbnail === "string"
+				? course.thumbnail.trim().length > 0
+				: Boolean(course?.thumbnail) ||
+			  (typeof course?.videoUrl === "string"
+				? course.videoUrl.trim().length > 0
+				: Boolean(course?.videoUrl));
+
+		// Hide only the duplicate Pioneer card that has no thumbnail/video
+		if (normalizedTitle.includes("agentic ai pioneer") && !hasMedia) {
+			return false;
+		}
+
 		// Exclude specific courses
 		if (coursesToExclude.includes(course.title)) {
 			return false;
@@ -365,6 +382,18 @@ export default function CoursesPage() {
 											const isAgentic = isAgenticCourse(course);
 											const pioneer = isPioneerCourse(course);
 											const crash = isCrashCourse(course);
+											const hasRenderableMedia =
+												typeof course?.thumbnail === "string"
+													? course.thumbnail.trim().length > 0
+													: Boolean(course?.thumbnail) ||
+												  (typeof course?.videoUrl === "string"
+													? course.videoUrl.trim().length > 0
+													: Boolean(course?.videoUrl));
+
+											if (pioneer && !hasRenderableMedia) {
+												return null;
+											}
+
 											const courseTitle = pioneer
 												? "Agentic AI Pioneer Program"
 												: crash

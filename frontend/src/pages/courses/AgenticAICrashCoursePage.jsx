@@ -652,11 +652,7 @@ export default function AgenticAICrashCoursePage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6">
-                <a href="/curriculum.pdf" className="block text-center w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-xl font-semibold px-6 py-3 transition-all">
-                  Download Free Curriculum
-                </a>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -731,14 +727,7 @@ export default function AgenticAICrashCoursePage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 flex justify-center">
-            <a
-              href="/tools-pack.pdf"
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold transition-all"
-            >
-              Download Tools Pack
-            </a>
-          </div>
+          
         </div>
       </section>
       <section id="instructors" className="instructors-page py-16 md:py-20">
@@ -1009,7 +998,7 @@ export default function AgenticAICrashCoursePage() {
             {/* Plan A */}
             <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
               <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">Agentic AI Pioneer program</h3>
-              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹12,999</div>
+              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹12,000</div>
               <ul className="space-y-3 text-[var(--text-color)]">
                 {[
                   "4 Months of Power Learning",
