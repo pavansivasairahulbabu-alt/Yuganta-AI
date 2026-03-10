@@ -1004,7 +1004,7 @@ export default function AgenticAICrashCoursePage() {
             {/* Plan B */}
             <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
               <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">AgenticAI Crash Course Page</h3>
-              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹2,999</div>
+              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹6000</div>
               <ul className="space-y-3 text-[var(--text-color)]">
                 {[
                   "4 Weeks of Continuous Access",
