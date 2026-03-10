@@ -271,7 +271,7 @@ export default function AgenticAICrashCoursePage() {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-6 text-sm">
-              <a href="#expect" className="text-[#C7C3D6] hover:text-white font-semibold">What to Expect</a>
+              
               <a href="#curriculum" className="text-[#C7C3D6] hover:text-white font-semibold">Curriculum</a>
               <a href="#instructors" className="text-[#C7C3D6] hover:text-white font-semibold">Instructors</a>
               <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
@@ -293,27 +293,18 @@ export default function AgenticAICrashCoursePage() {
               production-grade autonomous agents, with hands-on mentorship and capstone projects.
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 gap-10">
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">150+</div>
+                <div className="text-2xl font-extrabold text-[#3B82F6]">20+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Live Weekly</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
-              </div>
+             
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#F59E0B]">100%</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Placement Assistance</div>
+                <div className="mt-1 text-sm text-[var(--text-color)]">Trust Worthy </div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#22C55E]">30+</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Hours of Live Workshops</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">and</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Recordings</div>
-              </div>
+            
             </div>
 
             <div id="agentic-enroll-form" className="w-full max-w-lg">
@@ -376,14 +367,14 @@ export default function AgenticAICrashCoursePage() {
                   : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA]"
               }
             >
-              How does the AgenticAI Crash Course Page Help You?
+              How does the AgenticAI Crash Course Help You?
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                150+ Hours of Immersive Learning
+                20+ Hours of Immersive Learning
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Master advanced Agentic AI systems with LangChain, LangGraph, and CrewAI through hands-on projects.</li>
@@ -393,7 +384,7 @@ export default function AgenticAICrashCoursePage() {
 
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                10+ Industry-Aligned Projects
+                Industry-Aligned Projects
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Real-world projects that connect theory with practice.</li>
@@ -433,7 +424,7 @@ export default function AgenticAICrashCoursePage() {
                 <LayoutGrid className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">10+ Projects</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]"> Projects</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   Hands-on learning with industry-relevant challenges.
                 </p>
@@ -445,7 +436,7 @@ export default function AgenticAICrashCoursePage() {
                 <Clock className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">150+ Hours</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">20+ Hours</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   In-depth GenAI and Agentic AI learning to transform your career.
                 </p>
@@ -457,7 +448,7 @@ export default function AgenticAICrashCoursePage() {
                 <Code2 className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">40+ Tools & Libraries</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">20+ Tools & Libraries</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   Develop expertise in essential frameworks, SDKs, and platforms.
                 </p>
@@ -469,24 +460,14 @@ export default function AgenticAICrashCoursePage() {
                 <ClipboardList className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">30+ Assignments</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">Assignments</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   Structured practice to turn knowledge into action.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 border border-white/20">
-                <Users className="w-6 h-6 text-[var(--text-color)]" />
-              </span>
-              <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">25+ Mentorship Sessions</h3>
-                <p className="text-[var(--text-muted)] mt-1">
-                  1:1 live guidance from GenAI and Agentic AI experts.
-                </p>
-              </div>
-            </div>
+           
           </div>
         </div>
       </section>
