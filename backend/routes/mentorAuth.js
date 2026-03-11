@@ -25,33 +25,94 @@ const generateToken = (id) => {
 // Function to send OTP email via SendGrid
 const sendOTPEmail = async (email, otp, mentorName = "Mentor") => {
 	console.log(`\n📧 sendOTPEmail called for: ${email}, OTP: ${otp}`);
-	
-	const htmlContent = `
-		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #111827;">
-			<h2 style="margin-bottom: 8px;">YuganthaAI Password Setup OTP</h2>
-			<p>Hello ${mentorName},</p>
-			<p>Use the OTP below to set your password.</p>
-			
-			<div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-				<p style="margin: 0; color: #666; font-size: 14px;">Your OTP (valid for 10 minutes):</p>
-				<p style="margin: 10px 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #333;">${otp}</p>
-			</div>
-			
-			<p>Go to the password setup page and enter this OTP.</p>
-			<p><a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/mentor/forgot-password" style="color: #007bff; text-decoration: none;">Set Your Password</a></p>
-			
-			<p style="color: #666; font-size: 12px; margin-top: 30px;">
-				This is an automated transactional email. Do not reply.
-			</p>
-		</div>
-	`;
+	const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/mentor/forgot-password`;
 
-	const textContent = `YuganthaAI Password Setup OTP\n\nHello ${mentorName},\n\nUse this OTP to set your password: ${otp}\n\nThis OTP is valid for 10 minutes.\n\nSet password here: ${(process.env.FRONTEND_URL || 'http://localhost:5173')}/mentor/forgot-password\n\nIf you did not request this, please ignore this email.`;
+	const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Verification Code – YuganthaAI</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fb;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7fb;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1a56db 0%,#1e40af 100%);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">YuganthaAI</h1>
+              <p style="margin:6px 0 0;font-size:13px;color:#bfdbfe;">Mentor Portal</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px 40px 24px;">
+              <p style="margin:0 0 8px;font-size:16px;color:#374151;">Hello <strong>${mentorName}</strong>,</p>
+              <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.6;">
+                We received a request to set up your password for your YuganthaAI Mentor account.
+                Use the verification code below to continue.
+              </p>
+
+              <!-- OTP Box -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:28px 20px;">
+                    <p style="margin:0 0 8px;font-size:13px;color:#1d4ed8;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Your Verification Code</p>
+                    <p style="margin:0;font-size:40px;font-weight:700;letter-spacing:10px;color:#1a56db;font-family:monospace;">${otp}</p>
+                    <p style="margin:10px 0 0;font-size:12px;color:#6b7280;">This code expires in <strong>10 minutes</strong></p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:28px 0 16px;font-size:15px;color:#4b5563;line-height:1.6;">
+                Enter this code on the password setup page to secure your account.
+                For your security, do not share this code with anyone.
+              </p>
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
+                <tr>
+                  <td align="center" style="background-color:#1a56db;border-radius:6px;">
+                    <a href="${resetUrl}" style="display:inline-block;padding:12px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.3px;">Set Up Password</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
+                If you did not request this, you can safely disregard this message.
+                Your account remains secure and no changes have been made.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;border-top:1px solid #e5e7eb;padding:20px 40px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:12px;color:#9ca3af;">This is a transactional notification sent to <strong>${email}</strong></p>
+              <p style="margin:0;font-size:12px;color:#9ca3af;">&copy; ${new Date().getFullYear()} YuganthaAI. All rights reserved.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+	const textContent = `YuganthaAI – Mentor Verification Code\n\nHello ${mentorName},\n\nWe received a request to set up your password for your YuganthaAI Mentor account.\n\nYour verification code: ${otp}\n\nThis code is valid for 10 minutes. Do not share it with anyone.\n\nTo set up your password, visit:\n${resetUrl}\n\nIf you did not make this request, you can safely ignore this email. Your account remains secure.\n\n-- YuganthaAI Team`;
 
 	const msg = {
 		to: email,
-		from: process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || process.env.SMTP_USER,
-		subject: "YuganthaAI - Password Setup OTP",
+		from: {
+			name: "YuganthaAI",
+			email: process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_USER,
+		},
+		subject: `Your verification code: ${otp}`,
 		html: htmlContent,
 		text: textContent,
 		headers: {
