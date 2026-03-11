@@ -31,7 +31,7 @@ export default function AboutPage() {
 									Home
 								</a>
 								<span className="text-[var(--text-muted)]">/</span>
-								<span className="text-[var(--text-color)]">About Us</span>
+								<span className="text-[var(--text-color)]">Abo</span>
 							</div>
 						</div>
 						<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-[var(--text-color)] mb-6">
