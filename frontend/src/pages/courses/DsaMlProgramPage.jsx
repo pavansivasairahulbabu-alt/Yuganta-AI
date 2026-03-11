@@ -745,7 +745,7 @@ export default function DsaMlProgramPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <Plan
               name="DSA Track"
-              price="₹39,999"
+              price="₹5,000"
               bullets={[
                 "6 Months Structured Learning",
                 "200+ DSA Problems",
