@@ -7,6 +7,14 @@ import Instructor from "../models/Instructor.js";
 
 const router = express.Router();
 
+const getMailErrorDetails = (error) => ({
+	message: error.message,
+	code: error.code || null,
+	command: error.command || null,
+	response: error.response || null,
+	responseCode: error.responseCode || null,
+});
+
 // Generate JWT Token
 const generateToken = (id) => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -56,8 +64,11 @@ const sendOTPEmail = async (email, otp, instructorName = "Instructor") => {
 		console.log(`📧 Message ID: ${result.messageId}`);
 		return true;
 	} catch (error) {
-		console.error(`❌ Failed to send OTP email to ${email}:`, error.message);
-		throw new Error(`Failed to send OTP email: ${error.message}`);
+		const details = getMailErrorDetails(error);
+		console.error(`❌ Failed to send OTP email to ${email}:`, details);
+		const mailError = new Error(`Failed to send OTP email: ${error.message}`);
+		mailError.details = details;
+		throw mailError;
 	}
 };
 
@@ -112,7 +123,15 @@ router.post(
 				await instructor.save();
 
 				// Send OTP email
-				await sendOTPEmail(normalizedEmail, otp);
+				try {
+					await sendOTPEmail(normalizedEmail, otp);
+				} catch (mailError) {
+					return res.status(502).json({
+						message: "Unable to send OTP email right now.",
+						error: mailError.message,
+						details: mailError.details || null,
+					});
+				}
 
 				res.status(201).json({
 					message: "Registration successful. Check your email for OTP to set password.",
@@ -216,7 +235,15 @@ router.post(
 			await instructor.save();
 
 			// Send OTP email
-			await sendOTPEmail(email, otp, instructor.name);
+			try {
+				await sendOTPEmail(email, otp, instructor.name);
+			} catch (mailError) {
+				return res.status(502).json({
+					message: "Unable to send OTP email right now.",
+					error: mailError.message,
+					details: mailError.details || null,
+				});
+			}
 
 			res.json({
 				message: "OTP sent to your email. Check your inbox.",

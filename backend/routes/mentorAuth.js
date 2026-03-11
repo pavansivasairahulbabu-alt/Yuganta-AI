@@ -7,6 +7,14 @@ import Mentor from "../models/Mentor.js";
 
 const router = express.Router();
 
+const getMailErrorDetails = (error) => ({
+	message: error.message,
+	code: error.code || null,
+	command: error.command || null,
+	response: error.response || null,
+	responseCode: error.responseCode || null,
+});
+
 // Generate JWT Token
 const generateToken = (id) => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -59,11 +67,12 @@ const sendOTPEmail = async (email, otp, mentorName = "Mentor") => {
 		console.log(`📧 Message ID: ${result.messageId}`);
 		return true;
 	} catch (error) {
+		const details = getMailErrorDetails(error);
 		console.error(`❌ Failed to send OTP email to ${email}`);
-		console.error(`Error Code: ${error.code}`);
-		console.error(`Error Message: ${error.message}`);
-		console.error(`Full Error:`, error);
-		throw new Error(`Failed to send OTP email: ${error.message}`);
+		console.error("📮 SMTP error details:", details);
+		const mailError = new Error(`Failed to send OTP email: ${error.message}`);
+		mailError.details = details;
+		throw mailError;
 	}
 };
 
@@ -117,7 +126,8 @@ router.post(
 				console.error("❌ Email service error in forgot-password:", mailError.message);
 				return res.status(502).json({
 					message: "Unable to send OTP email right now. Please try again in a minute.",
-					error: process.env.NODE_ENV === "development" ? mailError.message : undefined,
+					error: mailError.message,
+					details: mailError.details || null,
 				});
 			}
 
