@@ -570,7 +570,7 @@ export default function AgenticAICrashCoursePage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="max-w-4xl mx-auto">
             <div className="space-y-4">
               {[
                 {
@@ -650,17 +650,6 @@ export default function AgenticAICrashCoursePage() {
                   </div>
                 </details>
               ))}
-            </div>
-
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-primary)] border border-[var(--border-primary)]">
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {["Adobe Firefly","AutoGen","LangGraph","Hugging Face","PyTorch","Diffusers","CrewAI","PEFT","harness","LangChain"].map((lib) => (
-                  <div key={lib} className="px-3 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm text-[var(--text-color)] text-center">
-                    {lib}
-                  </div>
-                ))}
-              </div>
-              
             </div>
           </div>
         </div>
@@ -1014,7 +1003,6 @@ export default function AgenticAICrashCoursePage() {
                   "150+ Hours of Hands-On Workshops",
                   "10+ Industry-Grade Projects",
                   "300+ Hours of Structured Curriculum",
-                  "30+ Industry-Aligned Assignments",
                   "AV Certificate | Fractal Certificate | WSU Certificate",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
@@ -1057,7 +1045,6 @@ export default function AgenticAICrashCoursePage() {
                   "10 Hours of Hands-On Workshops",
                   
                   "100+ Hours of Structured Curriculum",
-                  "30+ Industry-Aligned Assignments",
                   "AV Certificate ",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">

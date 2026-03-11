@@ -572,7 +572,7 @@ export default function AgenticAIPioneerProgramPage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="max-w-4xl mx-auto">
             <div className="space-y-4">
               {[
                 {
@@ -651,17 +651,6 @@ export default function AgenticAIPioneerProgramPage() {
                   </div>
                 </details>
               ))}
-            </div>
-
-            <div className="rounded-2xl p-6 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-primary)] border border-[var(--border-primary)]">
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {["LangChain","CrewAI","LangGraph","AutoGen","PyTorch","Hugging Face","OpenAI","PEFT","Claude","Gemini"].map((lib) => (
-                  <div key={lib} className="px-3 py-2 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm text-[var(--text-color)] text-center">
-                    {lib}
-                  </div>
-                ))}
-              </div>
-              
             </div>
           </div>
         </div>
@@ -1023,7 +1012,6 @@ export default function AgenticAIPioneerProgramPage() {
                   "80+ Hours of Hands-On Workshops",
                   "Industry-Grade Projects",
                   "300+ Hours of Structured Curriculum",
-                  "30+ Industry-Aligned Assignments",
                   "AV Certificate | Fractal Certificate | WSU Certificate",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
@@ -1059,7 +1047,6 @@ export default function AgenticAIPioneerProgramPage() {
                   "150+ Hours of Hands-On Workshops",
                   " Industry-Grade Projects",
                   "300+ Hours of Structured Curriculum",
-                  "30+ Industry-Aligned Assignments",
                   "AV Certificate | Fractal Certificate | WSU Certificate",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
