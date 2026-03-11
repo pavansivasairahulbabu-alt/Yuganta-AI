@@ -24,7 +24,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'];
+const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'SENDGRID_API_KEY'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
@@ -34,8 +34,8 @@ if (missingEnvVars.length > 0) {
 	process.exit(1);
 }
 
-console.log('✅ All required environment variables are configured (SMTP)');
-console.log(`🔐 SMTP host: ${process.env.SMTP_HOST} | user: ${process.env.SMTP_USER}`);
+console.log('✅ All required environment variables are configured (SendGrid)');
+console.log(`📧 SendGrid from: ${process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || 'not set'}`);
 
 const app = express();
 app.set("trust proxy", 1);

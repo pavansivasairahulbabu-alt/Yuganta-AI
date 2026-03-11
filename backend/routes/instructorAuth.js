@@ -48,7 +48,7 @@ const sendOTPEmail = async (email, otp, instructorName = "Instructor") => {
 
 	const msg = {
 		to: email,
-		from: process.env.SMTP_FROM || process.env.SMTP_USER,
+		from: process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || process.env.SMTP_USER,
 		subject: "YuganthaAI - Password Setup OTP",
 		html: htmlContent,
 		text: textContent,
