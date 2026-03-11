@@ -246,6 +246,15 @@ export default function MentorForgotPasswordPage() {
 								</p>
 							</div>
 
+							<div className='rounded-xl border border-sky-400/35 bg-sky-500/10 p-4 text-sm text-sky-100'>
+								<p className='font-semibold text-sky-200'>Check your inbox now</p>
+								<p className='mt-1 leading-6'>
+									If the verification email is not visible, please check your Spam or Junk folder and search for
+									 <span className='font-semibold text-white'>YuganthaAI</span> or the subject
+									 <span className='font-semibold text-white'>Your verification code</span>.
+								</p>
+							</div>
+
 							<div>
 								<label className='block text-white mb-2.5 text-sm font-semibold'>
 									Enter OTP
