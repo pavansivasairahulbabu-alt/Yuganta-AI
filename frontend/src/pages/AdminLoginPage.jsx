@@ -107,19 +107,7 @@ export default function AdminLoginPage() {
           </form>
 
           {/* Demo Credentials */}
-          <div className='border-t border-[rgba(139,92,246,0.2)] pt-6'>
-            <p className='text-xs text-[#9A93B5] text-center mb-3 font-semibold uppercase tracking-wider'>Demo Credentials</p>
-            <div className='space-y-2 text-xs text-[#C7C3D6]'>
-              <div className='flex items-center justify-between'>
-                <span>Email:</span>
-                <code className='bg-[rgba(139,92,246,0.2)] px-3 py-1.5 rounded text-[#A855F7] font-semibold'>{ADMIN_EMAIL}</code>
-              </div>
-              <div className='flex items-center justify-between'>
-                <span>Password:</span>
-                <code className='bg-[rgba(139,92,246,0.2)] px-3 py-1.5 rounded text-[#A855F7] font-semibold'>{ADMIN_PASSWORD}</code>
-              </div>
-            </div>
-          </div>
+      
         </div>
       </div>
     </div>
