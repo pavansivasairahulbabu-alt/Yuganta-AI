@@ -52,7 +52,7 @@ import AILearningPlatformPage from "./pages/projects/AILearningPlatformPage";
 import InstructorsPage from "./pages/InstructorsPage";
 import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
-import DsaMlProgramPage from "./pages/courses/DsaMlProgramPage";
+import DsaMlProgramPage from "./pages/courses/MasteringDataStructures&Algorithms";
 
 function CoursesHomePage() {
 	return (

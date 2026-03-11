@@ -296,8 +296,8 @@ export default function DsaMlProgramPage() {
             <h2
               className={
                 theme === "light-theme"
-                  ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent"
+                  ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)] mb-4"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2 mb-4"
               }
             >
               Curriculum Statistics
@@ -319,7 +319,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
               }
             >
               Personalized Roadmap
@@ -348,7 +348,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent"
+                  : "text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
               }
             >
               Detailed Curriculum
@@ -736,21 +736,37 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
               }
             >
-              Choose the Right Plan
+              Choose the Right AI Program for You
             </h2>
+            <p className="mt-3 text-sm md:text-base text-[var(--text-muted)]">
+              Unlock your AI potential with the GenAI program designed for your growth journey.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <Plan
               name="DSA Track"
               price="₹5,000"
               bullets={[
-                "6 Months Structured Learning",
+                "4 weeks Structured Learning",
                 "200+ DSA Problems",
                 "Interview Prep",
                 "Mentorship & Reviews",
+              ]}
+            />
+            <Plan
+              name="Agentic AI Pioneer program"
+              price="₹12,000"
+              bullets={[
+                "4 Months of Power Learning",
+                "25+ Deep-Dive Mentorship Sessions",
+                "150+ Hours of Hands-On Workshops",
+                "10+ Industry-Grade Projects",
+                "300+ Hours of Structured Curriculum",
+                "30+ Industry-Aligned Assignments",
+                "AV Certificate | Fractal Certificate | WSU Certificate",
               ]}
             />
           </div>
@@ -782,7 +798,11 @@ function Plan({ name, price, bullets }) {
       <ul className="space-y-3 text-[var(--text-color)]">
         {bullets.map((b) => (
           <li key={b} className="flex items-start gap-3">
-            <span className="w-5 h-5 rounded-full bg-[#22C55E] mt-0.5" />
+            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#22C55E] flex items-center justify-center mt-1">
+              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
             <span>{b}</span>
           </li>
         ))}

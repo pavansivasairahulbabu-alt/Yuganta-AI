@@ -153,7 +153,7 @@ export default function LandingPage() {
 						</h2>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
 						<div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl">
 							<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
 								<img
@@ -223,14 +223,46 @@ export default function LandingPage() {
 								Enroll Now
 							</Link>
 						</div>
+
+						<div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl">
+							<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
+								<img
+									src="https://miro.medium.com/1*u1dfDjx8WS86XlELNL252Q.jpeg"
+									alt="Mastering Data Structures and Algorithms"
+									className="w-full h-full object-cover"
+								/>
+							</div>
+
+							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
+								<span>200+ Hours</span>
+								<span>•</span>
+								<span>6 Months</span>
+							</div>
+
+							<h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-4 leading-tight">
+								Mastering Data Structures & Algorithms
+							</h3>
+
+							<div className="flex flex-wrap gap-2 mb-6">
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Arrays</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Linked Lists</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Stacks & Queues</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Searching & Sorting</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Trees & Graphs</span>
+							</div>
+
+							<Link
+								to="/courses/dsa-machine-learning"
+								className="block w-full text-center py-3.5 rounded-2xl border border-blue-300/70 text-base text-[var(--text-color)] font-semibold hover:border-blue-500 hover:text-blue-500 transition-colors"
+							>
+								Enroll Now
+							</Link>
+						</div>
+						
 					</div>
 				</div>
 			</div>
 			
-			
-
-
-
 			{/* Why yugantaAI Section */}
 			<div className="py-20 md:py-32 bg-[var(--bg-color)] transition-colors duration-300">
 				<div className="max-w-7xl mx-auto px-4 md:px-6">
