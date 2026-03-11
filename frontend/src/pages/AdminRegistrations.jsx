@@ -67,8 +67,10 @@ export default function AdminRegistrations() {
                     } else {
                         toast.success("Status updated! Student has been enrolled in the course successfully.");
                     }
+                } else if (data.accessRevoked === true) {
+                    toast.success("Status updated. Course access removed for this student.");
                 } else if (data.enrolled === false) {
-                    toast.info("Status updated. Student needs to register an account to access the course.");
+                    toast("Status updated. Student needs to register an account to access the course.");
                 } else {
                     toast.success(data.message || "Status updated");
                 }

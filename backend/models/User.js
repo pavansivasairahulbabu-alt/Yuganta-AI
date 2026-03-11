@@ -59,6 +59,9 @@ const userSchema = new mongoose.Schema({
 	},
 });
 
+userSchema.index({ createdAt: -1 });
+userSchema.index({ "enrolledCourses.courseId": 1 });
+
 // Hash password before saving
 userSchema.pre("save", async function (next) {
 	if (!this.isModified("password")) {

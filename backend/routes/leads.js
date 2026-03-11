@@ -10,6 +10,31 @@ import { protect } from "../middleware/auth.js"; // Standard user auth if needed
 
 const router = express.Router();
 
+const escapeRegExp = (value = "") =>
+	String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const resolveLeadCourse = async (lead, Course) => {
+	if (mongoose.Types.ObjectId.isValid(lead.courseId)) {
+		const courseById = await Course.findById(lead.courseId).select("_id students");
+		if (courseById) return courseById;
+	}
+
+	if (lead.courseName) {
+		const courseByName = await Course.findOne({
+			title: new RegExp(`^${escapeRegExp(lead.courseName)}$`, "i"),
+		}).select("_id students");
+		if (courseByName) return courseByName;
+	}
+
+	if (lead.courseId) {
+		return Course.findOne({
+			title: new RegExp(escapeRegExp(lead.courseId), "i"),
+		}).select("_id students");
+	}
+
+	return null;
+};
+
 // Middleware to check for Admin Token (Simplified based on existing admin patterns)
 const adminAuth = async (req, res, next) => {
 	try {
@@ -135,71 +160,87 @@ router.put("/:id", async (req, res) => {
 		}
 
 		const { status } = req.body;
-		const lead = await Lead.findByIdAndUpdate(
-			req.params.id,
-			{ status },
-			{ new: true },
-		);
+		const lead = await Lead.findById(req.params.id);
 
 		if (!lead) {
 			return res.status(404).json({ message: "Lead not found" });
 		}
 
+		lead.status = status;
+		await lead.save();
+
+		const User = (await import("../models/User.js")).default;
+		const Course = (await import("../models/Course.js")).default;
+		const course = await resolveLeadCourse(lead, Course);
+		const normalizedEmail = String(lead.email || "").trim().toLowerCase();
+		const user = normalizedEmail
+			? await User.findOne({ email: normalizedEmail })
+			: null;
+
 		// If status is changed to "Enrolled", automatically enroll the user if they have an account
 		if (status === "Enrolled") {
-			const User = (await import("../models/User.js")).default;
-			const Course = (await import("../models/Course.js")).default;
-
-		// Validate courseId is a valid ObjectId
-		if (!mongoose.Types.ObjectId.isValid(lead.courseId)) {
-			return res.json({
-				lead,
-				enrolled: false,
-				message: "Lead status updated. Invalid course ID format - cannot auto-enroll."
-			});
-		}
-
-		// Convert courseId string to ObjectId
-		const courseObjectId = new mongoose.Types.ObjectId(lead.courseId);
-
-		// Find user by email
-		const user = await User.findOne({ email: lead.email });
-
-		if (user) {
-			// Check if already enrolled
-			const alreadyEnrolled = user.enrolledCourses.find(
-				(course) => course.courseId.toString() === lead.courseId
-			);
-
-			if (!alreadyEnrolled) {
-				// Enroll user in the course
-				user.enrolledCourses.push({
-					courseId: courseObjectId,
-					enrolledAt: Date.now(),
-					progress: 0,
-					completed: false,
-				});
-
-				await user.save();
-
-				// Increment student count in course
-				await Course.findByIdAndUpdate(courseObjectId, {
-						enrolled: true,
-						message: "Lead status updated and student enrolled in course successfully"
-					});
-				} else {
-					return res.json({
-						lead,
-						enrolled: true,
-						alreadyEnrolled: true,
-						message: "Lead status updated. Student was already enrolled in this course"
-					});
-				}
-			} else {
+			if (!course) {
 				return res.json({
 					lead,
 					enrolled: false,
-					message: "Lead status updated. Note: Student doesn't have an account yet. They need to register first to access the course."
+					message: "Lead status updated, but matching course was not found for auto-enrollment.",
+				});
+			}
+
+			if (!user) {
+				return res.json({
+					lead,
+					enrolled: false,
+					message: "Lead status updated. Note: Student doesn't have an account yet. They need to register first to access the course.",
+				});
+			}
+
+			const alreadyEnrolled = user.enrolledCourses.find(
+				(courseEnrollment) => courseEnrollment.courseId.toString() === course._id.toString(),
+			);
+
+			if (alreadyEnrolled) {
+				return res.json({
+					lead,
+					enrolled: true,
+					alreadyEnrolled: true,
+					message: "Lead status updated. Student was already enrolled in this course",
+				});
+			}
+
+			user.enrolledCourses.push({
+				courseId: course._id,
+				enrolledAt: Date.now(),
+				progress: 0,
+				completed: false,
+			});
+
+			await user.save();
+			await Course.findByIdAndUpdate(course._id, { $inc: { students: 1 } });
+
+			return res.json({
+				lead,
+				enrolled: true,
+				message: "Lead status updated and student enrolled in course successfully",
+			});
+		}
+
+		if (course && user) {
+			const originalCount = user.enrolledCourses.length;
+			user.enrolledCourses = user.enrolledCourses.filter(
+				(courseEnrollment) => courseEnrollment.courseId.toString() !== course._id.toString(),
+			);
+
+			if (user.enrolledCourses.length !== originalCount) {
+				await user.save();
+				if ((course.students || 0) > 0) {
+					await Course.findByIdAndUpdate(course._id, { $inc: { students: -1 } });
+				}
+
+				return res.json({
+					lead,
+					accessRevoked: true,
+					message: `Lead status updated to ${status}. Course access removed for this student.`,
 				});
 			}
 		}

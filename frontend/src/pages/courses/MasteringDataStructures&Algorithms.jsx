@@ -1,18 +1,27 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import API_URL from "../../config/api";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function DsaMlProgramPage() {
   const { theme } = useTheme();
+  const { isAuthenticated, user, token } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
   const [whatsapp, setWhatsapp] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const [openWeek, setOpenWeek] = useState(null);
   const [showAllTools, setShowAllTools] = useState(false);
   const [loadingInstructors, setLoadingInstructors] = useState(false);
   const [instructors, setInstructors] = useState([]);
+
+  const DSA_SLUG = "dsa-ml-program";
+  const DSA_TITLE = "Mastering Data Structures & Algorithms";
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -116,30 +125,140 @@ export default function DsaMlProgramPage() {
     })();
   }, []);
 
+  useEffect(() => {
+    const fullName = user?.fullName || user?.user?.fullName || "";
+    const email = user?.email || user?.user?.email || "";
+
+    if (fullName || email) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || fullName,
+        email: prev.email || email,
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setIsEnrolled(false);
+      return;
+    }
+
+    const fetchEnrollmentStatus = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/users/enrolled`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) return;
+        const data = await response.json();
+
+        const found = Array.isArray(data) && data.some((item) => {
+          const course = item?.courseId;
+          const title = (course?.title || "").toLowerCase();
+          const id = course?._id || "";
+          return (
+            title.includes("mastering data structures") ||
+            title.includes("data structures & algorithms") ||
+            id === DSA_SLUG
+          );
+        });
+
+        setIsEnrolled(found);
+      } catch {
+        setIsEnrolled(false);
+      }
+    };
+
+    fetchEnrollmentStatus();
+  }, [isAuthenticated, token]);
+
+  const findDsaCourseId = async () => {
+    const response = await fetch(`${API_URL}/api/courses`);
+    if (!response.ok) return null;
+    const courses = await response.json();
+    if (!Array.isArray(courses)) return null;
+
+    const match = courses.find((course) =>
+      (course?.title || "").toLowerCase().includes("mastering data structures") ||
+      (course?.title || "").toLowerCase().includes("data structures & algorithms")
+    );
+
+    return match?._id || null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isEnrolled) {
+      toast.success("You are already enrolled in this program.");
+      return;
+    }
     if (!form.name || !form.phone || !form.email) return;
+    if (!agree) {
+      toast.error("Please accept Terms & Conditions to continue.");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast("Please sign up or log in to enroll.");
+      navigate("/signup");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_URL}/api/leads`, {
+      const leadRes = await fetch(`${API_URL}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
           email: form.email,
-          courseId: "dsa-ml-program",
-          courseName: "Mastering Data Structures & Algorithms",
+          courseId: DSA_SLUG,
+          courseName: DSA_TITLE,
           type: "Enrollment",
           agreeTerms: agree,
           whatsappUpdates: whatsapp,
         }),
       });
-      if (!res.ok) {
-        console.warn("Lead submit failed");
+
+      const leadData = await leadRes.json().catch(() => ({}));
+
+      if (leadData?.alreadyEnrolled) {
+        setIsEnrolled(true);
+        toast.success("Already enrolled with this phone number or email.");
+        return;
       }
+
+      const courseId = await findDsaCourseId();
+      if (courseId) {
+        const enrollRes = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!enrollRes.ok) {
+          const enrollData = await enrollRes.json().catch(() => ({}));
+          const message = (enrollData?.message || "").toLowerCase();
+          if (message.includes("already enrolled")) {
+            toast.success("You are already enrolled in this program.");
+          } else {
+            toast.error(enrollData?.message || "Enrollment failed. Please try again.");
+            return;
+          }
+        }
+      }
+
+      toast.success("Successfully enrolled!");
+      setForm((prev) => ({ ...prev, phone: "" }));
+      setIsEnrolled(true);
     } catch (err) {
       console.error("Lead submit error", err);
+      toast.error("Unable to complete enrollment right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -157,12 +276,7 @@ export default function DsaMlProgramPage() {
               <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
               <a href="#testimonials" className="text-[#C7C3D6] hover:text-white font-semibold">Testimonials</a>
             </div>
-            <Link
-              to="/signup"
-              className="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] text-white font-semibold shadow-[0_4px_16px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.6)] transition-all"
-            >
-              Enroll Now
-            </Link>
+            
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -235,10 +349,10 @@ export default function DsaMlProgramPage() {
                   </div>
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || isEnrolled}
                     className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] disabled:opacity-60"
                   >
-                    {submitting ? "Submitting..." : "Enroll Now"}
+                    {submitting ? "Submitting..." : isEnrolled ? "Enrolled" : "Enroll Now"}
                   </button>
                 </form>
               </div>

@@ -133,6 +133,11 @@ const courseSchema = new mongoose.Schema({
 	},
 });
 
+courseSchema.index({ createdAt: -1 });
+courseSchema.index({ title: 1 });
+courseSchema.index({ instructorId: 1, createdAt: -1 });
+courseSchema.index({ category: 1, createdAt: -1 });
+
 const Course = mongoose.model("Course", courseSchema);
 
 export default Course;

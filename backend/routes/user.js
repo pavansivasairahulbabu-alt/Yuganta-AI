@@ -157,7 +157,7 @@ router.get("/enrolled", protect, async (req, res) => {
 		// Filter out null courseIds (deleted courses)
 		const filteredEnrolledCourses = user.enrolledCourses.filter(
 			(enrollment) => enrollment.courseId !== null
-		);
+		).sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
 		
 		res.json(filteredEnrolledCourses);
 	} catch (error) {

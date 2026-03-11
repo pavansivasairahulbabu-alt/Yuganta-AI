@@ -12,7 +12,7 @@ const router = express.Router();
 // @access  Public
 router.get("/", async (req, res) => {
 	try {
-		const courses = await Course.find({}).sort({ createdAt: -1 });
+		const courses = await Course.find({}).sort({ createdAt: -1 }).lean();
 		res.json(courses);
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
@@ -23,7 +23,8 @@ router.get("/", async (req, res) => {
 router.get("/instructors/public", async (req, res) => {
 	try {
 		const instructors = await Instructor.find({})
-			.select("name email expertise bio photo company experience avatar approved createdAt");
+			.select("name email expertise bio photo company experience avatar approved createdAt")
+			.lean();
 		res.json(instructors);
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
@@ -37,7 +38,7 @@ router.get("/instructor/:instructorId", async (req, res) => {
 	try {
 		const courses = await Course.find({
 			instructorId: req.params.instructorId,
-		}).sort({ createdAt: -1 });
+		}).sort({ createdAt: -1 }).lean();
 		res.json(courses);
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
@@ -51,7 +52,7 @@ router.get("/my-courses/list", protectInstructor, async (req, res) => {
 	try {
 		const courses = await Course.find({
 			instructorId: req.instructor._id,
-		}).sort({ createdAt: -1 });
+		}).sort({ createdAt: -1 }).lean();
 		res.json(courses);
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
@@ -63,7 +64,7 @@ router.get("/my-courses/list", protectInstructor, async (req, res) => {
 // @access  Public
 router.get("/:id", async (req, res) => {
 	try {
-		const course = await Course.findById(req.params.id);
+		const course = await Course.findById(req.params.id).lean();
 
 		if (!course) {
 			return res.status(404).json({ message: "Course not found" });

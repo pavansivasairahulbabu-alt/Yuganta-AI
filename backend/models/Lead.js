@@ -40,7 +40,9 @@ const leadSchema = new mongoose.Schema({
 	},
 });
 
-// Ensure a user can only download brochure once per course (optional, per requirements)
-// leadSchema.index({ phone: 1, courseId: 1, type: 1 }, { unique: true });
+leadSchema.index({ date: -1 });
+leadSchema.index({ status: 1, date: -1 });
+leadSchema.index({ courseId: 1, type: 1, date: -1 });
+leadSchema.index({ email: 1, status: 1 });
 
 export default mongoose.model("Lead", leadSchema);

@@ -12,6 +12,52 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const newCourses = [
 	{
+		title: "Mastering Data Structures & Algorithms",
+		description: "Build a strong foundation in data structures, algorithms, and problem solving with guided practice, structured modules, and mentorship support.",
+		instructor: "Pavan",
+		rating: 4.7,
+		students: 0,
+		lessons: 36,
+		duration: "4 Months",
+		level: "Intermediate",
+		category: "Programming",
+		thumbnail: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&q=80",
+		price: "7000",
+		isFree: false,
+		modules: [
+			{
+				title: "DSA Foundations",
+				description: "Core programming logic, complexity analysis, and basic data structures.",
+				order: 1,
+				videos: [
+					{ title: "Time and Space Complexity", url: "", duration: "20:00", description: "Analyze algorithm performance", order: 1 },
+					{ title: "Arrays and Strings", url: "", duration: "24:00", description: "Core linear data handling", order: 2 },
+					{ title: "Recursion Basics", url: "", duration: "22:00", description: "Recursive problem solving", order: 3 }
+				]
+			},
+			{
+				title: "Intermediate Data Structures",
+				description: "Stacks, queues, linked lists, trees, and hashing.",
+				order: 2,
+				videos: [
+					{ title: "Stacks and Queues", url: "", duration: "26:00", description: "Linear abstract data types", order: 1 },
+					{ title: "Linked Lists", url: "", duration: "28:00", description: "Singly and doubly linked lists", order: 2 },
+					{ title: "Trees and BST", url: "", duration: "32:00", description: "Hierarchical structures", order: 3 }
+				]
+			},
+			{
+				title: "Algorithms and Problem Solving",
+				description: "Sorting, searching, graphs, dynamic programming, and interview patterns.",
+				order: 3,
+				videos: [
+					{ title: "Sorting and Searching", url: "", duration: "30:00", description: "Classic algorithm patterns", order: 1 },
+					{ title: "Graphs and Traversals", url: "", duration: "34:00", description: "BFS, DFS, shortest paths", order: 2 },
+					{ title: "Dynamic Programming", url: "", duration: "36:00", description: "Optimization techniques", order: 3 }
+				]
+			}
+		]
+	},
+	{
 		title: "AIML",
 		description: "Master Artificial Intelligence and Machine Learning from fundamentals to advanced applications. Build intelligent systems, work with neural networks, and create cutting-edge AI solutions. Perfect for aspiring AI engineers and data scientists.",
 		instructor: "Pavan",

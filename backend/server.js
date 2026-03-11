@@ -1,8 +1,11 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import dotenv from "dotenv";
+import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
+import rateLimit from "express-rate-limit";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/user.js";
@@ -35,6 +38,7 @@ console.log('✅ All required environment variables are configured (including Se
 console.log(`🔐 SendGrid from email: ${process.env.SENDGRID_FROM_EMAIL}`);
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Connect to MongoDB
 connectDB();
@@ -47,18 +51,53 @@ const envOrigins = (process.env.FRONTEND_URL || '')
 const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
 const prodDefaultOrigins = ['https://yuganthaai.vercel.app', 'https://yuganthaai.com'];
 
+const allowedOrigins = [
+	...(process.env.NODE_ENV === "production" ? prodDefaultOrigins : defaultDevOrigins),
+	...envOrigins,
+];
+const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
+
 const corsOptions = {
-	origin: process.env.NODE_ENV === 'production'
-		? [...prodDefaultOrigins, ...envOrigins]
-		: [...defaultDevOrigins, ...envOrigins],
+	origin: (origin, callback) => {
+		if (!origin || uniqueAllowedOrigins.includes(origin)) {
+			return callback(null, true);
+		}
+
+		return callback(new Error("Not allowed by CORS"));
+	},
 	credentials: true,
 	optionsSuccessStatus: 200
 };
 
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: Number(process.env.API_RATE_LIMIT_MAX || 600),
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: { message: "Too many requests. Please try again in a few minutes." },
+});
+
+const authLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: Number(process.env.AUTH_RATE_LIMIT_MAX || 50),
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: { message: "Too many authentication attempts. Please try again later." },
+});
+
 // Middleware
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(helmet({
+	contentSecurityPolicy: false,
+	crossOriginResourcePolicy: false,
+}));
+app.use(compression({ threshold: 1024 }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use("/api", apiLimiter);
+app.use("/api/auth", authLimiter);
+app.use("/api/instructor-auth", authLimiter);
+app.use("/api/mentor-auth", authLimiter);
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -73,7 +112,11 @@ app.use("/api/leads", leadRoutes);
 
 // Health check
 app.get("/", (req, res) => {
-	res.json({ message: "YuganthaAI API is running" });
+	res.json({
+		message: "YuganthaAI API is running",
+		uptime: process.uptime(),
+		timestamp: new Date().toISOString(),
+	});
 });
 
 // Error handling middleware
@@ -92,6 +135,9 @@ const startServer = (port, retriesLeft = MAX_PORT_RETRIES) => {
 	const server = app.listen(port, () => {
 		console.log(`Server running on port ${port}`);
 	});
+
+	server.keepAliveTimeout = 65000;
+	server.headersTimeout = 66000;
 
 	server.on("error", (error) => {
 		if (error.code === "EADDRINUSE" && retriesLeft > 0) {

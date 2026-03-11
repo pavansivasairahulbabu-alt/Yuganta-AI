@@ -39,13 +39,15 @@ export default function MyLearningPage() {
 			const data = await response.json();
 
 			// Extract course data from enrollment objects
-			const courses = data.map(enrollment => ({
-				...enrollment.courseId,
-				enrollmentId: enrollment._id,
-				progress: enrollment.progress,
-				completed: enrollment.completed,
-				enrolledAt: enrollment.enrolledAt,
-			}));
+			const courses = data
+				.map(enrollment => ({
+					...enrollment.courseId,
+					enrollmentId: enrollment._id,
+					progress: enrollment.progress,
+					completed: enrollment.completed,
+					enrolledAt: enrollment.enrolledAt,
+				}))
+				.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
 
 			setEnrolledCourses(courses);
 			setLoading(false);
