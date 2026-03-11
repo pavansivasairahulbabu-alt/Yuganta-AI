@@ -2,7 +2,7 @@ import express from "express";
 import { body, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import sgMail from "../config/mailer.js";
+import transporter from "../config/mailer.js";
 import Mentor from "../models/Mentor.js";
 
 const router = express.Router();
@@ -19,46 +19,49 @@ const sendOTPEmail = async (email, otp, mentorName = "Mentor") => {
 	console.log(`\n📧 sendOTPEmail called for: ${email}, OTP: ${otp}`);
 	
 	const htmlContent = `
-		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-			<h2>Password Setup - YuganthaAI</h2>
+		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #111827;">
+			<h2 style="margin-bottom: 8px;">YuganthaAI Password Setup OTP</h2>
 			<p>Hello ${mentorName},</p>
-			<p>Please use the OTP below to set your password:</p>
+			<p>Use the OTP below to set your password.</p>
 			
 			<div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
 				<p style="margin: 0; color: #666; font-size: 14px;">Your OTP (valid for 10 minutes):</p>
 				<p style="margin: 10px 0; font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #333;">${otp}</p>
 			</div>
 			
-			<p>Go to the password setup page and enter this OTP along with your new password.</p>
+			<p>Go to the password setup page and enter this OTP.</p>
 			<p><a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/mentor/forgot-password" style="color: #007bff; text-decoration: none;">Set Your Password</a></p>
 			
 			<p style="color: #666; font-size: 12px; margin-top: 30px;">
-				This OTP will expire in 10 minutes.
+				This is an automated transactional email. Do not reply.
 			</p>
 		</div>
 	`;
 
+	const textContent = `YuganthaAI Password Setup OTP\n\nHello ${mentorName},\n\nUse this OTP to set your password: ${otp}\n\nThis OTP is valid for 10 minutes.\n\nSet password here: ${(process.env.FRONTEND_URL || 'http://localhost:5173')}/mentor/forgot-password\n\nIf you did not request this, please ignore this email.`;
+
 	const msg = {
 		to: email,
-		from: process.env.SENDGRID_FROM_EMAIL || 'noreply@yuganthaai.com',
+		from: process.env.SMTP_FROM || process.env.SMTP_USER,
 		subject: "YuganthaAI - Password Setup OTP",
 		html: htmlContent,
+		text: textContent,
+		headers: {
+			"X-Auto-Response-Suppress": "All",
+			"Auto-Submitted": "auto-generated",
+		},
 	};
 
 	try {
 		console.log(`📤 Sending OTP email to ${email}...`);
-		const result = await sgMail.send(msg);
-		console.log(`✅ OTP email sent successfully to ${email}`);
-		console.log(`📧 Message ID: ${result[0].headers['x-message-id']}`);
+		const result = await transporter.sendMail(msg);
+		console.log(`✅ OTP email sent successfully to ${email} via SMTP`);
+		console.log(`📧 Message ID: ${result.messageId}`);
 		return true;
 	} catch (error) {
 		console.error(`❌ Failed to send OTP email to ${email}`);
 		console.error(`Error Code: ${error.code}`);
 		console.error(`Error Message: ${error.message}`);
-		const sgErrors = error?.response?.body?.errors;
-		if (Array.isArray(sgErrors) && sgErrors.length > 0) {
-			console.error("📮 SendGrid response errors:", sgErrors.map((item) => item.message).join(" | "));
-		}
 		console.error(`Full Error:`, error);
 		throw new Error(`Failed to send OTP email: ${error.message}`);
 	}
