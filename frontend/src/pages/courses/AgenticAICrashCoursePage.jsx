@@ -321,7 +321,7 @@ export default function AgenticAICrashCoursePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">150+</div>
+                <div className="text-2xl font-extrabold text-[#3B82F6]">80+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
@@ -409,7 +409,7 @@ export default function AgenticAICrashCoursePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                150+ Hours of Immersive Learning
+                80+ Hours of Immersive Learning
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Master advanced Agentic AI systems with LangChain, LangGraph, and CrewAI through hands-on projects.</li>
@@ -471,7 +471,7 @@ export default function AgenticAICrashCoursePage() {
                 <Clock className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">150+ Hours</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">80+ Hours</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   In-depth GenAI and Agentic AI learning to transform your career.
                 </p>
@@ -563,7 +563,7 @@ export default function AgenticAICrashCoursePage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {["10+ Projects","150+ Hours","40+ Tools","30+ Assignments"].map((chip) => (
+            {["10+ Projects","80+ Hours","40+ Tools","30+ Assignments"].map((chip) => (
               <span key={chip} className="px-3 py-1.5 rounded-full text-sm border border-[var(--border-primary)] bg-[var(--card-bg)]">
                 {chip}
               </span>
@@ -1040,12 +1040,12 @@ export default function AgenticAICrashCoursePage() {
               <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹2,999</div>
               <ul className="space-y-3 text-[var(--text-color)]">
                 {[
-                  "4 Weeks of Continuous Access",
-                
-                  "10 Hours of Hands-On Workshops",
+                  "4 Weeks of Power Learning",
                   
-                  "100+ Hours of Structured Curriculum",
-                  "AV Certificate ",
+                  "80+ Hours of Hands-On Workshops",
+                  "Industry-Grade Projects",
+                  "300+ Hours of Structured Curriculum",
+                  "AV Certificate | Fractal Certificate | WSU Certificate",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[#22C55E] mt-0.5 shrink-0" />

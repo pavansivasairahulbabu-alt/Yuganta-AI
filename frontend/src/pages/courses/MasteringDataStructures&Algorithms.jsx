@@ -736,6 +736,7 @@ export default function DsaMlProgramPage() {
               bullets={[
                 "6 weeks Structured Learning",
                 "100+ DSA Problems",
+                "40+ Hours of Immersive Learning",
                 "Interview Prep",
                 "Mentorship & Reviews",
               ]}
