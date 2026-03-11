@@ -91,6 +91,32 @@ export default function CoursesPage() {
 
 			if (response.ok) {
 				toast.success("Successfully enrolled in course!");
+				try {
+					const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
+						headers: { Authorization: `Bearer ${token}` },
+					});
+					if (mentorRes.ok) {
+						const mentor = await mentorRes.json();
+						const d = new Date();
+						d.setDate(d.getDate() + 8);
+						const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+						const time = "7:00pm";
+						await fetch(`${API_URL}/api/mentorship-sessions`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+								Authorization: `Bearer ${token}`,
+							},
+							body: JSON.stringify({
+								title: "First Mentorship",
+								mentorId: mentor?._id,
+								date: dateStr,
+								time,
+								notes: "Auto-created on enrollment",
+							}),
+						});
+					}
+				} catch {}
 				// Update enrolled courses list
 				setEnrolledCourseIds([...enrolledCourseIds, courseId]);
 				setTimeout(() => navigate("/my-learning"), 1000);
