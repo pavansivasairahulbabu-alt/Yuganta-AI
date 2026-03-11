@@ -186,7 +186,7 @@ export default function MentorForgotPasswordPage() {
 						</div>
 					)}
 
-					{message && (
+					{message && step !== 2 && (
 						<div className='mb-6 p-4 bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] rounded-lg text-[#22C55E] text-sm font-medium flex items-center space-x-2'>
 							<svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20'>
 								<path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
@@ -246,12 +246,12 @@ export default function MentorForgotPasswordPage() {
 								</p>
 							</div>
 
-							<div className='rounded-xl border border-sky-400/35 bg-sky-500/10 p-4 text-sm text-sky-100'>
-								<p className='font-semibold text-sky-200'>Check your inbox now</p>
+							<div className='rounded-xl border border-sky-300 bg-sky-50 p-4 text-sm text-slate-700 shadow-sm'>
+								<p className='font-semibold text-sky-700'>Check your inbox now</p>
 								<p className='mt-1 leading-6'>
 									If the verification email is not visible, please check your Spam or Junk folder and search for
-									 <span className='font-semibold text-white'>YuganthaAI</span> or the subject
-									 <span className='font-semibold text-white'>Your verification code</span>.
+									 <span className='font-semibold text-slate-900'>YuganthaAI</span> or the subject
+									 <span className='font-semibold text-slate-900'>Your verification code</span>.
 								</p>
 							</div>
 

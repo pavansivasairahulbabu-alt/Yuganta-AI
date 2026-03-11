@@ -167,7 +167,7 @@ export default function InstructorForgotPasswordPage() {
 						</div>
 					)}
 
-					{message && (
+					{message && step !== 2 && (
 						<div className='mb-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200 text-sm'>
 							{message}
 						</div>
@@ -213,12 +213,12 @@ export default function InstructorForgotPasswordPage() {
 								</p>
 							</div>
 
-							<div className='rounded-xl border border-blue-400/40 bg-blue-500/15 p-4 text-sm text-blue-100'>
-								<p className='font-semibold text-blue-200'>Check your inbox now</p>
+							<div className='rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm text-slate-700 shadow-sm'>
+								<p className='font-semibold text-blue-700'>Check your inbox now</p>
 								<p className='mt-1 leading-6'>
 									If the verification email is not visible, please check your Spam or Junk folder and search for
-									 <span className='font-semibold text-white'>YuganthaAI</span> or the subject
-									 <span className='font-semibold text-white'>Your verification code</span>.
+									 <span className='font-semibold text-slate-900'>YuganthaAI</span> or the subject
+									 <span className='font-semibold text-slate-900'>Your verification code</span>.
 								</p>
 							</div>
 
