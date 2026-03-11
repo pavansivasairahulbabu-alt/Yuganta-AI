@@ -136,32 +136,33 @@ export default function CourseDetailsPage() {
 			<CoursesNavbar />
 			<div className='min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300'>
 				{/* Fixed Back Button */}
-				<div className='fixed top-24 left-4 z-30'>
+				<div className='fixed top-20 left-4 z-30 md:top-24'>
 					<button
 						onClick={() => navigate("/courses")}
-						className='flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-color)] bg-[var(--card-bg)]/90 backdrop-blur-md px-4 py-2 rounded-lg border border-[var(--border-color)] transition-all group'>
+						className='flex items-center gap-2 text-xs md:text-sm text-[var(--text-muted)] hover:text-[var(--text-color)] bg-[var(--card-bg)]/90 backdrop-blur-md px-3 py-2 md:px-4 md:py-2 rounded-lg border border-[var(--border-color)] transition-all group'>
 						<span className='group-hover:-translate-x-1 transition-transform'>
 							←
 						</span>
-						Back to Courses
+						<span className='hidden sm:inline'>Back to Courses</span>
+						<span className='sm:hidden'>Back</span>
 					</button>
 				</div>
 
 				{/* Hero Section */}
-				<section className='relative overflow-hidden py-20 px-4 pt-32 bg-[var(--card-bg)] border-b border-[var(--border-color)]'>
-					<div className='max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
+				<section className='relative overflow-hidden py-8 md:py-20 px-4 pt-24 md:pt-32 bg-[var(--card-bg)] border-b border-[var(--border-color)]'>
+					<div className='max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center'>
 						<div>
-							<div className='inline-block px-3 py-1 mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-sm font-medium text-blue-600'>
+							<div className='inline-block px-3 py-1 mb-4 md:mb-6 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs md:text-sm font-medium text-blue-600'>
 								{course.level || "All Levels"} Program
 							</div>
-							<h1 className='text-5xl md:text-6xl font-bold leading-tight mb-6 text-[var(--text-color)]'>
+							<h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 md:mb-6 text-[var(--text-color)]'>
 								{course.title}
 							</h1>
-							<p className='text-xl text-[var(--text-muted)] mb-8 max-w-lg'>
+							<p className='text-base md:text-lg text-[var(--text-muted)] mb-4 md:mb-8 max-w-lg'>
 								{course.description.substring(0, 150)}...
 							</p>
 
-							<div className='flex flex-wrap gap-4 mb-8 text-[var(--text-muted)]'>
+							<div className='flex flex-wrap gap-3 md:gap-4 mb-4 md:mb-8 text-xs md:text-sm text-[var(--text-muted)]'>
 								<div className='flex items-center gap-2'>
 									<span className='text-blue-500'>★</span>
 								{course.rating > 0
@@ -269,36 +270,36 @@ export default function CourseDetailsPage() {
 			</section>
 
 			{/* Description Section */}
-			<section className='py-20 px-4 bg-[var(--bg-color)] transition-colors duration-300'>
+			<section className='py-12 md:py-20 px-4 bg-[var(--bg-color)] transition-colors duration-300'>
 				<div className='max-w-4xl mx-auto'>
-					<h2 className='text-3xl font-bold mb-8 text-center text-[var(--text-color)]'>
+					<h2 className='text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-center text-[var(--text-color)]'>
 						About the Program
 					</h2>
-					<div className='text-lg text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap'>
+					<div className='text-sm md:text-base text-[var(--text-muted)] leading-relaxed whitespace-pre-wrap'>
 						{course.description}
 					</div>
 
 					{/* Modules Preview */}
 					{course.modules && course.modules.length > 0 && (
-						<div className='mt-16'>
-							<h3 className='text-2xl font-bold mb-8 text-center text-[var(--text-color)]'>
+						<div className='mt-12 md:mt-16'>
+							<h3 className='text-xl md:text-2xl font-bold mb-6 md:mb-8 text-center text-[var(--text-color)]'>
 								Curriculum
 							</h3>
-							<div className='space-y-4'>
+							<div className='space-y-3 md:space-y-4'>
 								{course.modules.map((module, idx) => (
 									<div
 										key={idx}
-										className='bg-[var(--card-bg)] border border-[var(--border-color)] p-6 rounded-xl transition-colors'>
-										<div className='flex items-center gap-4'>
-											<span className='bg-blue-500/10 text-blue-500 w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold'>
+										className='bg-[var(--card-bg)] border border-[var(--border-color)] p-4 md:p-6 rounded-xl transition-colors'>
+										<div className='flex items-start gap-3 md:gap-4'>
+											<span className='bg-blue-500/10 text-blue-500 w-7 h-7 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-xs md:text-sm font-bold'>
 												{idx + 1}
 											</span>
 											<div>
-												<h4 className='font-bold text-[var(--text-color)] text-lg'>
+												<h4 className='font-bold text-[var(--text-color)] text-base md:text-lg'>
 													{module.title}
 												</h4>
 												{module.description && (
-													<p className='text-[var(--text-muted)] text-sm mt-1'>
+													<p className='text-[var(--text-muted)] text-xs md:text-sm mt-1'>
 														{module.description}
 													</p>
 												)}
@@ -313,18 +314,21 @@ export default function CourseDetailsPage() {
 			</section>
 
 			{/* Sticky Bottom Bar for Mobile */}
-			<div className='md:hidden fixed bottom-0 left-0 w-full bg-[var(--card-bg)]/95 backdrop-blur-lg border-t border-[var(--border-color)] p-4 z-40 flex gap-2'>
+			<div className='md:hidden fixed bottom-0 left-0 w-full bg-[var(--card-bg)]/95 backdrop-blur-lg border-t border-[var(--border-color)] p-3 md:p-4 z-40 flex gap-2'>
 				<button
 					onClick={() => handleAction("Enrollment")}
-					className='flex-1 bg-blue-500 text-white py-3 rounded-lg font-bold'>
+					className='flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-bold text-sm md:text-base transition-all'>
 					Enroll Now
 				</button>
 				<button
 					onClick={() => handleAction("Brochure")}
-					className='flex-1 bg-transparent border border-blue-500 text-blue-500 py-3 rounded-lg font-bold'>
+					className='flex-1 bg-transparent border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white py-2.5 md:py-3 rounded-lg font-bold text-sm md:text-base transition-all'>
 					Brochure
 				</button>
 			</div>
+
+			{/* Bottom Padding for Mobile */}
+			<div className='md:hidden h-24'></div>
 
 			{/* Modal */}
 			{showLeadForm && (

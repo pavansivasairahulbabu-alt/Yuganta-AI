@@ -150,33 +150,40 @@ router.put("/:id", async (req, res) => {
 			const User = (await import("../models/User.js")).default;
 			const Course = (await import("../models/Course.js")).default;
 
-			// Find user by email
-			const user = await User.findOne({ email: lead.email });
+		// Validate courseId is a valid ObjectId
+		if (!mongoose.Types.ObjectId.isValid(lead.courseId)) {
+			return res.json({
+				lead,
+				enrolled: false,
+				message: "Lead status updated. Invalid course ID format - cannot auto-enroll."
+			});
+		}
 
-			if (user) {
-				// Check if already enrolled
-				const alreadyEnrolled = user.enrolledCourses.find(
-					(course) => course.courseId.toString() === lead.courseId
-				);
+		// Convert courseId string to ObjectId
+		const courseObjectId = new mongoose.Types.ObjectId(lead.courseId);
 
-				if (!alreadyEnrolled) {
-					// Enroll user in the course
-					user.enrolledCourses.push({
-						courseId: lead.courseId,
-						enrolledAt: Date.now(),
-						progress: 0,
-						completed: false,
-					});
+		// Find user by email
+		const user = await User.findOne({ email: lead.email });
 
-					await user.save();
+		if (user) {
+			// Check if already enrolled
+			const alreadyEnrolled = user.enrolledCourses.find(
+				(course) => course.courseId.toString() === lead.courseId
+			);
 
-					// Increment student count in course
-					await Course.findByIdAndUpdate(lead.courseId, {
-						$inc: { students: 1 }
-					});
+			if (!alreadyEnrolled) {
+				// Enroll user in the course
+				user.enrolledCourses.push({
+					courseId: courseObjectId,
+					enrolledAt: Date.now(),
+					progress: 0,
+					completed: false,
+				});
 
-					return res.json({
-						lead,
+				await user.save();
+
+				// Increment student count in course
+				await Course.findByIdAndUpdate(courseObjectId, {
 						enrolled: true,
 						message: "Lead status updated and student enrolled in course successfully"
 					});
