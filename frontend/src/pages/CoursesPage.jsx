@@ -408,6 +408,7 @@ export default function CoursesPage() {
 											const isAgentic = isAgenticCourse(course);
 											const pioneer = isPioneerCourse(course);
 											const crash = isCrashCourse(course);
+											const dsa = (course?.title || "").toLowerCase().includes("data structures") || (course?.title || "").toLowerCase().includes("dsa");
 											const hasRenderableMedia =
 												typeof course?.thumbnail === "string"
 													? course.thumbnail.trim().length > 0
@@ -429,7 +430,12 @@ export default function CoursesPage() {
 												? "/courses/agentic-ai-pioneer-program"
 												: crash
 													? "/courses/agentic-ai-crash-course-page"
+													: dsa
+														? "/courses/dsa-machine-learning"
 													: `/course-details/${course._id}`;
+											const enrollPath = dsa
+												? "/courses/dsa-machine-learning#pioneer-enroll-form"
+												: coursePath;
 											const durationText = isAgentic ? "150 Hours" : (course.duration || "150 Hours");
 											const countText = isAgentic ? "15 Courses" : `${course.modules?.length || course.lessons || 15} Courses`;
 
@@ -498,7 +504,7 @@ export default function CoursesPage() {
 													const isEnrolled = enrolledCourseIds.includes(course._id);
 													return (
 														<Link
-															to={isEnrolled ? "/my-learning" : coursePath}
+															to={isEnrolled ? "/my-learning" : enrollPath}
 															className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 ${
 																isEnrolled
 																	? "bg-blue-500 text-white hover:bg-blue-600"

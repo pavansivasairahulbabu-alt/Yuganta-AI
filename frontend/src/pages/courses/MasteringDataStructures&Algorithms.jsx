@@ -283,7 +283,7 @@ export default function DsaMlProgramPage() {
           <div className="flex flex-col items-center text-center gap-8">
             <h1 className={theme === "light-theme"
               ? "text-4xl md:text-5xl lg:text-6xl font-extrabold leading-snug md:leading-tight text-[var(--text-color)] pb-1 md:pb-2"
-              : "text-4xl md:text-5xl lg:text-6xl font-extrabold leading-snug md:leading-tight bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
+              : "text-4xl md:text-5xl lg:text-6xl font-extrabold leading-snug md:leading-tight text-[#60A5FA] pb-1 md:pb-2"
             }>
               Mastering Data Structures & Algorithms
             </h1>
@@ -312,7 +312,7 @@ export default function DsaMlProgramPage() {
             </div>
 
             <div id="pioneer-enroll-form" className="w-full max-w-lg">
-              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
+              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(37,99,235,0.1)]">
                 <h3 className="text-xl font-bold mb-4">Enroll for Mastering Data Structures & Algorithms </h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <input
@@ -350,7 +350,7 @@ export default function DsaMlProgramPage() {
                   <button
                     type="submit"
                     disabled={submitting || isEnrolled}
-                    className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] disabled:opacity-60"
+                    className="w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.5)] disabled:opacity-60"
                   >
                     {submitting ? "Submitting..." : isEnrolled ? "Enrolled" : "Enroll Now"}
                   </button>
@@ -369,7 +369,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA]"
               }
             >
               How does the Mastering Data Structures & Algorithms Program Help You?
@@ -411,7 +411,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)] mb-4"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2 mb-4"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA] pb-1 md:pb-2 mb-4"
               }
             >
               Curriculum Statistics
@@ -433,7 +433,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA] pb-1 md:pb-2"
               }
             >
               Personalized Roadmap
@@ -443,11 +443,11 @@ export default function DsaMlProgramPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
+          <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(37,99,235,0.12)] max-w-6xl mx-auto">
             <img
               src={theme === "light-theme" ? "/DSA-light.png" : "/DSA-dark.png"}
               alt="Program Personalized Roadmap"
-              className="w-full h-auto object-contain"
+              className="w-full md:w-[92%] mx-auto h-auto object-contain"
               loading="lazy"
             />
           </div>
@@ -462,7 +462,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
+                  : "text-3xl md:text-4xl font-extrabold text-[#60A5FA] pb-1 md:pb-2"
               }
             >
               Detailed Curriculum
@@ -551,7 +551,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA]"
               }
             >
               DSA Tools & Frameworks
@@ -850,7 +850,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-[#8B5CF6] via-[#EC4899] to-[#06B6D4] bg-clip-text text-transparent pb-1 md:pb-2"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA] pb-1 md:pb-2"
               }
             >
               Choose the Right AI Program for You
@@ -863,6 +863,7 @@ export default function DsaMlProgramPage() {
             <Plan
               name="DSA Track"
               price="₹5,000"
+              ctaHref={isAuthenticated ? "#pioneer-enroll-form" : "/signup"}
               bullets={[
                 "4 weeks Structured Learning",
                 "200+ DSA Problems",
@@ -873,6 +874,7 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Agentic AI Pioneer program"
               price="₹12,000"
+              ctaHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
               bullets={[
                 "4 Months of Power Learning",
                 "25+ Deep-Dive Mentorship Sessions",
@@ -894,7 +896,7 @@ function Item({ title, desc }) {
   return (
     <div className="flex items-start gap-4">
       <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 border border-white/20">
-        <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#8B5CF6] to-[#EC4899]" />
+        <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2563EB] to-[#38BDF8]" />
       </span>
       <div>
         <h3 className="text-xl font-semibold text-[var(--text-color)]">{title}</h3>
@@ -904,9 +906,9 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets }) {
+function Plan({ name, price, bullets, ctaHref = "/signup" }) {
   return (
-    <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
+    <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(37,99,235,0.12)]">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
       <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">{price}</div>
       <ul className="space-y-3 text-[var(--text-color)]">
@@ -922,12 +924,21 @@ function Plan({ name, price, bullets }) {
         ))}
       </ul>
       <div className="mt-8">
-        <Link
-          to="/signup"
-          className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-        >
-          Enroll Now
-        </Link>
+        {ctaHref.startsWith("#") ? (
+          <a
+            href={ctaHref}
+            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+          >
+            Enroll Now
+          </a>
+        ) : (
+          <Link
+            to={ctaHref}
+            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+          >
+            Enroll Now
+          </Link>
+        )}
       </div>
     </div>
   );
