@@ -181,6 +181,25 @@ export default function CoursesPage() {
 
 	const getCourseTopics = (course) => {
 		const title = (course?.title || "").toLowerCase();
+		const isDsaTrack = title.includes("data structures") || title.includes("dsa");
+
+		if (isPioneerCourse(course)) {
+			return [
+				"Agentic AI Pioneer Program",
+				"DSA",
+				"ML & DL",
+				"LangChain",
+				"CrewAI",
+				"LangGraph",
+				"AI Agents",
+				"RAG",
+				"AutoGen",
+			];
+		}
+
+		if (isCrashCourse(course)) {
+			return ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"];
+		}
 
 		if (title.includes("agentic")) {
 			return ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"];
@@ -192,6 +211,16 @@ export default function CoursesPage() {
 
 		if (title.includes("astra")) {
 			return ["LLMs", "Transformers", "RAG", "Agents"];
+		}
+
+		if (isDsaTrack) {
+			return [
+				"Arrays",
+				"Linked Lists",
+				"Stacks & Queues",
+				"Searching & Sorting",
+				"Trees & Graphs",
+			];
 		}
 
 		if (title.includes("aiml") || title.includes("machine learning")) {
@@ -424,7 +453,7 @@ export default function CoursesPage() {
 											const courseTitle = pioneer
 												? "Agentic AI Pioneer Program"
 												: crash
-													? "AgenticAI Crash Course Page"
+													? "Agentic AI Crash Course"
 													: course.title;
 											const coursePath = pioneer
 												? "/courses/agentic-ai-pioneer-program"
@@ -436,8 +465,24 @@ export default function CoursesPage() {
 											const enrollPath = dsa
 												? "/courses/dsa-machine-learning#pioneer-enroll-form"
 												: coursePath;
-											const durationText = isAgentic ? "150 Hours" : (course.duration || "150 Hours");
-											const countText = isAgentic ? "15 Courses" : `${course.modules?.length || course.lessons || 15} Courses`;
+											const durationText = crash
+												? "80+ Hours"
+												: pioneer
+													? "180+ Hours"
+													: dsa
+														? "40+ Hours"
+														: isAgentic
+															? "150 Hours"
+															: (course.duration || "150 Hours");
+											const countText = crash
+												? "4 Weeks"
+												: pioneer
+													? "4 Months"
+													: dsa
+														? "6 Weeks"
+														: isAgentic
+															? "15 Courses"
+															: `${course.modules?.length || course.lessons || 15} Courses`;
 
 											return (
 										<div
