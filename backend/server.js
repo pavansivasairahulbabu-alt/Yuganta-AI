@@ -53,7 +53,7 @@ const envOrigins = (process.env.FRONTEND_URL || '')
 	.map(url => url.trim())
 	.filter(Boolean);
 const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-const prodDefaultOrigins = ['https://yuganthaai.vercel.app', 'https://yuganthaai.com'];
+const prodDefaultOrigins = ['https://yuganthaai.vercel.app', 'https://yugantaai.com'];
 
 const allowedOrigins = [
 	...(process.env.NODE_ENV === "production" ? prodDefaultOrigins : defaultDevOrigins),
@@ -63,7 +63,12 @@ const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
 
 const corsOptions = {
 	origin: (origin, callback) => {
-		if (!origin || uniqueAllowedOrigins.includes(origin)) {
+		const isAllowedExact = !origin || uniqueAllowedOrigins.includes(origin);
+		const isVercelPreview =
+			typeof origin === "string" &&
+			/^https:\/\/yugantha-ai-[a-z0-9-]+\.vercel\.app$/i.test(origin);
+
+		if (isAllowedExact || isVercelPreview) {
 			return callback(null, true);
 		}
 
