@@ -22,6 +22,35 @@ export default function DsaMlProgramPage() {
 
   const DSA_SLUG = "dsa-ml-program";
   const DSA_TITLE = "Mastering Data Structures & Algorithms";
+  const getToolLogo = (name) => {
+    const logos = {
+      "Java: ArrayList": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Java: LinkedList": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Java: Deque/Queue": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Java: PriorityQueue": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Java: Arrays.sort": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Java: Collections.sort": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Java: HashMap/HashSet": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Set/map": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "binarytree": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "Adjacency List/Matrix Utils": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
+      "LeetCode": "https://upload.wikimedia.org/wikipedia/commons/1/19/LeetCode_logo_black.png",
+      "HackerRank": "https://avatars.githubusercontent.com/u/126733545?s=200&v=4",
+      "Codeforces": "https://cdn.iconscout.com/icon/free/png-256/free-code-forces-logo-icon-svg-download-png-2944796.png",
+      "GeeksforGeeks": "https://upload.wikimedia.org/wikipedia/commons/4/43/GeeksforGeeks.svg",
+      "VS Code Debugger": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Visual_Studio_Code_1.35_icon.svg",
+      "GDB/LLDB": "https://cdn-1.webcatalog.io/catalog/onlinegdb/onlinegdb-icon-filled-256.png?v=1714775337320",
+      "pytest/JUnit/Catch2": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Pytest_logo.svg/1200px-Pytest_logo.svg.png",
+      "Mistral AI": "https://avatars.githubusercontent.com/u/132141527?s=200&v=4",
+      "BentoML": "https://avatars.githubusercontent.com/u/45155100?s=200&v=4",
+      "Weights & Biases": "https://avatars.githubusercontent.com/u/26401354?s=200&v=4",
+      "Midjourney": "https://upload.wikimedia.org/wikipedia/commons/e/e4/Midjourney_Emblem.svg",
+      "Cohere": "https://avatars.githubusercontent.com/u/79015033?s=200&v=4",
+      "CSES": "https://avatars.githubusercontent.com/u/3874311?s=200&v=4",
+      "AtCoder": "https://avatars.githubusercontent.com/u/11883526?s=200&v=4"
+    };
+    return logos[name] || `https://via.placeholder.com/24?text=${name[0]}`;
+  };
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -570,13 +599,26 @@ export default function DsaMlProgramPage() {
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Arrays & Linked Lists</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {[
                   "Java: ArrayList",
                   "Java: LinkedList",
                 ].map((name) => (
-                  <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
-                    {name}
+                  <div
+                    key={name}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:scale-105 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-default"
+                  >
+                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
+                      <img
+                        src={getToolLogo(name)}
+                        alt={name}
+                        className="w-full h-full object-contain"
+                        onError={(e) => { e.target.src = `https://via.placeholder.com/24?text=${name[0]}`; }}
+                      />
+                    </div>
+                    <span className="text-sm md:text-base font-bold text-gray-900 leading-tight flex-1 break-words">
+                      {name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -584,13 +626,26 @@ export default function DsaMlProgramPage() {
 
             <div>
               <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Stacks, Queues & Searching</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {[
                   "Java: Deque/Queue",
                   "Java: PriorityQueue"
                 ].map((name) => (
-                  <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
-                    {name}
+                  <div
+                    key={name}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:scale-105 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-default"
+                  >
+                    <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
+                      <img
+                        src={getToolLogo(name)}
+                        alt={name}
+                        className="w-full h-full object-contain"
+                        onError={(e) => { e.target.src = `https://via.placeholder.com/24?text=${name[0]}`; }}
+                      />
+                    </div>
+                    <span className="text-sm md:text-base font-bold text-gray-900 leading-tight flex-1 break-words">
+                      {name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -600,14 +655,27 @@ export default function DsaMlProgramPage() {
               {showAllTools && (
                 <>
                   <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Sorting & Hashing</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {[
                       "Java: Arrays.sort",
                       "Java: Collections.sort",
                       "Java: HashMap/HashSet"
                     ].map((name) => (
-                      <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
-                        {name}
+                      <div
+                        key={name}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:scale-105 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-default"
+                      >
+                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
+                          <img
+                            src={getToolLogo(name)}
+                            alt={name}
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.target.src = `https://via.placeholder.com/24?text=${name[0]}`; }}
+                          />
+                        </div>
+                        <span className="text-sm md:text-base font-bold text-gray-900 leading-tight flex-1 break-words">
+                          {name}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -620,14 +688,27 @@ export default function DsaMlProgramPage() {
                 {/* Trees & Graphs */}
                 <div>
                   <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Trees & Graphs</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {[
                       "Set/map",
                       "binarytree",
                       "Adjacency List/Matrix Utils"
                     ].map((name) => (
-                      <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
-                        {name}
+                      <div
+                        key={name}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:scale-105 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-default"
+                      >
+                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
+                          <img
+                            src={getToolLogo(name)}
+                            alt={name}
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.target.src = `https://via.placeholder.com/24?text=${name[0]}`; }}
+                          />
+                        </div>
+                        <span className="text-sm md:text-base font-bold text-gray-900 leading-tight flex-1 break-words">
+                          {name}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -636,7 +717,7 @@ export default function DsaMlProgramPage() {
                 {/* Practice & Dev */}
                 <div>
                   <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Practice & Dev</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {[
                       "LeetCode",
                       "HackerRank",
@@ -648,8 +729,21 @@ export default function DsaMlProgramPage() {
                       "GDB/LLDB",
                       "pytest/JUnit/Catch2"
                     ].map((name) => (
-                      <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
-                        {name}
+                      <div
+                        key={name}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:scale-105 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-default"
+                      >
+                        <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
+                          <img
+                            src={getToolLogo(name)}
+                            alt={name}
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.target.src = `https://via.placeholder.com/24?text=${name[0]}`; }}
+                          />
+                        </div>
+                        <span className="text-sm md:text-base font-bold text-gray-900 leading-tight flex-1 break-words">
+                          {name}
+                        </span>
                       </div>
                     ))}
                   </div>

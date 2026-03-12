@@ -21,6 +21,65 @@ export default function AgenticAIPioneerProgramPage() {
   const [loadingInstructors, setLoadingInstructors] = useState(true);
   const [showAllTools, setShowAllTools] = useState(false);
 
+  const getToolLogo = (name) => {
+    const logos = {
+      "ChatGPT": "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+      "wordware": "https://hdrobots.com/wp-content/uploads/2024/10/wordware-logo.webp",
+      "LangChain": "https://avatars.githubusercontent.com/u/126733545?s=200&v=4",
+      "CrewAI": "https://avatars.githubusercontent.com/u/153205166?s=200&v=4",
+      "LangGraph": "https://avatars.githubusercontent.com/u/126733545?s=200&v=4",
+      "AutoGen": "https://avatars.githubusercontent.com/u/6154722?s=200&v=4",
+      "AutoGen Studio": "https://avatars.githubusercontent.com/u/6154722?s=200&v=4",
+      "OpenAI": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS3PwERLLNB9XKFpeMgAMPxl5VvN3HRJnXQQ&s",
+      "Python": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg",
+      "SQLite": "https://upload.wikimedia.org/wikipedia/commons/3/38/SQLite370.svg",
+      "Meta Llama": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
+      "Gemini": "https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/gemini-color.png",
+      "OpenAI GPT-4": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS3PwERLLNB9XKFpeMgAMPxl5VvN3HRJnXQQ&s",
+      "Chroma": "https://avatars.githubusercontent.com/u/104526806?s=200&v=4",
+      "LangSmith": "https://avatars.githubusercontent.com/u/126733545?s=200&v=4",
+      "Redis": "https://logowik.com/content/uploads/images/redis.jpg",
+      "Hugging Face": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+      "PEFT": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+      "DALL·E": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS3PwERLLNB9XKFpeMgAMPxl5VvN3HRJnXQQ&s",
+      "harness": "https://avatars.githubusercontent.com/u/41344499?s=200&v=4",
+      "PyTorch": "https://upload.wikimedia.org/wikipedia/commons/1/10/PyTorch_logo_icon.svg",
+      "Diffusers": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+      "huggingface_hub": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+      "CLIPTokenizer": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS3PwERLLNB9XKFpeMgAMPxl5VvN3HRJnXQQ&s",
+      "CIVITAI": "https://avatars.githubusercontent.com/u/121852438?s=200&v=4",
+      "stability.ai": "https://avatars.githubusercontent.com/u/107931326?s=200&v=4",
+      "BlueWillow": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn49NcF3W5JfNeokxhH5ssl80W5oHiZbMwMQ&s",
+      "Designer": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVWS37WKwsNDmo8HcyhCbJjsHDSUSfObnr6A&s",
+      "Lexica": "https://lexica.art/favicon.ico",
+      "Chainlit": "https://avatars.githubusercontent.com/u/127344265?s=200&v=4",
+      "Stripe": "https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg",
+      "Meta": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg",
+      "Claude": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Claude_AI_symbol.svg/1280px-Claude_AI_symbol.svg.png",
+      "n8n": "https://avatars.githubusercontent.com/u/45402633?s=200&v=4",
+      "Whisper": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS3PwERLLNB9XKFpeMgAMPxl5VvN3HRJnXQQ&s",
+      "Docker": "https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png",
+      "gradio": "https://avatars.githubusercontent.com/u/51063788?s=200&v=4",
+      "Pinecone": "https://avatars.githubusercontent.com/u/64010323?s=200&v=4",
+      "tavily": "https://tavily.com/favicon.ico",
+      "LOCUST": "https://avatars.githubusercontent.com/u/672004?s=200&v=4",
+      "Locust": "https://avatars.githubusercontent.com/u/672004?s=200&v=4",
+      "kubernetes": "https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg",
+      "Langfuse": "https://avatars.githubusercontent.com/u/132148705?s=200&v=4",
+      "Adobe Firefly": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR87SW6V5XE57Vgz6pce2mG2HpocuMsFiZxtw&s",
+      "Unstructured": "https://avatars.githubusercontent.com/u/111306385?s=200&v=4",
+      "ChatGPT API": "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+      "DALL·E 2": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQS3PwERLLNB9XKFpeMgAMPxl5VvN3HRJnXQQ&s",
+      "OpenAI Gym": "https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg",
+      "Mistral AI": "https://avatars.githubusercontent.com/u/132141527?s=200&v=4",
+      "BentoML": "https://avatars.githubusercontent.com/u/45155100?s=200&v=4",
+      "Weights & Biases": "https://avatars.githubusercontent.com/u/26401354?s=200&v=4",
+      "Midjourney": "https://upload.wikimedia.org/wikipedia/en/thumb/0/06/Midjourney_logo.svg/1280px-Midjourney_logo.svg.png",
+      "Cohere": "https://avatars.githubusercontent.com/u/79015033?s=200&v=4"
+    };
+    return logos[name] || `https://via.placeholder.com/24?text=${name[0]}`;
+  };
+
   const PIONEER_SLUG = "agentic-ai-pioneer-program";
   const PIONEER_TITLE = "Agentic AI Pioneer Program";
 
@@ -714,13 +773,33 @@ export default function AgenticAIPioneerProgramPage() {
               "tavily",
               "LOCUST",
               "kubernetes",
-              "Langfuse"
+              "Langfuse",
+              "Adobe Firefly",
+              "Unstructured",
+              "ChatGPT API",
+              "DALL·E 2",
+              "Mistral AI",
+              "BentoML",
+              "Weights & Biases",
+              "Midjourney",
+              "Cohere",
+              "LangSmith",
             ].slice(0, showAllTools ? undefined : 18).map((name) => (
               <div
                 key={name}
-                className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] shadow-[0_4px_24px_rgba(139,92,246,0.08)]"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:scale-105 hover:shadow-[0_8px_32px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-default"
               >
-                {name}
+                <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
+                  <img
+                    src={getToolLogo(name)}
+                    alt={name}
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.target.src = `https://via.placeholder.com/24?text=${name[0]}`; }}
+                  />
+                </div>
+                <span className="text-sm md:text-base font-bold text-gray-900 leading-tight flex-1 break-words">
+                  {name}
+                </span>
               </div>
             ))}
           </div>
