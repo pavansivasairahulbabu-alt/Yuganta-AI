@@ -445,9 +445,9 @@ export default function DsaMlProgramPage() {
 
           <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(37,99,235,0.12)] max-w-6xl mx-auto">
             <img
-              src={theme === "light-theme" ? "/DSA-light.png" : "/DSA-dark.png"}
+              src={theme === "light-theme" ? "/DSA-light1.png" : "/DSA-dark1.png"}
               alt="Program Personalized Roadmap"
-              className="w-full md:w-[92%] mx-auto h-auto object-contain"
+              className="w-full md:w-[90%] mx-auto h-auto object-contain"
               loading="lazy"
             />
           </div>
