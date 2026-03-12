@@ -681,22 +681,6 @@ export default function DsaMlProgramPage() {
                               {ins.experience}
                             </div>
                           )}
-                          <div className="ins-divider w-full h-px my-4" />
-                          {ins.email ? (
-                            <a href={`mailto:${ins.email}`} onClick={(e) => e.stopPropagation()} className="ins-mailto-btn w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200">
-                              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                              </svg>
-                              {ins.email}
-                            </a>
-                          ) : (
-                            <div className="ins-mailto-btn w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold opacity-40 cursor-default">
-                              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                              </svg>
-                              No email listed
-                            </div>
-                          )}
                         </div>
                         {ins.active === false && (
                           <div className="absolute top-4 right-4 bg-[rgba(0,0,0,0.5)] backdrop-blur-sm text-blue-300 text-[10px] font-semibold px-2.5 py-1 rounded-full">

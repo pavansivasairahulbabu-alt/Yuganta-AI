@@ -199,7 +199,7 @@ export default function LandingPage() {
 							</div>
 
 							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
-								<span>180+ Hours</span>
+								<span>150+ Hours</span>
 								<span>•</span>
 								<span>4 Months</span>
 							</div>
