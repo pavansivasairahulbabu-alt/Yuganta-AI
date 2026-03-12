@@ -88,8 +88,12 @@ router.post(
 				userExists.signupOtp = otp;
 				userExists.signupOtpExpiry = otpExpiry;
 				await userExists.save();
-				await sendOtpEmail(normalizedEmail, otp, fullName, "signup");
-
+				try {
+					await sendOtpEmail(normalizedEmail, otp, fullName, "signup");
+				} catch (emailErr) {
+					console.error("[Signup] Email send failed:", emailErr.message, emailErr.response || "");
+					return res.status(500).json({ message: "Failed to send OTP email. Please check email configuration.", error: emailErr.message });
+				}
 				return res.status(200).json({
 					message: "OTP sent to your email. Please verify to complete signup.",
 					email: normalizedEmail,
@@ -106,13 +110,19 @@ router.post(
 			});
 
 			if (user) {
-				await sendOtpEmail(user.email, otp, user.fullName, "signup");
+				try {
+					await sendOtpEmail(user.email, otp, user.fullName, "signup");
+				} catch (emailErr) {
+					console.error("[Signup] Email send failed:", emailErr.message, emailErr.response || "");
+					return res.status(500).json({ message: "Failed to send OTP email. Please check email configuration.", error: emailErr.message });
+				}
 				res.status(201).json({
 					message: "OTP sent to your email. Please verify to complete signup.",
 					email: user.email,
 				});
 			}
 		} catch (error) {
+			console.error("[Signup] Unexpected error:", error.message);
 			res.status(500).json({
 				message: "Server error",
 				error: error.message,
@@ -210,10 +220,15 @@ router.post(
 			user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 			await user.save();
 
-			await sendOtpEmail(user.email, otp, user.fullName || "User", "reset");
-
-			return res.status(200).json({ message: "OTP sent to your email. Check your inbox." });
-		} catch (error) {
+				try {
+					await sendOtpEmail(user.email, otp, user.fullName || "User", "reset");
+				} catch (emailErr) {
+					console.error("[ForgotPassword] Email send failed:", emailErr.message, emailErr.response || "");
+					return res.status(500).json({ message: "Failed to send OTP email. Please check email configuration.", error: emailErr.message });
+				}
+				return res.status(200).json({ message: "OTP sent to your email. Check your inbox." });
+			} catch (error) {
+				console.error("[ForgotPassword] Unexpected error:", error.message);
 			return res.status(500).json({ message: "Server error", error: error.message });
 		}
 	}
