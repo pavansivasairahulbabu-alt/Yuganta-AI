@@ -751,10 +751,7 @@ export default function AgenticAICrashCoursePage() {
               border: 1px solid rgba(59,130,246,0.35);
               color: #60a5fa;
             }
-            .instructors-page .ins-email { color: #93c5fd; }
-            .instructors-page .ins-email:hover { color: #60a5fa; }
             .instructors-page .ins-company { color: #60a5fa; }
-            .instructors-page .ins-email-icon { color: #3b82f6; }
             .instructors-page .ins-bio { color: #bfdbfe; }
             .instructors-page .ins-back-label { color: #93c5fd; }
             .instructors-page .ins-mailto-btn {
@@ -785,10 +782,7 @@ export default function AgenticAICrashCoursePage() {
               border: 1px solid rgba(59,130,246,0.28);
               color: #2563eb;
             }
-            .light-theme .instructors-page .ins-email { color: #2563eb; }
-            .light-theme .instructors-page .ins-email:hover { color: #1d4ed8; }
             .light-theme .instructors-page .ins-company { color: #3b82f6; }
-            .light-theme .instructors-page .ins-email-icon { color: #2563eb; }
             .light-theme .instructors-page .ins-bio { color: #1e3a5f; }
             .light-theme .instructors-page .ins-back-label { color: #2563eb; }
             .light-theme .instructors-page .ins-experience { color: #2563eb; }
@@ -835,7 +829,7 @@ export default function AgenticAICrashCoursePage() {
                 const [c1, c2] = gradients[idx % gradients.length];
                 const expertiseTags = (ins.expertise || ins.designation || "Instructor").split(/[,/]/).map(s => s.trim()).filter(Boolean);
                 return (
-                  <div key={ins._id || ins.email || ins.name} className="ins-flip-wrapper">
+                  <div key={ins._id || ins.name || `instructor-${idx}`} className="ins-flip-wrapper">
                     <div className="ins-flip-inner">
                       <div className="ins-flip-front ins-card-face flex flex-col h-full relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[20px] z-10" style={{ background: `linear-gradient(90deg, ${c1}, ${c2})` }} />
