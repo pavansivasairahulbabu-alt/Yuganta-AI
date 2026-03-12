@@ -322,7 +322,7 @@ export default function AgenticAIPioneerProgramPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">180+</div>
+                <div className="text-2xl font-extrabold text-[#3B82F6]">150+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
@@ -411,7 +411,7 @@ export default function AgenticAIPioneerProgramPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                180+ Hours of Advanced Learning
+                150+ Hours of Advanced Learning
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Master advanced Agentic AI systems with LangChain, LangGraph, and CrewAI through hands-on projects.</li>
@@ -473,7 +473,7 @@ export default function AgenticAIPioneerProgramPage() {
                 <Clock className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">180+ Hours</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">150+ Hours</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   In-depth GenAI and Agentic AI learning to transform your career.
                 </p>
@@ -565,7 +565,7 @@ export default function AgenticAIPioneerProgramPage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {["14+ Projects","180+ Hours","50+ Tools","40+ Assignments"].map((chip) => (
+            {["14+ Projects","150+ Hours","50+ Tools","40+ Assignments"].map((chip) => (
               <span key={chip} className="px-3 py-1.5 rounded-full text-sm border border-[var(--border-primary)] bg-[var(--card-bg)]">
                 {chip}
               </span>
@@ -949,22 +949,6 @@ export default function AgenticAIPioneerProgramPage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
                               {ins.experience}
-                            </div>
-                          )}
-                          <div className="ins-divider w-full h-px my-4" />
-                          {ins.email ? (
-                            <a href={`mailto:${ins.email}`} onClick={(e) => e.stopPropagation()} className="ins-mailto-btn w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-all duration-200">
-                              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                              </svg>
-                              {ins.email}
-                            </a>
-                          ) : (
-                            <div className="ins-mailto-btn w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold opacity-40 cursor-default">
-                              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                              </svg>
-                              No email listed
                             </div>
                           )}
                         </div>
