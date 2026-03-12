@@ -19,6 +19,26 @@ const userSchema = new mongoose.Schema({
 		required: true,
 		minlength: 6,
 	},
+	isVerified: {
+		type: Boolean,
+		default: false,
+	},
+	signupOtp: {
+		type: String,
+		default: null,
+	},
+	signupOtpExpiry: {
+		type: Date,
+		default: null,
+	},
+	resetOtp: {
+		type: String,
+		default: null,
+	},
+	resetOtpExpiry: {
+		type: Date,
+		default: null,
+	},
 	enrolledCourses: [
 		{
 			courseId: {

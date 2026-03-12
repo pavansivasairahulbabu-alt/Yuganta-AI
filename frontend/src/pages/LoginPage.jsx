@@ -149,11 +149,11 @@ export default function LoginPage() {
 								/>
 								Remember me
 							</label>
-							<a
-								href='#'
+							<Link
+								to='/forgot-password'
 								className='text-[#A855F7] hover:text-[#EC4899] transition-colors duration-200'>
 								Forgot Password?
-							</a>
+							</Link>
 						</div>
 
 						{/* Login Button */}

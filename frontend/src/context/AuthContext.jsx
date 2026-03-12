@@ -69,6 +69,32 @@ export const AuthProvider = ({ children }) => {
 				throw new Error(data.message || "Signup failed");
 			}
 
+			return {
+				success: true,
+				email: data.email,
+				message: data.message || "OTP sent successfully",
+			};
+		} catch (error) {
+			return { success: false, error: error.message };
+		}
+	};
+
+	const verifySignupOtp = async (email, otp) => {
+		try {
+			const response = await fetch(`${API_URL}/api/auth/verify-signup-otp`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ email, otp }),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || "OTP verification failed");
+			}
+
 			localStorage.setItem("user", JSON.stringify(data));
 			localStorage.setItem("token", data.token);
 			setUser(data);
@@ -126,6 +152,7 @@ export const AuthProvider = ({ children }) => {
 		loading,
 		login,
 		signup,
+		verifySignupOtp,
 		logout,
 		enrollCourse,
 		isAuthenticated: !!user,

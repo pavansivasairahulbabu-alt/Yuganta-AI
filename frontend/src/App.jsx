@@ -23,6 +23,7 @@ import MentorshipBookingPage from "./pages/MentorshipBookingPage";
 import MyMentorshipSessionsPage from "./pages/MyMentorshipSessionsPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ProfilePage from "./pages/ProfilePage";
 import InstructorLoginPage from "./pages/InstructorLoginPage";
 import InstructorDashboard from "./pages/InstructorDashboard";
@@ -157,6 +158,10 @@ export default function App() {
 									<Route
 										path='/signup'
 										element={<SignupPage />}
+									/>
+									<Route
+										path='/forgot-password'
+										element={<ForgotPasswordPage />}
 									/>
 									<Route
 										path='/about'

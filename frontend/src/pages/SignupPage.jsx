@@ -3,17 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function SignupPage() {
+	const [step, setStep] = useState(1);
 	const [formData, setFormData] = useState({
 		fullName: "",
 		email: "",
 		password: "",
 		confirmPassword: "",
 	});
+	const [otp, setOtp] = useState("");
+	const [message, setMessage] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { signup } = useAuth();
+	const { signup, verifySignupOtp } = useAuth();
 	const navigate = useNavigate();
 
 	const handleChange = (e) => {
@@ -40,11 +43,30 @@ export default function SignupPage() {
 		);
 
 		if (result.success) {
-			navigate("/");
+			setMessage(result.message || "OTP sent to your email");
+			setStep(2);
 		} else {
 			setError(result.error);
 		}
 
+		setLoading(false);
+	};
+
+	const handleVerifyOtp = async (e) => {
+		e.preventDefault();
+		setError("");
+		if (!/^\d{6}$/.test(otp.trim())) {
+			setError("Please enter a valid 6-digit OTP");
+			return;
+		}
+
+		setLoading(true);
+		const result = await verifySignupOtp(formData.email, otp.trim());
+		if (result.success) {
+			navigate("/");
+		} else {
+			setError(result.error);
+		}
 		setLoading(false);
 	};
 
@@ -85,7 +107,13 @@ export default function SignupPage() {
 							{error}
 						</div>
 					)}
+					{message && (
+						<div className='bg-blue-500/10 border border-blue-400/40 text-blue-200 px-4 py-3 rounded-xl mb-6'>
+							{message}
+						</div>
+					)}
 
+					{step === 1 ? (
 					<form onSubmit={handleSubmit} className='space-y-5'>
 						{/* Full Name */}
 						<div>
@@ -334,6 +362,37 @@ export default function SignupPage() {
 								GitHub										<span className='absolute -top-2 -right-2 bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] text-white text-xs px-2 py-1 rounded-full'>Soon</span>							</button>
 						</div>
 					</form>
+					) : (
+						<form onSubmit={handleVerifyOtp} className='space-y-5'>
+							<div className='text-center text-sm text-gray-300'>
+								Enter the OTP sent to <span className='font-semibold text-white'>{formData.email}</span>
+							</div>
+							<div>
+								<label className='block text-[var(--text-color)] text-sm font-medium mb-2'>OTP</label>
+								<input
+									type='text'
+									value={otp}
+									onChange={(e) => setOtp(e.target.value.slice(0, 6))}
+									required
+									maxLength={6}
+									className='w-full px-4 py-3 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl text-center tracking-[0.3em] text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#8B5CF6] focus:ring-2 focus:ring-[rgba(139,92,246,0.3)] transition-all duration-200'
+									placeholder='000000'
+								/>
+							</div>
+							<button
+								type='submit'
+								disabled={loading}
+								className='w-full bg-gradient-to-r from-[#1a56db] to-[#1e40af] hover:from-[#1d4ed8] hover:to-[#1e3a8a] text-white font-semibold py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'>
+								{loading ? "Verifying OTP..." : "Verify OTP & Create Account"}
+							</button>
+							<button
+								type='button'
+								onClick={() => setStep(1)}
+								className='w-full text-blue-300 hover:text-blue-200 text-sm'>
+								Back
+							</button>
+						</form>
+					)}
 
 					{/* Login Link */}
 					<p className='mt-6 text-center text-gray-400'>
