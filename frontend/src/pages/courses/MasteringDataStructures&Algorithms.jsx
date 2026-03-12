@@ -292,9 +292,9 @@ export default function DsaMlProgramPage() {
               real-world problem solving through structured projects and expert mentorship.
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">200+</div>
+                <div className="text-2xl font-extrabold text-[#3B82F6]">100+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">DSA Problems</div>
               </div>
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
@@ -302,17 +302,13 @@ export default function DsaMlProgramPage() {
                 <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
               </div>
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#F59E0B]">10+</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Projects</div>
-              </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#22C55E]">Job</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Readiness</div>
               </div>
             </div>
 
-            <div id="pioneer-enroll-form" className="w-full max-w-lg">
-              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(37,99,235,0.1)]">
+            <div id="pioneer-enroll-form" className="w-full max-w-lg mx-auto">
+              <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
                 <h3 className="text-xl font-bold mb-4">Enroll for Mastering Data Structures & Algorithms </h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <input
@@ -349,7 +345,7 @@ export default function DsaMlProgramPage() {
                   </div>
                   <button
                     type="submit"
-                    disabled={submitting || isEnrolled}
+                    disabled={submitting}
                     className="w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.5)] disabled:opacity-60"
                   >
                     {submitting ? "Submitting..." : isEnrolled ? "Enrolled" : "Enroll Now"}
@@ -369,7 +365,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA]"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA] pb-1 md:pb-2"
               }
             >
               How does the Mastering Data Structures & Algorithms Program Help You?
@@ -417,8 +413,8 @@ export default function DsaMlProgramPage() {
               Curriculum Statistics
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            <Item title="200+ DSA Problems" desc="From fundamentals to advanced techniques." />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
+            <Item title="100+ DSA Problems" desc="From fundamentals to advanced techniques." />
             <Item title="Interview Prep & Patterns" desc="Core patterns, complexity, and real interview drills." />
             <Item title="300+ Hours" desc="Structured learning focused entirely on DSA." />
           </div>
@@ -465,12 +461,22 @@ export default function DsaMlProgramPage() {
                   : "text-3xl md:text-4xl font-extrabold text-[#60A5FA] pb-1 md:pb-2"
               }
             >
-              Detailed Curriculum
+              Curriculum
             </h2>
+            <p className="mt-3 text-sm md:text-base text-[var(--text-muted)]">
+              Master the foundations of problem-solving with our structured DSA curriculum
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8">
-            {/* DSA Weeks */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {["100+ Problems", "40+ Hours", "50+ Tools", "40+ Assignments"].map((chip) => (
+              <span key={chip} className="px-3 py-1.5 rounded-full text-sm border border-[var(--border-primary)] bg-[var(--card-bg)] text-[var(--text-color)]">
+                {chip}
+              </span>
+            ))}
+          </div>
+
+          <div className="max-w-4xl mx-auto">
             <div className="space-y-4">
               {[
                 {
@@ -551,7 +557,7 @@ export default function DsaMlProgramPage() {
               className={
                 theme === "light-theme"
                   ? "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-color)]"
-                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA]"
+                  : "text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#60A5FA] pb-1 md:pb-2"
               }
             >
               DSA Tools & Frameworks
@@ -566,12 +572,8 @@ export default function DsaMlProgramPage() {
               <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Arrays & Linked Lists</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
                 {[
-                  "C++ STL: vector",
-                  "C++ STL: list",
                   "Java: ArrayList",
                   "Java: LinkedList",
-                  "Python: list",
-                  "Python: array"
                 ].map((name) => (
                   <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
                     {name}
@@ -584,14 +586,8 @@ export default function DsaMlProgramPage() {
               <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Stacks, Queues & Searching</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
                 {[
-                  "C++: stack",
-                  "C++: queue/deque",
-                  "C++: priority_queue",
                   "Java: Deque/Queue",
-                  "Java: PriorityQueue",
-                  "Python: collections.deque",
-                  "Python: heapq",
-                  "Python: bisect"
+                  "Java: PriorityQueue"
                 ].map((name) => (
                   <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
                     {name}
@@ -606,14 +602,9 @@ export default function DsaMlProgramPage() {
                   <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Sorting & Hashing</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
                     {[
-                      "C++: sort/stable_sort",
-                      "C++: unordered_map/set",
                       "Java: Arrays.sort",
                       "Java: Collections.sort",
-                      "Java: HashMap/HashSet",
-                      "Python: sorted",
-                      "Python: dict/set",
-                      "functools.cmp_to_key"
+                      "Java: HashMap/HashSet"
                     ].map((name) => (
                       <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
                         {name}
@@ -631,10 +622,8 @@ export default function DsaMlProgramPage() {
                   <h3 className="text-lg font-bold mb-3 text-[var(--text-color)]">Trees & Graphs</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
                     {[
-                      "C++: set/map",
-                      "binarytree (Python)",
-                      "NetworkX",
-                      "Graphviz",
+                      "Set/map",
+                      "binarytree",
                       "Adjacency List/Matrix Utils"
                     ].map((name) => (
                       <div key={name} className="flex items-center justify-center px-3 py-3 md:py-4 rounded-xl border border-[var(--border-primary)] bg-[var(--card-bg)] text-sm md:text-base font-semibold text-[var(--text-color)] text-center">
@@ -859,14 +848,15 @@ export default function DsaMlProgramPage() {
               Unlock your AI potential with the GenAI program designed for your growth journey.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto justify-items-center">
             <Plan
-              name="DSA Track"
+              name="Mastering Data Structures & Algorithms"
               price="₹5,000"
               ctaHref={isAuthenticated ? "#pioneer-enroll-form" : "/signup"}
               bullets={[
-                "4 weeks Structured Learning",
-                "200+ DSA Problems",
+                "6 weeks Structured Learning",
+                "100+ DSA Problems",
+                "40+ Hours of Immersive Learning",
                 "Interview Prep",
                 "Mentorship & Reviews",
               ]}
@@ -881,7 +871,6 @@ export default function DsaMlProgramPage() {
                 "150+ Hours of Hands-On Workshops",
                 "10+ Industry-Grade Projects",
                 "300+ Hours of Structured Curriculum",
-                "30+ Industry-Aligned Assignments",
                 "AV Certificate | Fractal Certificate | WSU Certificate",
               ]}
             />
@@ -894,7 +883,7 @@ export default function DsaMlProgramPage() {
 
 function Item({ title, desc }) {
   return (
-    <div className="flex items-start gap-4">
+    <div className="flex flex-col items-center text-center gap-4">
       <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 border border-white/20">
         <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#2563EB] to-[#38BDF8]" />
       </span>
@@ -908,7 +897,7 @@ function Item({ title, desc }) {
 
 function Plan({ name, price, bullets, ctaHref = "/signup" }) {
   return (
-    <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(37,99,235,0.12)]">
+    <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
       <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">{price}</div>
       <ul className="space-y-3 text-[var(--text-color)]">
