@@ -6,6 +6,14 @@ import transporter from "../config/mailer.js";
 
 const router = express.Router();
 
+const getMailErrorDetails = (error) => ({
+	message: error.message,
+	code: error.code || null,
+	command: error.command || null,
+	response: error.response || null,
+	responseCode: error.responseCode || null,
+});
+
 // Generate JWT Token
 const generateToken = (id) => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -17,28 +25,73 @@ const sendOtpEmail = async (email, otp, name, context = "signup") => {
 	console.log(`\n📧 [sendOtpEmail] Called — context: ${context}, to: ${email}, BREVO_KEY: ${process.env.BREVO_API_KEY ? "SET" : "NOT SET"}, FROM: ${process.env.BREVO_FROM_EMAIL || "(not set)"}`);
 	const isSignup = context === "signup";
 	const actionText = isSignup ? "complete your registration" : "reset your password";
+	const portalLabel = isSignup ? "Learner Portal" : "Password Reset";
+	const introText = isSignup
+		? "We received a request to create your YuganthaAI account. Use the verification code below to complete your signup."
+		: "We received a request to reset your YuganthaAI password. Use the verification code below to continue.";
+	const buttonText = isSignup ? "Complete Signup" : "Reset Password";
 	const pagePath = isSignup ? "/signup" : "/forgot-password";
 	const url = `${process.env.FRONTEND_URL || "http://localhost:5173"}${pagePath}`;
 
-	const html = `
-		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #111827;">
-			<h2 style="margin-bottom: 8px;">YuganthaAI Verification Code</h2>
-			<p>Hello ${name},</p>
-			<p>Use this code to ${actionText}.</p>
-			<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:18px;text-align:center;margin:20px 0;">
-				<p style="margin:0;color:#1d4ed8;font-size:13px;font-weight:600;">Your verification code</p>
-				<p style="margin:8px 0 0;font-size:34px;letter-spacing:8px;font-weight:700;color:#1a56db;">${otp}</p>
-				<p style="margin:10px 0 0;font-size:12px;color:#6b7280;">This code expires in 10 minutes</p>
-			</div>
-			<p>Continue here: <a href="${url}" style="color:#1a56db;">${url}</a></p>
-			<p style="font-size:12px;color:#6b7280;">If you did not request this, you can ignore this email.</p>
-		</div>
-	`;
+	const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Verification Code - YuganthaAI</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fb;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7fb;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#1a56db 0%,#1e40af 100%);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">YuganthaAI</h1>
+              <p style="margin:6px 0 0;font-size:13px;color:#bfdbfe;">${portalLabel}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 40px 24px;">
+              <p style="margin:0 0 8px;font-size:16px;color:#374151;">Hello <strong>${name}</strong>,</p>
+              <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.6;">${introText}</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:28px 20px;">
+                    <p style="margin:0 0 8px;font-size:13px;color:#1d4ed8;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Your Verification Code</p>
+                    <p style="margin:0;font-size:40px;font-weight:700;letter-spacing:10px;color:#1a56db;font-family:monospace;">${otp}</p>
+                    <p style="margin:10px 0 0;font-size:12px;color:#6b7280;">This code expires in <strong>10 minutes</strong></p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:28px 0 16px;font-size:15px;color:#4b5563;line-height:1.6;">Use this code to ${actionText}. For your security, do not share this code with anyone.</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
+                <tr>
+                  <td align="center" style="background-color:#1a56db;border-radius:6px;">
+                    <a href="${url}" style="display:inline-block;padding:12px 32px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.3px;">${buttonText}</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">If you did not request this, you can safely ignore this message.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f8fafc;border-top:1px solid #e5e7eb;padding:20px 40px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:12px;color:#9ca3af;">This is a transactional notification sent to <strong>${email}</strong></p>
+              <p style="margin:0;font-size:12px;color:#9ca3af;">&copy; ${new Date().getFullYear()} YuganthaAI. All rights reserved.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
-	const text = `YuganthaAI Verification Code\n\nHello ${name},\n\nUse this code to ${actionText}: ${otp}\n\nThis code expires in 10 minutes.\n\nContinue here: ${url}\n\nIf you did not request this, please ignore this email.`;
+	const text = `YuganthaAI Verification Code\n\nHello ${name},\n\n${introText}\n\nYour verification code: ${otp}\n\nThis code is valid for 10 minutes. Do not share it with anyone.\n\nContinue here: ${url}\n\nIf you did not request this, please ignore this email.\n\n-- YuganthaAI Team`;
 
 	try {
-		const result = await transporter.sendMail({
+		const msg = {
 			from: {
 				name: "YuganthaAI",
 				email: process.env.BREVO_FROM_EMAIL || process.env.SMTP_USER,
@@ -47,10 +100,18 @@ const sendOtpEmail = async (email, otp, name, context = "signup") => {
 			subject: `Your verification code: ${otp}`,
 			html,
 			text,
-		});
+			headers: {
+				"X-Auto-Response-Suppress": "All",
+				"Auto-Submitted": "auto-generated",
+			},
+		};
+
+		console.log(`📤 [sendOtpEmail] Sending OTP email to ${email}...`);
+		const result = await transporter.sendMail(msg);
 		console.log(`✅ [sendOtpEmail] Email sent to ${email}. MessageId: ${result?.messageId}`);
 	} catch (err) {
-		console.error(`❌ [sendOtpEmail] Failed to send to ${email}:`, err.message, err.response || "");
+		const details = getMailErrorDetails(err);
+		console.error(`❌ [sendOtpEmail] Failed to send to ${email}:`, details);
 		throw err;
 	}
 };
