@@ -14,6 +14,7 @@ const generateToken = (id) => {
 };
 
 const sendOtpEmail = async (email, otp, name, context = "signup") => {
+	console.log(`\n📧 [sendOtpEmail] Called — context: ${context}, to: ${email}, BREVO_KEY: ${process.env.BREVO_API_KEY ? "SET" : "NOT SET"}, FROM: ${process.env.BREVO_FROM_EMAIL || "(not set)"}`);
 	const isSignup = context === "signup";
 	const actionText = isSignup ? "complete your registration" : "reset your password";
 	const pagePath = isSignup ? "/signup" : "/forgot-password";
@@ -36,16 +37,22 @@ const sendOtpEmail = async (email, otp, name, context = "signup") => {
 
 	const text = `YuganthaAI Verification Code\n\nHello ${name},\n\nUse this code to ${actionText}: ${otp}\n\nThis code expires in 10 minutes.\n\nContinue here: ${url}\n\nIf you did not request this, please ignore this email.`;
 
-	await transporter.sendMail({
-		from: {
-			name: "YuganthaAI",
-			email: process.env.BREVO_FROM_EMAIL || process.env.SMTP_USER,
-		},
-		to: email,
-		subject: `Your verification code: ${otp}`,
-		html,
-		text,
-	});
+	try {
+		const result = await transporter.sendMail({
+			from: {
+				name: "YuganthaAI",
+				email: process.env.BREVO_FROM_EMAIL || process.env.SMTP_USER,
+			},
+			to: email,
+			subject: `Your verification code: ${otp}`,
+			html,
+			text,
+		});
+		console.log(`✅ [sendOtpEmail] Email sent to ${email}. MessageId: ${result?.messageId}`);
+	} catch (err) {
+		console.error(`❌ [sendOtpEmail] Failed to send to ${email}:`, err.message, err.response || "");
+		throw err;
+	}
 };
 
 // @route   POST /api/auth/signup
