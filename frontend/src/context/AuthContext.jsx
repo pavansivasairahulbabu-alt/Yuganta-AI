@@ -36,7 +36,12 @@ export const AuthProvider = ({ children }) => {
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(data.message || "Login failed");
+				return {
+					success: false,
+					error: data.message || "Login failed",
+					errorCode: data.errorCode || null,
+					status: response.status,
+				};
 			}
 
 			localStorage.setItem("user", JSON.stringify(data));
@@ -46,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
 			return { success: true };
 		} catch (error) {
-			return { success: false, error: error.message };
+			return { success: false, error: error.message, errorCode: null };
 		}
 	};
 
@@ -66,7 +71,12 @@ export const AuthProvider = ({ children }) => {
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(data.message || "Signup failed");
+				return {
+					success: false,
+					error: data.message || "Signup failed",
+					errorCode: data.errorCode || null,
+					status: response.status,
+				};
 			}
 
 			return {
@@ -75,7 +85,7 @@ export const AuthProvider = ({ children }) => {
 				message: data.message || "OTP sent successfully",
 			};
 		} catch (error) {
-			return { success: false, error: error.message };
+			return { success: false, error: error.message, errorCode: null };
 		}
 	};
 

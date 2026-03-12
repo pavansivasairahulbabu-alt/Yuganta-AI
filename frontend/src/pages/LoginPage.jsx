@@ -7,6 +7,7 @@ export default function LoginPage() {
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState("");
+	const [errorCode, setErrorCode] = useState("");
 	const [loading, setLoading] = useState(false);
 	const { login } = useAuth();
 	const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function LoginPage() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
+		setErrorCode("");
 		setLoading(true);
 
 		const result = await login(email, password);
@@ -22,6 +24,7 @@ export default function LoginPage() {
 			navigate("/");
 		} else {
 			setError(result.error);
+			setErrorCode(result.errorCode || "");
 		}
 
 		setLoading(false);
@@ -62,6 +65,18 @@ export default function LoginPage() {
 					{error && (
 						<div className='bg-[rgba(236,72,153,0.1)] border border-[#EC4899] text-[#EC4899] px-4 py-3 rounded-xl mb-6'>
 							{error}
+						</div>
+					)}
+					{errorCode === "USER_NOT_VERIFIED" && (
+						<div className='mb-6 rounded-xl border border-blue-400/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-200'>
+							<div className='font-medium'>Your account is not verified yet.</div>
+							<div className='mt-2'>
+								Please sign up again with the same email to receive a fresh OTP.
+							</div>
+							<div className='mt-2 flex items-center gap-4'>
+								<Link to='/signup' className='font-semibold text-blue-300 hover:text-blue-200'>Go to Signup</Link>
+								<Link to='/forgot-password' className='font-semibold text-blue-300 hover:text-blue-200'>Forgot Password</Link>
+							</div>
 						</div>
 					)}
 

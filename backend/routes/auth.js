@@ -73,7 +73,10 @@ router.post(
 			// Check if user exists
 			const userExists = await User.findOne({ email: normalizedEmail });
 			if (userExists && userExists.isVerified) {
-				return res.status(400).json({ message: "User already exists" });
+				return res.status(409).json({
+					message: "Account already exists. Please login or use Forgot Password.",
+					errorCode: "USER_EXISTS",
+				});
 			}
 
 			const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -294,7 +297,10 @@ router.post(
 			}
 
 			if (!user.isVerified) {
-				return res.status(401).json({ message: "Please verify your email using OTP before login" });
+				return res.status(403).json({
+					message: "Please verify your email using OTP before login",
+					errorCode: "USER_NOT_VERIFIED",
+				});
 			}
 
 			// Check password

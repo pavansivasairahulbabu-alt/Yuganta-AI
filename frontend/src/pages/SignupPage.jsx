@@ -12,6 +12,7 @@ export default function SignupPage() {
 	});
 	const [otp, setOtp] = useState("");
 	const [message, setMessage] = useState("");
+	const [errorCode, setErrorCode] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [error, setError] = useState("");
@@ -29,6 +30,7 @@ export default function SignupPage() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
+		setErrorCode("");
 
 		if (formData.password !== formData.confirmPassword) {
 			setError("Passwords do not match!");
@@ -47,6 +49,7 @@ export default function SignupPage() {
 			setStep(2);
 		} else {
 			setError(result.error);
+			setErrorCode(result.errorCode || "");
 		}
 
 		setLoading(false);
@@ -55,6 +58,7 @@ export default function SignupPage() {
 	const handleVerifyOtp = async (e) => {
 		e.preventDefault();
 		setError("");
+		setErrorCode("");
 		if (!/^\d{6}$/.test(otp.trim())) {
 			setError("Please enter a valid 6-digit OTP");
 			return;
@@ -66,6 +70,7 @@ export default function SignupPage() {
 			navigate("/");
 		} else {
 			setError(result.error);
+			setErrorCode(result.errorCode || "");
 		}
 		setLoading(false);
 	};
@@ -105,6 +110,15 @@ export default function SignupPage() {
 					{error && (
 						<div className='bg-[rgba(236,72,153,0.1)] border border-[#EC4899] text-[#EC4899] px-4 py-3 rounded-xl mb-6'>
 							{error}
+						</div>
+					)}
+					{errorCode === "USER_EXISTS" && (
+						<div className='mb-6 rounded-xl border border-blue-400/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-200'>
+							<div className='font-medium'>This email already has an account.</div>
+							<div className='mt-2 flex items-center gap-4'>
+								<Link to='/login' className='font-semibold text-blue-300 hover:text-blue-200'>Login</Link>
+								<Link to='/forgot-password' className='font-semibold text-blue-300 hover:text-blue-200'>Forgot Password</Link>
+							</div>
 						</div>
 					)}
 					{message && (
