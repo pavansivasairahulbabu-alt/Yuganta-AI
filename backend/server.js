@@ -24,18 +24,22 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'SENDGRID_API_KEY'];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+const requiredEnvVars = ["MONGODB_URI", "JWT_SECRET"];
+const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
-	console.error('❌ FATAL ERROR: Missing required environment variables:');
-	missingEnvVars.forEach(varName => console.error(`   - ${varName}`));
-	console.error('Please set these variables in your .env file or deployment platform.');
+	console.error("❌ FATAL ERROR: Missing required environment variables:");
+	missingEnvVars.forEach((varName) => console.error(`   - ${varName}`));
+	console.error("Please set these variables in your .env file or deployment platform.");
 	process.exit(1);
 }
 
-console.log('✅ All required environment variables are configured (SendGrid)');
-console.log(`📧 SendGrid from: ${process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM || 'not set'}`);
+console.log("✅ Core environment variables are configured");
+if (process.env.BREVO_API_KEY) {
+	console.log(`📧 Brevo email configured: ${process.env.BREVO_FROM_EMAIL || '(no BREVO_FROM_EMAIL set)'}`);
+} else {
+	console.warn("⚠️  BREVO_API_KEY not set — OTP emails will fail");
+}
 
 const app = express();
 app.set("trust proxy", 1);

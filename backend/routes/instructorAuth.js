@@ -109,7 +109,7 @@ const sendOTPEmail = async (email, otp, instructorName = "Instructor") => {
 		to: email,
 		from: {
 			name: "YuganthaAI",
-			email: process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_USER,
+			email: process.env.BREVO_FROM_EMAIL || process.env.SMTP_USER,
 		},
 		subject: `Your verification code: ${otp}`,
 		html: htmlContent,
