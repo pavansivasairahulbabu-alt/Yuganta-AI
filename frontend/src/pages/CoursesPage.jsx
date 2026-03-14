@@ -3,40 +3,172 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import API_URL from "../config/api";
-import LearningPaths from "../components/LearningPaths";
 
 export default function CoursesPage() {
+	const [selectedTab, setSelectedTab] = useState("all");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [courses, setCourses] = useState([]);
+	const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [enrolling, setEnrolling] = useState({});
+	const { isAuthenticated } = useAuth();
 	const navigate = useNavigate();
 
-	const staticCourses = [
-		{
-			id: "agentic-ai-crash-course",
-			title: "Agentic AI Crash Course",
-			duration: "80+ Hours",
-			weeks: "4 Weeks",
-			thumbnail: "https://onug.net/wp-content/uploads/2025/02/ONUG-Blog-Image-1024x512-1.jpg", 
-			topics: ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"],
-			path: "/courses/agentic-ai-crash-course-page"
-		},
-		{
-			id: "agentic-ai-pioneer-program",
-			title: "Agentic AI Pioneer Program",
-			duration: "150+ Hours",
-			weeks: "4 Months",
-			thumbnail: "https://miro.medium.com/v2/resize:fit:1400/1*LtgPxfl-J6dJrg9rRgWdGA.png",
-			topics: ["DSA", "ML & DL", "LangChain", "CrewAI", "LangGraph", "AI Agents", "RAG", "AutoGen"],
-			path: "/courses/agentic-ai-pioneer-program"
-		},
-		{
-			id: "mastering-dsa-algorithms",
-			title: "Mastering Data Structures & Algorithms",
-			duration: "40+ Hours",
-			weeks: "6 Weeks",
-			thumbnail: "https://miro.medium.com/1*u1dfDjx8WS86XlELNL252Q.jpeg",
-			topics: ["Arrays", "Linked Lists", "Stacks & Queues", "Searching & Sorting", "Trees & Graphs"],
-			path: "/courses/dsa-machine-learning"
+	useEffect(() => {
+		fetchCourses();
+		if (isAuthenticated) {
+			fetchEnrolledCourses();
 		}
-	];
+	}, [isAuthenticated]);
+
+	const fetchCourses = async () => {
+		try {
+			const response = await fetch(`${API_URL}/api/courses`);
+			const data = await response.json();
+			setCourses(data);
+			setLoading(false);
+		} catch (error) {
+			console.error("Error fetching courses:", error);
+			setLoading(false);
+		}
+	};
+
+	const fetchEnrolledCourses = async () => {
+		try {
+			const token = localStorage.getItem("token");
+			if (!token) return;
+
+			const response = await fetch(`${API_URL}/api/users/enrolled`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (response.status === 401) {
+				return; // Token expired, user needs to login
+			}
+
+			if (response.ok) {
+				const data = await response.json();
+				// Extract course IDs from enrolled courses
+				const enrolledIds = data.map((enrollment) => enrollment.courseId?._id || enrollment._id);
+				setEnrolledCourseIds(enrolledIds);
+			}
+		} catch (error) {
+			console.error("Error fetching enrolled courses:", error);
+		}
+	};
+
+	const handleEnroll = async (courseId) => {
+		if (!isAuthenticated) {
+			toast.error("Please login to enroll in courses");
+			navigate("/login");
+			return;
+		}
+
+		const token = localStorage.getItem("token");
+		if (!token) {
+			toast.error("Please login to enroll in courses");
+			navigate("/login");
+			return;
+		}
+
+		setEnrolling({ ...enrolling, [courseId]: true });
+
+		try {
+			const response = await fetch(
+				`${API_URL}/api/users/enroll/${courseId}`,
+				{
+					method: "POST",
+					headers: {
+						Authorization: `Bearer ${token}`,
+						"Content-Type": "application/json",
+					},
+				}
+			);
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success("Successfully enrolled in course!");
+				try {
+					const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
+						headers: { Authorization: `Bearer ${token}` },
+					});
+					if (mentorRes.ok) {
+						const mentor = await mentorRes.json();
+						const d = new Date();
+						d.setDate(d.getDate() + 8);
+						const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+						const time = "7:00pm";
+						await fetch(`${API_URL}/api/mentorship-sessions`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+								Authorization: `Bearer ${token}`,
+							},
+							body: JSON.stringify({
+								title: "First Mentorship",
+								mentorId: mentor?._id,
+								date: dateStr,
+								time,
+								notes: "Auto-created on enrollment",
+							}),
+						});
+					}
+				} catch {}
+				// Update enrolled courses list
+				setEnrolledCourseIds([...enrolledCourseIds, courseId]);
+				setTimeout(() => navigate("/my-learning"), 1000);
+			} else {
+				if (response.status === 401 || data.message === "Please login") {
+					toast.error("Session expired. Please login again");
+					localStorage.removeItem("token");
+					localStorage.removeItem("user");
+					setTimeout(() => navigate("/login"), 1500);
+				} else {
+					toast.error(data.message || "Enrollment failed");
+				}
+			}
+		} catch (error) {
+			console.error("Error enrolling:", error);
+			toast.error("Error enrolling in course");
+		} finally {
+			setEnrolling({ ...enrolling, [courseId]: false });
+		}
+	};
+
+	// Filter courses based on search query and exclude specific courses
+	const coursesToExclude = ["AIML", "ASTRA AI", "MERN MASTERY PROGRAM"];
+	const filteredCourses = courses.filter((course) => {
+		const normalizedTitle = (course?.title || "")
+			.toLowerCase()
+			.replace(/\s+/g, " ")
+			.trim();
+		const hasMedia =
+			typeof course?.thumbnail === "string"
+				? course.thumbnail.trim().length > 0
+				: Boolean(course?.thumbnail) ||
+			  (typeof course?.videoUrl === "string"
+				? course.videoUrl.trim().length > 0
+				: Boolean(course?.videoUrl));
+
+		// Hide only the duplicate Pioneer card that has no thumbnail/video
+		if (normalizedTitle.includes("agentic ai pioneer") && !hasMedia) {
+			return false;
+		}
+
+		// Exclude specific courses
+		if (coursesToExclude.includes(course.title)) {
+			return false;
+		}
+		// Apply search filter
+		return (
+			course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			(course.instructor && course.instructor.toLowerCase().includes(searchQuery.toLowerCase()))
+		);
+	});
 
 	// Animated images for the slider
 	const sliderImages = [
@@ -46,6 +178,72 @@ export default function CoursesPage() {
 		"https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400",
 		"https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400",
 	];
+
+	const getCourseTopics = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		const isDsaTrack = title.includes("data structures") || title.includes("dsa");
+
+		if (isPioneerCourse(course)) {
+			return [
+				"Agentic AI Pioneer Program",
+				"DSA",
+				"ML & DL",
+				"LangChain",
+				"CrewAI",
+				"LangGraph",
+				"AI Agents",
+				"RAG",
+				"AutoGen",
+			];
+		}
+
+		if (isCrashCourse(course)) {
+			return ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"];
+		}
+
+		if (title.includes("agentic")) {
+			return ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"];
+		}
+
+		if (title.includes("mern")) {
+			return ["MongoDB", "Express", "React", "Node.js"];
+		}
+
+		if (title.includes("astra")) {
+			return ["LLMs", "Transformers", "RAG", "Agents"];
+		}
+
+		if (isDsaTrack) {
+			return [
+				"Arrays",
+				"Linked Lists",
+				"Stacks & Queues",
+				"Searching & Sorting",
+				"Trees & Graphs",
+			];
+		}
+
+		if (title.includes("aiml") || title.includes("machine learning")) {
+			return ["AI Basics", "ML", "Deep Learning", "Projects"];
+		}
+
+		return ["Hands-on", "Projects", "Mentorship"];
+	};
+
+	const isAgenticCourse = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		return title.includes("agentic") && (title.includes("pioneer") || title.includes("crash"));
+	};
+
+	const isPioneerCourse = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		return title.includes("agentic") && title.includes("pioneer");
+	};
+
+	const isCrashCourse = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		return title.includes("agentic") && (title.includes("crash") || title.includes("crash course page"));
+	};
 
 	return (
 		<div className='min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-20 transition-colors duration-300'>
@@ -102,62 +300,277 @@ export default function CoursesPage() {
 				</div>
 			</section>
 
-			{/* Courses Section */}
-			<section className='px-4 md:px-6 py-12 bg-[var(--bg-color)]'>
+			{/* Search and Filters Section */}
+			<section className='px-4 md:px-6 py-8'>
 				<div className='max-w-7xl mx-auto'>
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8'>
-						{staticCourses.map((course) => (
-							<div
-								key={course.id}
-								className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
-								
-								{/* Thumbnail */}
-								<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
-									<img
-										src={course.thumbnail}
-										alt={course.title}
-										className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-									/>
+					{/* Search Bar */}
+					<div className='mb-6'>
+						<div className='relative max-w-md'>
+							<input
+								type='text'
+								placeholder='Search Course'
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className='w-full bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg px-4 py-3 pl-10 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300'
+							/>
+							<svg
+								className='absolute left-3 top-3.5 w-5 h-5 text-gray-500'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+								/>
+							</svg>
+						</div>
+					</div>
+
+					{/* Tabs */}
+					<div className='flex flex-wrap space-x-4 md:space-x-8 mb-8 border-b border-[rgba(139,92,246,0.2)]'>
+						<button
+							onClick={() => setSelectedTab("all")}
+							className={`pb-3 px-2 font-medium transition ${selectedTab === "all"
+								? "text-[var(--text-color)] border-b-2 border-[#8B5CF6]"
+								: "text-[var(--text-muted)] hover:text-[var(--text-color)]"
+								}`}>
+							All
+						</button>
+						<button
+							onClick={() => setSelectedTab("courses")}
+							className={`pb-3 px-2 font-medium transition ${selectedTab === "courses"
+								? "text-[var(--text-color)] border-b-2 border-[#8B5CF6]"
+								: "text-[var(--text-muted)] hover:text-[var(--text-color)]"
+								}`}>
+							Courses
+						</button>
+						<button
+							onClick={() => setSelectedTab("learning-path")}
+							className={`pb-3 px-2 font-medium transition ${selectedTab === "learning-path"
+								? "text-[var(--text-color)] border-b-2 border-[#8B5CF6]"
+								: "text-[var(--text-muted)] hover:text-[var(--text-color)]"
+								}`}>
+							Learning Path
+						</button>
+					</div>
+
+					{/* Courses Grid with Sidebar */}
+					<div className='flex flex-col lg:flex-row gap-8'>
+						{/* Sidebar Filters */}
+						<aside className='lg:w-64 flex-shrink-0'>
+							<div className='bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--border-color)] rounded-lg p-4 md:p-6 transition-colors duration-300'>
+								<div className='flex justify-between items-center mb-6'>
+									<h3 className='font-semibold text-lg'>
+										All Filters
+									</h3>
+									<button className='text-[#A855F7] text-sm hover:text-[#EC4899] transition duration-300'>
+										Clear All
+									</button>
 								</div>
 
-								{/* Duration/Weeks */}
-								<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
-									<span>{course.duration}</span>
-									<span>•</span>
-									<span>{course.weeks}</span>
+								<div className='mb-6'>
+									<h4 className='font-medium mb-3'>
+										Sort By
+									</h4>
+									<div className='space-y-2'>
+										<label className='flex items-center'>
+											<input
+												type='radio'
+												name='sort'
+												className='mr-2'
+												defaultChecked
+											/>
+											<span className='text-sm'>All</span>
+										</label>
+										<label className='flex items-center'>
+											<input
+												type='radio'
+												name='sort'
+												className='mr-2'
+											/>
+											<span className='text-sm'>
+												Most Popular
+											</span>
+										</label>
+										<label className='flex items-center'>
+											<input
+												type='radio'
+												name='sort'
+												className='mr-2'
+											/>
+											<span className='text-sm'>
+												Highest Rated
+											</span>
+										</label>
+									</div>
 								</div>
+							</div>
+						</aside>
 
-								{/* Title */}
-								<h3 className="text-xl md:text-2xl font-bold text-[var(--text-color)] mb-4 leading-tight group-hover:text-[#A855F7] transition-colors">
-									{course.title}
-								</h3>
+						{/* Courses Grid */}
+						<div className='flex-1'>
+							{loading ? (
+								<div className='text-center py-12'>
+									<div className='text-white text-lg'>Loading courses...</div>
+								</div>
+							) : filteredCourses.length === 0 ? (
+								<div className="flex flex-col items-center justify-center py-20 text-center animate-fadeIn">
+									<div className="relative w-40 h-40 mb-6">
+										<div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-20 animate-ping"></div>
+										<div className="relative z-10 w-full h-full bg-[var(--card-bg)] border-2 border-purple-500/50 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/20 transition-colors duration-300">
+											<svg className="w-20 h-20 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+											</svg>
+										</div>
+									</div>
+									<h3 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-3">No Courses Found</h3>
+									<p className="text-gray-400 text-lg max-w-md mx-auto">
+										We are currently updating our course catalog. Please check back later for new exciting content!
+									</p>
+								</div>
+							) : (
+								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7'>
+									{filteredCourses.map((course) => (
+										(() => {
+											const isAgentic = isAgenticCourse(course);
+											const pioneer = isPioneerCourse(course);
+											const crash = isCrashCourse(course);
+											const dsa = (course?.title || "").toLowerCase().includes("data structures") || (course?.title || "").toLowerCase().includes("dsa");
+											const hasRenderableMedia =
+												typeof course?.thumbnail === "string"
+													? course.thumbnail.trim().length > 0
+													: Boolean(course?.thumbnail) ||
+												  (typeof course?.videoUrl === "string"
+													? course.videoUrl.trim().length > 0
+													: Boolean(course?.videoUrl));
 
-								{/* Topics */}
-								<div className="flex flex-wrap gap-2 mb-6 min-h-[80px]">
-									{course.topics.map((topic, index) => (
-										<span 
-											key={index}
-											className="px-3 py-1 rounded-lg border border-[var(--border-color)] text-xs font-semibold text-[var(--text-muted)] group-hover:border-[#A855F7]/30 transition-colors"
-										>
-											{topic}
-										</span>
+											if (pioneer && !hasRenderableMedia) {
+												return null;
+											}
+
+											const courseTitle = pioneer
+												? "Agentic AI Pioneer Program"
+												: crash
+													? "Agentic AI Crash Course"
+													: course.title;
+											const coursePath = pioneer
+												? "/courses/agentic-ai-pioneer-program"
+												: crash
+													? "/courses/agentic-ai-crash-course-page"
+													: dsa
+														? "/courses/dsa-machine-learning"
+													: `/course-details/${course._id}`;
+											const enrollPath = dsa
+												? "/courses/dsa-machine-learning#pioneer-enroll-form"
+												: coursePath;
+											const durationText = crash
+												? "80+ Hours"
+												: pioneer
+													? "180+ Hours"
+													: dsa
+														? "40+ Hours"
+														: isAgentic
+															? "150 Hours"
+															: (course.duration || "150 Hours");
+											const countText = crash
+												? "4 Weeks"
+												: pioneer
+													? "4 Months"
+													: dsa
+														? "6 Weeks"
+														: isAgentic
+															? "15 Courses"
+															: `${course.modules?.length || course.lessons || 15} Courses`;
+
+											return (
+										<div
+											key={course._id}
+											className='bg-[var(--card-bg)] border border-[var(--border-color)]/80 rounded-2xl overflow-hidden hover:shadow-[0_12px_36px_rgba(139,92,246,0.22)] hover:border-[rgba(139,92,246,0.45)] transition-all duration-300 group backdrop-blur-sm'>
+											{/* Video/Thumbnail Section */}
+											<div className='relative h-44 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900'>
+												{course.videoUrl ? (
+													<video
+														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
+														muted
+														loop
+														playsInline
+														onMouseEnter={(e) => e.target.play()}
+														onMouseLeave={(e) => {
+															e.target.pause();
+															e.target.currentTime = 0;
+														}}>
+														<source src={course.videoUrl} type='video/mp4' />
+													</video>
+												) : course.thumbnail ? (
+													<img
+														src={course.thumbnail}
+														alt={course.title}
+														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
+													/>
+												) : (
+													<div className='w-full h-full flex items-center justify-center text-6xl'>
+														📚
+													</div>
+												)}
+											</div>
+
+											{/* Course Info */}
+											<div className='p-5 md:p-6'>
+												{/* Duration and Count */}
+												<div className='flex items-center gap-3 text-[var(--text-muted)] text-sm mb-3'>
+													<span>{durationText}</span>
+													<span>•</span>
+													<span>{countText}</span>
+												</div>
+
+												{/* Title */}
+												<Link to={coursePath}>
+													<h3 className='font-bold text-2xl mb-4 text-[var(--text-color)] line-clamp-2 min-h-[4rem] hover:text-[#A855F7] transition-colors'>
+														{courseTitle}
+													</h3>
+												</Link>
+
+												{/* Topics */}
+												<div className='flex flex-wrap gap-2 mb-5 min-h-[4.5rem] content-start'>
+													{getCourseTopics(course).map((topic) => (
+														<span
+															key={`${course._id}-${topic}`}
+															className='px-3 py-1.5 text-sm font-semibold rounded-md border border-[var(--border-color)] text-[var(--text-color)] bg-[var(--bg-secondary)]'
+														>
+															{topic}
+														</span>
+													))}
+												</div>
+
+												{/* Enroll Button */}
+												{(() => {
+													const isEnrolled = enrolledCourseIds.includes(course._id);
+													return (
+														<Link
+															to={isEnrolled ? "/my-learning" : enrollPath}
+															className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 ${
+																isEnrolled
+																	? "bg-blue-500 text-white hover:bg-blue-600"
+																	: "border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
+															}`}
+														>
+															{isEnrolled ? "Resume Learning" : "Enroll Now"}
+														</Link>
+													);
+												})()}
+											</div>
+										</div>
+											);
+										})()
 									))}
 								</div>
-
-								{/* Enroll Button */}
-								<button
-									onClick={() => navigate(course.path)}
-									className="block w-full text-center py-3.5 rounded-2xl border border-blue-400/50 text-base text-[var(--text-color)] font-semibold hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
-								>
-									Enroll Now
-								</button>
-							</div>
-						))}
+							)}
+						</div>
 					</div>
 				</div>
 			</section>
-
-			<LearningPaths />
 		</div>
 	);
 }
