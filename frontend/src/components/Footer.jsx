@@ -118,45 +118,22 @@ export default function Footer() {
 						<h3 style={{ color: '#FFFFFF' }} className='text-lg font-semibold mb-4'>Categories</h3>
 						<ul className='space-y-3'>
 							<li>
-								<Link to='/courses' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
-									AI & Machine Learning
+								<Link to='/courses/agentic-ai-pioneer-program' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
+									Agentic AI Pioneer Program
 								</Link>
 							</li>
 							<li>
-								<Link to='/courses' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
-									Deep Learning
+								<Link to='/courses/agentic-ai-crash-course-page' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
+									Agentic AI Crash Course
 								</Link>
 							</li>
 
 							<li>
-								<Link to='/courses' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
-									Web Development
+								<Link to='/courses/dsa-machine-learning' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
+									Mastering Data Structure & Algorithms
 								</Link>
 							</li>
 						</ul>
-					</div>
-				</div>
-
-				<div className='border-t border-[rgba(139,92,246,0.2)] pt-8 mb-8'>
-					<div className='max-w-md'>
-						<h3 style={{ color: '#FFFFFF' }} className='text-lg font-semibold mb-4'>
-							Stay Updated
-						</h3>
-						<p style={{ color: '#C7C3D6' }} className='text-sm mb-4'>
-							Subscribe to our newsletter for the latest courses and
-							updates.
-						</p>
-						<div className='flex'>
-							<input
-								type='email'
-								placeholder='Enter your email'
-								style={{ backgroundColor: '#0B0614', color: '#FFFFFF', borderColor: '#2A1F4D' }}
-								className='flex-1 px-4 py-3 border rounded-l-xl placeholder-[#9A93B5] focus:outline-none focus:border-[#8B5CF6] focus:ring-2 focus:ring-[rgba(139,92,246,0.3)] transition-all duration-200'
-							/>
-							<button className='px-6 py-3 bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] rounded-r-xl font-semibold transition-all duration-200 shadow-[0_4px_20px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_28px_rgba(139,92,246,0.6)]'>
-								Subscribe
-							</button>
-						</div>
 					</div>
 				</div>
 

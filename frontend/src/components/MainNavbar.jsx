@@ -25,7 +25,6 @@ export default function MainNavbar() {
 		{ label: "Court Booker", to: "/projects/court-booker" },
 		{ label: "AI Agent Avatar", to: "/projects/ai-agent-avatar" },
 		{ label: "HVAC Agent", to: "/projects/hvac-agent" },
-		{ label: "AI Learning Platform", to: "/projects/ai-learning-platform" },
 	];
 
 	const handleNavClick = () => {

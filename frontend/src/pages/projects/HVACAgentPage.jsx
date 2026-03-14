@@ -193,12 +193,6 @@ export default function HVACAgentPage() {
 						Deploy autonomous HVAC and lighting control with edge-based AI. No cloud dependency,
 						explainable decisions, and real-time responsiveness for your building zones.
 					</p>
-					<Link
-						to="/contact"
-						className="inline-block px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
-					>
-						Start Building
-					</Link>
 				</div>
 			</div>
 		</div>

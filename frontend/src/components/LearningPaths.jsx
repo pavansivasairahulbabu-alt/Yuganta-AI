@@ -33,9 +33,9 @@ export default function LearningPaths() {
 							Explore our comprehensive, FREE learning paths designed by industry mentors. Master AI, machine learning, and deep learning through structured curricula that combines theory with hands-on projects.
 						</p>
 						<button
-							onClick={() => navigate('/courses')}
+							onClick={() => navigate('/free-courses')}
 							className='border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-200'>
-							Get Started for FREE
+							Get Started
 						</button>
 					</div>
 

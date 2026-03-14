@@ -240,52 +240,6 @@ export default function BlogsPage() {
 						))}
 					</div>
 				</div>
-
-				{/* Roadmap Section */}
-				<div className='mt-16 bg-gradient-to-r from-gray-900 to-black rounded-3xl p-8 md:p-12'>
-					<h2 className='text-2xl md:text-3xl font-bold mb-8 text-center'>Roadmap for 2026</h2>
-					<div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
-						{[
-							{
-								title: "Learning Path for AI Agents",
-								description: "Learn AI Agents basics to advanced RAG systems, tools, & frameworks. Build autonomous agents from scratch.",
-								color: "from-purple-500 to-pink-500",
-							},
-							{
-								title: "Roadmap to Learn Generative AI",
-								description: "This learning path guides users, developers, and researchers through mastering cutting-edge AI tools and trends.",
-								color: "from-red-500 to-orange-500",
-							},
-							{
-								title: "Learn All About AgentOps",
-								description: "Structured six-month roadmap that takes you from fundamentals to full mastery of the agent lifecycle.",
-								color: "from-pink-500 to-red-500",
-							},
-							{
-								title: "Learning Path for Data Scientist",
-								description: "Start with basics, advance through ML and deep learning, and excel with real-world projects.",
-								color: "from-purple-500 to-blue-500",
-							},
-						].map((roadmap, index) => (
-							<div
-								key={index}
-								className='bg-gray-800 rounded-2xl p-6 border border-gray-700 hover:border-purple-500 transition duration-300'>
-								<h3 className={`text-xl font-bold mb-4 bg-gradient-to-r ${roadmap.color} bg-clip-text text-transparent`}>
-									{roadmap.title}
-								</h3>
-								<p className='text-gray-400 text-sm mb-6'>
-									{roadmap.description}
-								</p>
-								<button className='text-blue-400 hover:text-blue-300 text-sm font-semibold flex items-center space-x-2 transition'>
-									<span>Explore</span>
-									<svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-										<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-									</svg>
-								</button>
-							</div>
-						))}
-					</div>
-				</div>
 			</div>
 		</div>
 	);

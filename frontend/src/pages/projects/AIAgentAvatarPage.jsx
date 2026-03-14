@@ -53,12 +53,6 @@ export default function AIAgentAvatarPage() {
 								Our AI Learning Mentor adapts to each student’s pace and confidence, explains
 								concepts patiently, and teaches through interactive media, voice, and emotion-aware guidance.
 							</p>
-							<Link
-								to="/contact"
-								className="inline-block px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
-							>
-								Learn More
-							</Link>
 						</div>
 
 						<div className="relative">
@@ -174,12 +168,6 @@ export default function AIAgentAvatarPage() {
 					<p className="text-[var(--text-muted)] text-lg mb-8 max-w-2xl mx-auto">
 						Give every student a personal AI mentor with emotion-aware, multilingual guidance.
 					</p>
-					<Link
-						to="/contact"
-						className="inline-block px-8 py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
-					>
-						Get Started
-					</Link>
 				</div>
 			</div>
 		</div>

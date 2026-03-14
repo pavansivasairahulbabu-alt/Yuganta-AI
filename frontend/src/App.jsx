@@ -59,7 +59,7 @@ function CoursesHomePage() {
 	return (
 		<>
 			<Hero />
-			
+			<FreeCourses />
 			<LearningPaths />
 		</>
 	);

@@ -1061,7 +1061,7 @@ export default function AgenticAIPioneerProgramPage() {
             {/* Plan A */}
             <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
               <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">Agentic-AI-Crash Course</h3>
-              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹6000</div>
+              <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹6,000</div>
               <ul className="space-y-3 text-[var(--text-color)]">
                 {[
                   "4 Weeks of Power Learning",

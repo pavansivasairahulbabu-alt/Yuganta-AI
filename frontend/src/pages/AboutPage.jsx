@@ -2,15 +2,6 @@ import { useState } from "react";
 import SEO from "../components/SEO";
 
 export default function AboutPage() {
-	const [email, setEmail] = useState("");
-
-	const handleSubscribe = (e) => {
-		e.preventDefault();
-		// Handle newsletter subscription
-		console.log("Subscribe email:", email);
-		setEmail("");
-	};
-
 	return (
 		<>
 			<SEO
@@ -155,42 +146,6 @@ export default function AboutPage() {
 									Experts
 								</div>
 							</div>
-						</div>
-					</div>
-				</div>
-
-				{/* Newsletter Section */}
-				<div className="relative py-20 md:py-24 overflow-hidden">
-					<div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-secondary)] via-[var(--bg-primary)] to-[var(--bg-secondary)]"></div>
-					<div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
-						<div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-							{/* Left - Newsletter Text */}
-							<div className="text-center lg:text-left">
-								<h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-color)] mb-2">
-									Subscribe
-								</h2>
-								<p className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--text-color)]">
-									To Our Newsletter
-								</p>
-							</div>
-
-							{/* Right - Form */}
-							<form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-								<input
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									placeholder="Your Email"
-									required
-									className="px-6 py-4 rounded-full bg-[var(--card-bg)] backdrop-blur-sm border border-[var(--border-color)] text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#A855F7] w-full sm:w-80 text-lg"
-								/>
-								<button
-									type="submit"
-									className="px-8 py-4 bg-gradient-to-r from-[#00BCD4] to-[#4DD0E1] text-white font-semibold rounded-full hover:shadow-xl hover:scale-105 transition-all duration-200 text-lg whitespace-nowrap"
-								>
-									Subscribe Now
-								</button>
-							</form>
 						</div>
 					</div>
 				</div>

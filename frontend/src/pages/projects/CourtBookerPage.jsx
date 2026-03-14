@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Users, MapPin, CheckCircle } from "lucide-react";
+import { Calendar, Users, MapPin, CheckCircle } from "lucide-react";
 
 export default function CourtBookerPage() {
 	const features = [
@@ -47,20 +47,6 @@ export default function CourtBookerPage() {
 							<p className="text-lg text-[var(--text-muted)] mb-8 font-medium">
 								🤖 Powered by AI Agent - No Human Support Needed
 							</p>
-							<div className="flex flex-wrap gap-4">
-								<Link
-									to="/contact"
-									className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
-								>
-									Get Started
-								</Link>
-								<a
-									href="#how-it-works"
-									className="px-6 py-3 border border-purple-600 hover:bg-purple-600/10 rounded-lg font-semibold transition-colors"
-								>
-									Learn More
-								</a>
-							</div>
 						</div>
 
 						<div className="relative">
