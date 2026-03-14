@@ -33,8 +33,8 @@ export default function ContactPage() {
 		<>
 			<SEO
 				title="Contact Us - Yuganta AI | Get in Touch"
-				description="Contact Yuganta AI for inquiries about our AI courses, mentorship programs, and technology training. Located in Bhimavaram, Andhra Pradesh."
-				keywords="contact yuganta ai, get in touch, support, customer service, bhimavaram"
+				description="Contact Yuganta AI for inquiries about our AI courses, mentorship programs, and technology training. Located in Kamavarapukota, Eluru, Andhra Pradesh."
+				keywords="contact yuganta ai, get in touch, support, customer service, kamavarapukota, eluru"
 				url="/contact"
 			/>
 			<div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300">
@@ -68,19 +68,25 @@ export default function ContactPage() {
 						<div className="relative">
 							<div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xl h-[400px] md:h-[500px]">
 								<iframe
-									src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3824.8688762446947!2d81.52182431487373!3d16.547773888565867!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a37ce5e3fb4dd3d%3A0x3f64e5e9b36fca9d!2sChinnamiram%2C%20Bhimavaram%2C%20Andhra%20Pradesh%20534201!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+									src="https://www.google.com/maps?q=Kamavarapukota,Eluru,Andhra%20Pradesh,India&z=14&output=embed"
 									width="100%"
 									height="100%"
 									style={{ border: 0 }}
 									allowFullScreen=""
 									loading="lazy"
 									referrerPolicy="no-referrer-when-downgrade"
+									title="Yuganta AI location in Kamavarapukota, Eluru"
 									className="grayscale hover:grayscale-0 transition-all duration-300"
 								></iframe>
 								<div className="absolute top-4 left-4 bg-white px-4 py-2 rounded-lg shadow-lg">
-									<button className="text-[#2D1B69] text-sm font-medium hover:text-[#A855F7] transition-colors">
+									<a
+										href="https://www.google.com/maps/search/?api=1&query=Kamavarapukota,Eluru,Andhra%20Pradesh,India"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-[#2D1B69] text-sm font-medium hover:text-[#A855F7] transition-colors"
+									>
 										View larger map
-									</button>
+									</a>
 								</div>
 								<div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-[rgba(0,0,0,0.7)] text-white px-4 py-2 rounded-lg text-sm">
 									Use ctrl + scroll to zoom the map
@@ -123,7 +129,7 @@ export default function ContactPage() {
 								</div>
 							</div>
 
-							{/* India Location 01 */}
+							{/* India Location */}
 							<div className="flex items-start gap-4">
 								<div className="w-12 h-12 bg-gradient-to-br from-[#69baf7] to-[#5fc2fb] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ring-1 ring-purple-400/30">
 									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,27 +137,11 @@ export default function ContactPage() {
 									</svg>
 								</div>
 								<div>
-									<h3 className="text-xl font-semibold text-[var(--text-color)] mb-2">India Location 01</h3>
+									<h3 className="text-xl font-semibold text-[var(--text-color)] mb-2">Location</h3>
 									<p className="text-[var(--text-muted)] leading-relaxed">
 										Yuganta AI,<br />
-										Bhimavaram , Chinnamiram <br />
-										Near Sri Chaitanya College 534201,<br />
+										Kamavarapukota, Eluru <br />
 										Andhra Pradesh, India
-									</p>
-								</div>
-							</div>
-
-							{/* India Location 02 */}
-							<div className="flex items-start gap-4">
-								<div className="w-12 h-12 bg-gradient-to-br from-[#69baf7] to-[#5fc2fb] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ring-1 ring-purple-400/30">
-									<svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-									</svg>
-								</div>
-								<div>
-									<h3 className="text-xl font-semibold text-[var(--text-color)] mb-2">India Location 02</h3>
-									<p className="text-[var(--text-muted)] leading-relaxed">
-										Coming Soon...
 									</p>
 								</div>
 							</div>

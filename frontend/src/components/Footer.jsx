@@ -49,7 +49,10 @@ export default function Footer() {
 								</svg>
 							</a>
 							<a
-								href='#'
+								href='https://www.linkedin.com/company/yugantaai/'
+								target='_blank'
+								rel='noopener noreferrer'
+								aria-label='Open YugantaAI LinkedIn page in a new tab'
 								style={{ backgroundColor: '#12091F', borderColor: 'rgba(139,92,246,0.3)' }}
 								className='w-10 h-10 border hover:bg-[rgba(139,92,246,0.2)] hover:border-[#8B5CF6] rounded-full flex items-center justify-center transition-all duration-200'>
 								<svg
@@ -144,32 +147,7 @@ export default function Footer() {
 							© {new Date().getFullYear()} YugantaAI. All rights
 							reserved. Built  for learners worldwide.
 						</p>
-						<div className='flex space-x-6 text-sm'>
-							<a
-								href='#'
-								style={{ color: '#C7C3D6' }}
-								className='hover:text-[#A855F7] transition-colors duration-200'>
-								Privacy Policy
-							</a>
-							<a
-								href='#'
-								style={{ color: '#C7C3D6' }}
-								className='hover:text-[#A855F7] transition-colors duration-200'>
-								Terms of Service
-							</a>
-							<a
-								href='#'
-								style={{ color: '#C7C3D6' }}
-								className='hover:text-[#A855F7] transition-colors duration-200'>
-								Cookie Policy
-							</a>
-							<a
-								href='#'
-								style={{ color: '#C7C3D6' }}
-								className='hover:text-[#A855F7] transition-colors duration-200'>
-								Sitemap
-							</a>
-						</div>
+							
 					</div>
 				</div>
 			</div>

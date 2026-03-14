@@ -24,6 +24,7 @@ export default function MainNavbar() {
 	const serviceItems = [
 		{ label: "Court Booker", to: "/projects/court-booker" },
 		{ label: "AI Agent Avatar", to: "/projects/ai-agent-avatar" },
+		{ label: "AI Learning Platform", to: "/projects/ai-learning-platform" },
 		{ label: "HVAC Agent", to: "/projects/hvac-agent" },
 	];
 
