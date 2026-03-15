@@ -292,7 +292,7 @@ export default function LandingPage() {
 							<img
 								src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop"
 								alt="Students collaborating"
-								className="rounded-2xl shadow-2xl"
+								className="rounded-2xl "
 							/>
 						</div>
 					</div>
@@ -308,7 +308,7 @@ export default function LandingPage() {
 							<img
 								src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop"
 								alt="Learning environment"
-								className="rounded-2xl shadow-2xl"
+								className="rounded-2xl "
 							/>
 						</div>
 
@@ -346,8 +346,8 @@ export default function LandingPage() {
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 						{/* Left Video */}
 						<div className="relative">
-							<div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-[#2563EB] to-[#1E40AF] aspect-video flex items-center justify-center">
-								<div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop')] bg-cover bg-center opacity-30"></div>
+							<div className="relative rounded-3xl overflow-hidden  aspect-video flex items-center justify-center">
+								<div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop')] bg-cover bg-center "></div>
 							</div>
 						</div>
 
@@ -395,7 +395,7 @@ export default function LandingPage() {
 							</p>
 							<div className="border-t border-[rgba(139,92,246,0.2)] pt-6">
 								<h4 className="text-[var(--text-color)] font-bold text-lg">Priya Sharma</h4>
-								<p className="text-[#A855F7]">Computer Science Student, IIT Delhi</p>
+								<p className="text-[#A855F7]">Computer Science Student</p>
 							</div>
 						</div>
 
@@ -411,7 +411,7 @@ export default function LandingPage() {
 							</p>
 							<div className="border-t border-[rgba(139,92,246,0.2)] pt-6">
 								<h4 className="text-[var(--text-color)] font-bold text-lg">Rahul Verma</h4>
-								<p className="text-[#A855F7]">Engineering Student, BITS Pilani</p>
+								<p className="text-[#A855F7]">Engineering Student</p>
 							</div>
 						</div>
 
@@ -427,7 +427,7 @@ export default function LandingPage() {
 							</p>
 							<div className="border-t border-[rgba(139,92,246,0.2)] pt-6">
 								<h4 className="text-[var(--text-color)] font-bold text-lg">Ananya Reddy</h4>
-								<p className="text-[#A855F7]">AI Enthusiast, NIT Warangal</p>
+								<p className="text-[#A855F7]">AI Enthusiast</p>
 							</div>
 						</div>
 					</div>
