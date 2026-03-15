@@ -12,7 +12,7 @@ export default function CoursesNavbar() {
 	const { theme, toggleTheme } = useTheme();
 
 	const navItems = [
-		{ label: "Courses", to: "/free-courses" },
+		{ label: "Courses", to: "/all-courses" },
 		{
 			label: "Program Dashboard",
 			to: isAuthenticated ? "/my-learning" : "/login",

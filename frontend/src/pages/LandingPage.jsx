@@ -156,7 +156,7 @@ export default function LandingPage() {
 							</div>
 
 							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
-								<span>80+ Hours</span>
+								<span>30+ Hours</span>
 								<span>•</span>
 								<span>4 Weeks</span>
 							</div>
@@ -191,7 +191,7 @@ export default function LandingPage() {
 							</div>
 
 							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
-								<span>150+ Hours</span>
+								<span>150 Hours</span>
 								<span>•</span>
 								<span>4 Months</span>
 							</div>

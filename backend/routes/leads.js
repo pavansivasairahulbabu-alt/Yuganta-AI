@@ -68,7 +68,18 @@ const adminAuth = async (req, res, next) => {
 // @access  Public
 router.post("/", async (req, res) => {
 	try {
-		const { name, email, phone, courseId, courseName, type } = req.body;
+		const {
+			name,
+			email,
+			phone,
+			courseId,
+			courseName,
+			type,
+			discussionTopic,
+			preferredContactMode,
+			preferredContactTime,
+			leadSource,
+		} = req.body;
 		const normalizedEmail = String(email || "").trim().toLowerCase();
 		const normalizedPhone = String(phone || "").trim();
 
@@ -120,6 +131,10 @@ router.post("/", async (req, res) => {
 			courseId,
 			courseName,
 			type: leadType,
+			discussionTopic: discussionTopic || "",
+			preferredContactMode: preferredContactMode || "",
+			preferredContactTime: preferredContactTime || "",
+			leadSource: leadSource || "",
 		});
 
 		const savedLead = await newLead.save();

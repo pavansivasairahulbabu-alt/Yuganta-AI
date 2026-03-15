@@ -25,6 +25,26 @@ const leadSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	discussionTopic: {
+		type: String,
+		default: "",
+		trim: true,
+	},
+	preferredContactMode: {
+		type: String,
+		enum: ["Call", "WhatsApp", "Email", "Meet", ""],
+		default: "",
+	},
+	preferredContactTime: {
+		type: String,
+		default: "",
+		trim: true,
+	},
+	leadSource: {
+		type: String,
+		default: "",
+		trim: true,
+	},
 	status: {
 		type: String,
 		enum: ["New", "Contacted", "Enrolled", "Closed"],

@@ -16,7 +16,7 @@ export default function Navbar() {
 			label: "Program Dashboard",
 			to: isAuthenticated ? "/my-learning" : "/login",
 		},
-		{ label: "Courses", to: "/free-courses" },
+		{ label: "Courses", to: "/all-courses" },
 		{ label: "Blogs", to: "/blogs" },
 		{ label: "About Us", to: "/about" },
 		{ label: "Contact", to: "/contact" },

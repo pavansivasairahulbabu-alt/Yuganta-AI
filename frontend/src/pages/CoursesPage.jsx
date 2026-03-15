@@ -138,13 +138,20 @@ export default function CoursesPage() {
 		}
 	};
 
-	// Filter courses based on search query and exclude specific courses
-	const coursesToExclude = ["AIML", "ASTRA AI", "MERN MASTERY PROGRAM"];
-	const filteredCourses = courses.filter((course) => {
-		const normalizedTitle = (course?.title || "")
-			.toLowerCase()
-			.replace(/\s+/g, " ")
-			.trim();
+	// Build the three instructor-added course cards in a fixed order.
+	const normalize = (value = "") => value.toLowerCase().replace(/\s+/g, " ").trim();
+	const pickPreferredCourse = (predicate) => {
+		const matches = courses.filter(predicate);
+		return matches.find((course) => Boolean(course?.instructorId)) || matches[0] || null;
+	};
+
+	const crashCourse = pickPreferredCourse((course) => {
+		const title = normalize(course?.title);
+		return title.includes("agentic") && title.includes("crash");
+	});
+
+	const pioneerCourse = pickPreferredCourse((course) => {
+		const title = normalize(course?.title);
 		const hasMedia =
 			typeof course?.thumbnail === "string"
 				? course.thumbnail.trim().length > 0
@@ -152,21 +159,23 @@ export default function CoursesPage() {
 			  (typeof course?.videoUrl === "string"
 				? course.videoUrl.trim().length > 0
 				: Boolean(course?.videoUrl));
+		return title.includes("agentic") && title.includes("pioneer") && hasMedia;
+	});
 
-		// Hide only the duplicate Pioneer card that has no thumbnail/video
-		if (normalizedTitle.includes("agentic ai pioneer") && !hasMedia) {
-			return false;
-		}
+	const dsaCourse = pickPreferredCourse((course) => {
+		const title = normalize(course?.title);
+		return title.includes("data structures") || title.includes("dsa");
+	});
 
-		// Exclude specific courses
-		if (coursesToExclude.includes(course.title)) {
-			return false;
-		}
-		// Apply search filter
+	// Display order for all-courses page: Crash, Pioneer, DSA.
+	const curatedCourses = [crashCourse, pioneerCourse, dsaCourse].filter(Boolean);
+
+	const filteredCourses = curatedCourses.filter((course) => {
+		const query = searchQuery.toLowerCase();
 		return (
-			course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			(course.instructor && course.instructor.toLowerCase().includes(searchQuery.toLowerCase()))
+			(course?.title || "").toLowerCase().includes(query) ||
+			(course?.description || "").toLowerCase().includes(query) ||
+			(course?.instructor || "").toLowerCase().includes(query)
 		);
 	});
 
@@ -346,14 +355,7 @@ export default function CoursesPage() {
 								}`}>
 							Courses
 						</button>
-						<button
-							onClick={() => setSelectedTab("learning-path")}
-							className={`pb-3 px-2 font-medium transition ${selectedTab === "learning-path"
-								? "text-[var(--text-color)] border-b-2 border-[#8B5CF6]"
-								: "text-[var(--text-muted)] hover:text-[var(--text-color)]"
-								}`}>
-							Learning Path
-						</button>
+						
 					</div>
 
 					{/* Courses Grid with Sidebar */}
@@ -466,9 +468,9 @@ export default function CoursesPage() {
 												? "/courses/dsa-machine-learning#pioneer-enroll-form"
 												: coursePath;
 											const durationText = crash
-												? "80+ Hours"
+												? "30+ Hours"
 												: pioneer
-													? "180+ Hours"
+													? "150 Hours"
 													: dsa
 														? "40+ Hours"
 														: isAgentic

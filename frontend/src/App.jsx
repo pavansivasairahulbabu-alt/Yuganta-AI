@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
@@ -40,11 +40,16 @@ import AdminMentorAssignments from "./pages/AdminMentorAssignments";
 import AdminRegistrations from "./pages/AdminRegistrations";
 import AdminBlogManagement from "./pages/AdminBlogManagement";
 import AdminMentorshipBookings from "./pages/AdminMentorshipBookings";
+import AdminCalls from "./pages/AdminCalls";
 import InstructorForgotPasswordPage from "./pages/InstructorForgotPasswordPage";
 import BlogsPage from "./pages/BlogsPage";
 import BlogDetailPage from "./pages/BlogDetailPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import TalkToExpertPage from "./pages/TalkToExpertPage";
+import TermsAndConditionsPage from "./pages/TermsAndConditionsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import CookiesPolicyPage from "./pages/CookiesPolicyPage";
 import CareersPage from "./pages/CareersPage";
 import CourtBookerPage from "./pages/projects/CourtBookerPage";
 import AIAgentAvatarPage from "./pages/projects/AIAgentAvatarPage";
@@ -180,6 +185,38 @@ export default function App() {
 										}
 									/>
 									<Route
+										path='/talk-to-expert'
+										element={
+											<MainLayout>
+												<TalkToExpertPage />
+											</MainLayout>
+										}
+									/>
+									<Route
+										path='/terms-and-conditions'
+										element={
+											<MainLayout>
+												<TermsAndConditionsPage />
+											</MainLayout>
+										}
+									/>
+									<Route
+										path='/privacy-policy'
+										element={
+											<MainLayout>
+												<PrivacyPolicyPage />
+											</MainLayout>
+										}
+									/>
+									<Route
+										path='/cookies-policy'
+										element={
+											<MainLayout>
+												<CookiesPolicyPage />
+											</MainLayout>
+										}
+									/>
+									<Route
 										path='/instructors'
 										element={
 											<MainLayout>
@@ -206,13 +243,14 @@ export default function App() {
 										}
 									/>
 									<Route
-										path='/free-courses'
+										path='/all-courses'
 										element={
 											<CoursesLayout>
 												<CoursesPage />
 											</CoursesLayout>
 										}
 									/>
+									<Route path='/free-courses' element={<Navigate to='/all-courses' replace />} />
 									<Route
 										path='/courses/:id'
 										element={
@@ -354,6 +392,7 @@ export default function App() {
 									<Route path='/admin/instructors' element={<AdminInstructorManagement />} />							<Route path='/admin/blogs' element={<AdminBlogManagement />} />											<Route path='/admin/assign-mentors' element={<AdminAssignMentors />} />
 									<Route path='/admin/mentorships' element={<AdminMentorAssignments />} />
 									<Route path='/admin/bookings' element={<AdminMentorshipBookings />} />
+									<Route path='/admin/calls' element={<AdminCalls />} />
 									<Route path='/admin/assign-instructors' element={<AdminAssignInstructors />} />
 									<Route path='/admin/registrations' element={<AdminRegistrations />} />
 

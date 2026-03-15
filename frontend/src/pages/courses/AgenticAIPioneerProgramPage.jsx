@@ -381,7 +381,7 @@ export default function AgenticAIPioneerProgramPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">150+</div>
+                <div className="text-2xl font-extrabold text-[#3B82F6]">150</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
@@ -470,7 +470,7 @@ export default function AgenticAIPioneerProgramPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold mb-4 text-[var(--text-color)]">
-                150+ Hours of Advanced Learning
+                150 Hours of Advanced Learning
               </h3>
               <ul className="list-disc pl-5 space-y-3 text-[var(--text-muted)] leading-relaxed">
                 <li>Master advanced Agentic AI systems with LangChain, LangGraph, and CrewAI through hands-on projects.</li>
@@ -532,7 +532,7 @@ export default function AgenticAIPioneerProgramPage() {
                 <Clock className="w-6 h-6 text-[var(--text-color)]" />
               </span>
               <div>
-                <h3 className="text-xl font-semibold text-[var(--text-color)]">150+ Hours</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-color)]">150 Hours</h3>
                 <p className="text-[var(--text-muted)] mt-1">
                   In-depth GenAI and Agentic AI learning to transform your career.
                 </p>
@@ -624,7 +624,7 @@ export default function AgenticAIPioneerProgramPage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {["14+ Projects","150+ Hours","50+ Tools","40+ Assignments"].map((chip) => (
+            {["14+ Projects","150 Hours","50+ Tools","40+ Assignments"].map((chip) => (
               <span key={chip} className="px-3 py-1.5 rounded-full text-sm border border-[var(--border-primary)] bg-[var(--card-bg)]">
                 {chip}
               </span>
@@ -1101,7 +1101,7 @@ export default function AgenticAIPioneerProgramPage() {
                 {[
                   "4 Months of Continuous Access",
                   " Deep-Dive Mentorship Sessions",
-                  "150+ Hours of Hands-On Workshops",
+                  "150 Hours of Hands-On Workshops",
                   " Industry-Grade Projects",
                   "300+ Hours of Structured Curriculum",
                   "AV Certificate | Fractal Certificate | WSU Certificate",

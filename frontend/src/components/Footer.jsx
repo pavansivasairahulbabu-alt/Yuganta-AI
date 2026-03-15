@@ -94,7 +94,7 @@ export default function Footer() {
 									to='/instructor'
 									style={{ color: '#C7C3D6' }}
 									className='hover:text-[#A855F7] transition-colors duration-200'>
-									Become Instructor
+									 Instructor
 								</Link>
 							</li>
 							<li>
@@ -147,7 +147,19 @@ export default function Footer() {
 							© {new Date().getFullYear()} YugantaAI. All rights
 							reserved. Built  for learners worldwide.
 						</p>
-							
+						<div className='flex items-center gap-3 text-sm'>
+							<Link to='/terms-and-conditions' style={{ color: '#C7C3D6' }} className='hover:text-[#60A5FA] transition-colors duration-200'>
+								Terms and Conditions
+							</Link>
+							<span style={{ color: '#7E7A92' }}>|</span>
+							<Link to='/privacy-policy' style={{ color: '#C7C3D6' }} className='hover:text-[#60A5FA] transition-colors duration-200'>
+								Privacy Policy
+							</Link>
+							<span style={{ color: '#7E7A92' }}>|</span>
+							<Link to='/cookies-policy' style={{ color: '#C7C3D6' }} className='hover:text-[#60A5FA] transition-colors duration-200'>
+								Cookies Policy
+							</Link>
+						</div>
 					</div>
 				</div>
 			</div>
