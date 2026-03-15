@@ -55,6 +55,36 @@ export const AuthProvider = ({ children }) => {
 		}
 	};
 
+	const googleLogin = async (credential) => {
+		try {
+			const response = await fetch(`${API_URL}/api/auth/google`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ credential }),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				return {
+					success: false,
+					error: data.message || "Google login failed",
+				};
+			}
+
+			localStorage.setItem("user", JSON.stringify(data));
+			localStorage.setItem("token", data.token);
+			setUser(data);
+			setToken(data.token);
+
+			return { success: true };
+		} catch (error) {
+			return { success: false, error: error.message };
+		}
+	};
+
 	const signup = async (fullName, email, password) => {
 		try {
 			const response = await fetch(
@@ -161,6 +191,7 @@ export const AuthProvider = ({ children }) => {
 		token,
 		loading,
 		login,
+		googleLogin,
 		signup,
 		verifySignupOtp,
 		logout,

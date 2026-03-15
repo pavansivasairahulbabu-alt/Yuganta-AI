@@ -1,10 +1,12 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import transporter from "../config/mailer.js";
 
 const router = express.Router();
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const getMailErrorDetails = (error) => ({
 	message: error.message,
@@ -115,6 +117,61 @@ const sendOtpEmail = async (email, otp, name, context = "signup") => {
 		throw err;
 	}
 };
+
+// @route   POST /api/auth/google
+// @desc    Google login/signup
+// @access  Public
+router.post("/google", async (req, res) => {
+	const { credential } = req.body;
+
+	try {
+		if (!process.env.GOOGLE_CLIENT_ID) {
+			console.error("GOOGLE_CLIENT_ID not set in backend .env");
+			return res.status(500).json({ message: "Google login is currently unavailable" });
+		}
+
+		const ticket = await client.verifyIdToken({
+			idToken: credential,
+			audience: process.env.GOOGLE_CLIENT_ID,
+		});
+
+		const payload = ticket.getPayload();
+		const { email, name, picture, sub: googleId } = payload;
+
+		let user = await User.findOne({ email });
+
+		if (user) {
+			// If user exists but is not verified, verify them
+			if (!user.isVerified) {
+				user.isVerified = true;
+				await user.save();
+			}
+		} else {
+			// Create new user
+			// Since password is required in the schema, we generate a random one
+			const randomPassword = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
+			user = await User.create({
+				fullName: name,
+				email: email,
+				password: randomPassword,
+				isVerified: true,
+				avatar: picture,
+			});
+		}
+
+		res.json({
+			_id: user._id,
+			fullName: user.fullName,
+			email: user.email,
+			avatar: user.avatar,
+			enrolledCourses: user.enrolledCourses,
+			token: generateToken(user._id),
+		});
+	} catch (error) {
+		console.error("Google auth error:", error);
+		res.status(400).json({ message: "Google authentication failed", error: error.message });
+	}
+});
 
 // @route   POST /api/auth/signup
 // @desc    Register new user

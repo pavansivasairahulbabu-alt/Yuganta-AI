@@ -69,8 +69,8 @@ body {
 	/* Thick Blue */
 	--text-secondary: #1A1F3C;
 	/* Darker color for navigation - Thick Blue */
-	--text-muted: #4B5563;
-	/* Darker muted text */
+	--text-muted: #374151;
+	/* Darker muted text for better contrast (gray-700) */
 	--accent-primary: #1e212c;
 	--accent-primary-light: #171a27;
 	/* Lightest Blue from Palette */
