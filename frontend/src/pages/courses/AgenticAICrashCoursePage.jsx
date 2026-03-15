@@ -360,8 +360,7 @@ export default function AgenticAICrashCoursePage() {
               <a href="#curriculum" className="text-[#C7C3D6] hover:text-white font-semibold">Curriculum</a>
               <a href="#instructors" className="text-[#C7C3D6] hover:text-white font-semibold">Instructors</a>
               <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
-              <a href="#testimonials" className="text-[#C7C3D6] hover:text-white font-semibold">Testimonials</a>
-            </div>
+               </div>
          
           </div>
         </div>

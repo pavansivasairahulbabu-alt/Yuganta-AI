@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import API_URL from "../../config/api";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function DsaMlProgramPage() {
   const { theme } = useTheme();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
   const [whatsapp, setWhatsapp] = useState(true);
@@ -146,6 +148,16 @@ export default function DsaMlProgramPage() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    setForm((current) => ({
+      name: current.name || user.fullName || user.name || "",
+      phone: current.phone || user.phone || "",
+      email: current.email || user.email || "",
+    }));
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.email) return;
@@ -185,8 +197,7 @@ export default function DsaMlProgramPage() {
               <a href="#curriculum-detailed" className="text-[#C7C3D6] hover:text-white font-semibold">Curriculum</a>
               <a href="#instructors" className="text-[#C7C3D6] hover:text-white font-semibold">Instructors</a>
               <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
-              <a href="#testimonials" className="text-[#C7C3D6] hover:text-white font-semibold">Testimonials</a>
-            </div>
+             </div>
             
           </div>
         </div>
@@ -218,7 +229,7 @@ export default function DsaMlProgramPage() {
               </div>
             </div>
 
-            <div id="pioneer-enroll-form" className="w-full max-w-lg mx-auto">
+            <div id="dsa-enroll-form" className="w-full max-w-lg mx-auto">
               <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
                 <h3 className="text-xl font-bold mb-4">Enroll for Mastering Data Structures & Algorithms </h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -828,6 +839,9 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Mastering Data Structures & Algorithms"
               price="₹5,000"
+              isAuthenticated={isAuthenticated}
+              authLoading={authLoading}
+              authenticatedHref="#dsa-enroll-form"
               bullets={[
                 "6 weeks Structured Learning",
                 "100+ DSA Problems",
@@ -839,6 +853,9 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Agentic AI Pioneer program"
               price="₹12,000"
+              isAuthenticated={isAuthenticated}
+              authLoading={authLoading}
+              authenticatedHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
               bullets={[
                 "4 Months of Power Learning",
                 "25+ Deep-Dive Mentorship Sessions",
@@ -869,7 +886,7 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets }) {
+function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticatedHref }) {
   return (
     <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
@@ -887,12 +904,32 @@ function Plan({ name, price, bullets }) {
         ))}
       </ul>
       <div className="mt-8">
-        <Link
-          to="/signup"
-          className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-        >
-          Enroll Now
-        </Link>
+        {authLoading ? (
+          <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3 opacity-70">
+            Checking account...
+          </span>
+        ) : isAuthenticated && authenticatedHref?.startsWith("/") ? (
+          <Link
+            to={authenticatedHref}
+            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+          >
+            Enroll Now
+          </Link>
+        ) : isAuthenticated ? (
+          <a
+            href={authenticatedHref || "#dsa-enroll-form"}
+            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+          >
+            Enroll Now
+          </a>
+        ) : (
+          <Link
+            to="/signup"
+            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+          >
+            Enroll Now
+          </Link>
+        )}
       </div>
     </div>
   );
