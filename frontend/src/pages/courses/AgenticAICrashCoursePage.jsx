@@ -251,6 +251,10 @@ export default function AgenticAICrashCoursePage() {
       return;
     }
     if (!form.name || !form.phone || !form.email) return;
+    if (!/^\d{10}$/.test(form.phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
     if (!agree) {
       toast.error("Please accept Terms & Conditions to continue.");
       return;
@@ -412,10 +416,13 @@ export default function AgenticAICrashCoursePage() {
                     required
                   />
                   <input
+                    type="tel"
                     value={form.phone}
-                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                    onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setForm((f) => ({ ...f, phone: v })); }}
                     placeholder="Your Phone Number"
                     className="w-full bg-[var(--bg-color)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5"
+                    maxLength={10}
+                    pattern="[0-9]{10}"
                     required
                   />
                   <input

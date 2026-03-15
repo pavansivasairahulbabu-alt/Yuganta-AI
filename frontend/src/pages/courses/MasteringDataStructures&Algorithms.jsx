@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import API_URL from "../../config/api";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -161,6 +162,10 @@ export default function DsaMlProgramPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.email) return;
+    if (!/^\d{10}$/.test(form.phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(`${API_URL}/api/leads`, {
@@ -179,9 +184,14 @@ export default function DsaMlProgramPage() {
       });
       if (!res.ok) {
         console.warn("Lead submit failed");
+        toast.error("Something went wrong. Please try again.");
+      } else {
+        toast.success("Enrolled successfully! We'll be in touch soon.");
+        setForm({ name: "", phone: "", email: "" });
       }
     } catch (err) {
       console.error("Lead submit error", err);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -241,10 +251,13 @@ export default function DsaMlProgramPage() {
                     required
                   />
                   <input
+                    type="tel"
                     value={form.phone}
-                    onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                    onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 10) setForm((f) => ({ ...f, phone: v })); }}
                     placeholder="Your Phone Number"
                     className="w-full bg-[var(--bg-color)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5"
+                    maxLength={10}
+                    pattern="[0-9]{10}"
                     required
                   />
                   <input
