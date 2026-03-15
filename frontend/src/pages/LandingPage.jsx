@@ -353,9 +353,6 @@ export default function LandingPage() {
 
 						{/* Right Content */}
 						<div>
-							<p className="text-sm text-[#A855F7] font-semibold mb-4 uppercase tracking-wider">
-								Video
-							</p>
 							<h2 className="text-4xl md:text-5xl font-bold text-[var(--text-color)] mb-8">
 								Why Is Learning With yugantaAI Important?
 							</h2>

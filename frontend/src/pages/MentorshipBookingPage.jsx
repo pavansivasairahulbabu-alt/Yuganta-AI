@@ -237,6 +237,11 @@ export default function MentorshipBookingPage() {
 
   const handleConfirmBooking = async () => {
     if (!email || !topic || !selectedDate || !selectedSlot) return;
+
+    if (!assignedMentor) {
+      toast.error("Mentor not yet assigned. Please try again after a mentor is assigned to you by the admin.");
+      return;
+    }
     
     // Check if user has 3 or more upcoming sessions this week
     const now = new Date();

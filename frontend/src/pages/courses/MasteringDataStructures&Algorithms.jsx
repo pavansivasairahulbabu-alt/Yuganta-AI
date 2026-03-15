@@ -1,27 +1,19 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import API_URL from "../../config/api";
 import { useTheme } from "../../context/ThemeContext";
-import { useAuth } from "../../context/AuthContext";
 
 export default function DsaMlProgramPage() {
   const { theme } = useTheme();
-  const { isAuthenticated, user, token } = useAuth();
-  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
   const [whatsapp, setWhatsapp] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [isEnrolled, setIsEnrolled] = useState(false);
   const [openWeek, setOpenWeek] = useState(null);
   const [showAllTools, setShowAllTools] = useState(false);
   const [loadingInstructors, setLoadingInstructors] = useState(false);
   const [instructors, setInstructors] = useState([]);
 
-  const DSA_SLUG = "dsa-ml-program";
-  const DSA_TITLE = "Mastering Data Structures & Algorithms";
   const getToolLogo = (name) => {
     const logos = {
       "Java: ArrayList": "https://www.vectorlogo.zone/logos/java/java-icon.svg",
@@ -154,140 +146,30 @@ export default function DsaMlProgramPage() {
     })();
   }, []);
 
-  useEffect(() => {
-    const fullName = user?.fullName || user?.user?.fullName || "";
-    const email = user?.email || user?.user?.email || "";
-
-    if (fullName || email) {
-      setForm((prev) => ({
-        ...prev,
-        name: prev.name || fullName,
-        email: prev.email || email,
-      }));
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !token) {
-      setIsEnrolled(false);
-      return;
-    }
-
-    const fetchEnrollmentStatus = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/users/enrolled`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) return;
-        const data = await response.json();
-
-        const found = Array.isArray(data) && data.some((item) => {
-          const course = item?.courseId;
-          const title = (course?.title || "").toLowerCase();
-          const id = course?._id || "";
-          return (
-            title.includes("mastering data structures") ||
-            title.includes("data structures & algorithms") ||
-            id === DSA_SLUG
-          );
-        });
-
-        setIsEnrolled(found);
-      } catch {
-        setIsEnrolled(false);
-      }
-    };
-
-    fetchEnrollmentStatus();
-  }, [isAuthenticated, token]);
-
-  const findDsaCourseId = async () => {
-    const response = await fetch(`${API_URL}/api/courses`);
-    if (!response.ok) return null;
-    const courses = await response.json();
-    if (!Array.isArray(courses)) return null;
-
-    const match = courses.find((course) =>
-      (course?.title || "").toLowerCase().includes("mastering data structures") ||
-      (course?.title || "").toLowerCase().includes("data structures & algorithms")
-    );
-
-    return match?._id || null;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (isEnrolled) {
-      toast.success("You are already enrolled in this program.");
-      return;
-    }
     if (!form.name || !form.phone || !form.email) return;
-    if (!agree) {
-      toast.error("Please accept Terms & Conditions to continue.");
-      return;
-    }
-
-    if (!isAuthenticated) {
-      toast("Please sign up or log in to enroll.");
-      navigate("/signup");
-      return;
-    }
-
     setSubmitting(true);
     try {
-      const leadRes = await fetch(`${API_URL}/api/leads`, {
+      const res = await fetch(`${API_URL}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
           email: form.email,
-          courseId: DSA_SLUG,
-          courseName: DSA_TITLE,
+          courseId: "dsa-ml-program",
+          courseName: "Mastering Data Structures & Algorithms",
           type: "Enrollment",
           agreeTerms: agree,
           whatsappUpdates: whatsapp,
         }),
       });
-
-      const leadData = await leadRes.json().catch(() => ({}));
-
-      if (leadData?.alreadyEnrolled) {
-        setIsEnrolled(true);
-        toast.success("Already enrolled with this phone number or email.");
-        return;
+      if (!res.ok) {
+        console.warn("Lead submit failed");
       }
-
-      const courseId = await findDsaCourseId();
-      if (courseId) {
-        const enrollRes = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!enrollRes.ok) {
-          const enrollData = await enrollRes.json().catch(() => ({}));
-          const message = (enrollData?.message || "").toLowerCase();
-          if (message.includes("already enrolled")) {
-            toast.success("You are already enrolled in this program.");
-          } else {
-            toast.error(enrollData?.message || "Enrollment failed. Please try again.");
-            return;
-          }
-        }
-      }
-
-      toast.success("Successfully enrolled!");
-      setForm((prev) => ({ ...prev, phone: "" }));
-      setIsEnrolled(true);
     } catch (err) {
       console.error("Lead submit error", err);
-      toast.error("Unable to complete enrollment right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -377,7 +259,7 @@ export default function DsaMlProgramPage() {
                     disabled={submitting}
                     className="w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.5)] disabled:opacity-60"
                   >
-                    {submitting ? "Submitting..." : isEnrolled ? "Enrolled" : "Enroll Now"}
+                    {submitting ? "Submitting..." : "Enroll Now"}
                   </button>
                 </form>
               </div>
@@ -468,11 +350,11 @@ export default function DsaMlProgramPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(37,99,235,0.12)] max-w-6xl mx-auto">
+          <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
             <img
-              src={theme === "light-theme" ? "/DSA-light1.png" : "/DSA-dark1.png"}
+              src={theme === "light-theme" ? "/DSA-light.png" : "/DSA-dark.png"}
               alt="Program Personalized Roadmap"
-              className="w-full md:w-[90%] mx-auto h-auto object-contain"
+              className="w-full h-auto object-contain"
               loading="lazy"
             />
           </div>
@@ -536,6 +418,22 @@ export default function DsaMlProgramPage() {
                     { text: "Trees", sub: ["Binary", "AVL", "RedBlack"] },
                     "Graph Representation",
                     { text: "Graph types", sub: ["Directed", "UnDirected"] }
+                  ]
+                },
+                {
+                  title: "WEEK 5: ADVANCED DSA",
+                  items: [
+                    "Recursion",
+                    "Searching , BFS, DFS",
+                    "Solving problems on algorithms"
+                  ]
+                },
+                {
+                  title: "WEEK 6: DYNAMIC PROGRAMMING & MISCELLANEOUS PROBLEMS",
+                  items: [
+                    "Dynamic programming",
+                    "Problems on DP",
+                    "Miscellaneous problems"
                   ]
                 }
               ].map((wk, i) => (
@@ -797,7 +695,7 @@ export default function DsaMlProgramPage() {
                 const [c1, c2] = gradients[idx % gradients.length];
                 const expertiseTags = (ins.expertise || ins.designation || "Instructor").split(/[,/]/).map(s => s.trim()).filter(Boolean);
                 return (
-                  <div key={ins._id || ins.name || `instructor-${idx}`} className="ins-flip-wrapper">
+                  <div key={ins._id || ins.email || ins.name} className="ins-flip-wrapper">
                     <div className="ins-flip-inner">
                       <div className="ins-flip-front ins-card-face flex flex-col h-full relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[20px] z-10" style={{ background: `linear-gradient(90deg, ${c1}, ${c2})` }} />
@@ -930,7 +828,6 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Mastering Data Structures & Algorithms"
               price="₹5,000"
-              ctaHref={isAuthenticated ? "#pioneer-enroll-form" : "/signup"}
               bullets={[
                 "6 weeks Structured Learning",
                 "100+ DSA Problems",
@@ -942,7 +839,6 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Agentic AI Pioneer program"
               price="₹12,000"
-              ctaHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
               bullets={[
                 "4 Months of Power Learning",
                 "25+ Deep-Dive Mentorship Sessions",
@@ -973,7 +869,7 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets, ctaHref = "/signup" }) {
+function Plan({ name, price, bullets }) {
   return (
     <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
@@ -991,21 +887,12 @@ function Plan({ name, price, bullets, ctaHref = "/signup" }) {
         ))}
       </ul>
       <div className="mt-8">
-        {ctaHref.startsWith("#") ? (
-          <a
-            href={ctaHref}
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </a>
-        ) : (
-          <Link
-            to={ctaHref}
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </Link>
-        )}
+        <Link
+          to="/signup"
+          className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+        >
+          Enroll Now
+        </Link>
       </div>
     </div>
   );

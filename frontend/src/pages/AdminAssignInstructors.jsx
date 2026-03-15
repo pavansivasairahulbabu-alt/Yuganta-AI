@@ -4,9 +4,12 @@ import toast from "react-hot-toast";
 import { Users, BookOpen, Check, ChevronDown, Sparkles, AlertCircle } from "lucide-react";
 import AdminNavbar from "../components/AdminNavbar";
 import API_URL from "../config/api";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AdminAssignMentors() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isLight = theme === "light-theme";
   const [mentors, setMentors] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,11 +114,18 @@ export default function AdminAssignMentors() {
     navigate("/admin/login", { replace: true });
   };
 
-  // Filter users
-  const filteredUsers = users.filter(user => 
-    user.fullName.toLowerCase().includes(searchUserQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchUserQuery.toLowerCase())
-  );
+  // Filter users - ONLY show those who don't have a mentor assigned
+  const filteredUsers = users.filter(user => {
+    // Exclude users who already have an assigned mentor/instructor
+    if (user.assignedMentor || user.assignedInstructor) {
+      return false;
+    }
+
+    return (
+      user.fullName.toLowerCase().includes(searchUserQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchUserQuery.toLowerCase())
+    );
+  });
 
   // Filter mentors
   const filteredMentors = mentors.filter(mentor =>
@@ -136,7 +146,11 @@ export default function AdminAssignMentors() {
             <div className="w-1 h-8 bg-gradient-to-b from-[#8B5CF6] to-[#EC4899] rounded-full"></div>
             <p className="text-sm font-semibold text-[#A855F7]">Admin Panel</p>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-[#C7C3D6] to-[#9A93B5] bg-clip-text text-transparent">
+          <h1 className={`text-5xl font-bold bg-clip-text text-transparent ${
+            isLight 
+              ? "bg-gradient-to-r from-gray-900 to-gray-700" 
+              : "bg-gradient-to-r from-white via-[#C7C3D6] to-[#9A93B5]"
+          }`}>
             Assign Mentors to Users
           </h1>
           <p className="text-[#9A93B5] text-lg">Select a user and assign a mentor to enable personalized 1:1 mentoring sessions</p>
@@ -170,7 +184,7 @@ export default function AdminAssignMentors() {
                   <div className="bg-gradient-to-r from-[#8B5CF6]/10 to-[#EC4899]/10 p-5 border-b border-[rgba(139,92,246,0.2)]">
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5 text-[#A855F7]" />
-                      <h2 className="text-lg font-bold text-white">Users <span className="text-[#A855F7]">({filteredUsers.length})</span></h2>
+                      <h2 className={`text-lg font-bold ${isLight ? "text-gray-900" : "text-white"}`}>Users <span className="text-[#A855F7]">({filteredUsers.length})</span></h2>
                     </div>
                   </div>
                   
@@ -200,7 +214,7 @@ export default function AdminAssignMentors() {
                                 ? "bg-gradient-to-r from-[#8B5CF6]/20 to-transparent border-[#8B5CF6] shadow-[0_0_16px_rgba(139,92,246,0.2)]"
                                 : "border-transparent hover:bg-[rgba(139,92,246,0.05)] hover:border-[rgba(139,92,246,0.3)]"
                             }`}>
-                            <p className="font-semibold text-sm text-white">{user.fullName}</p>
+                            <p className={`font-semibold text-sm ${isLight ? "text-gray-900" : "text-white"}`}>{user.fullName}</p>
                             <p className="text-xs text-[#9A93B5] mt-1">{user.email}</p>
                             {user.assignedInstructor && (
                               <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-[#8B5CF6]/20 to-[#EC4899]/20 border border-[#8B5CF6]/30 rounded-lg text-xs text-[#A855F7] font-medium">
@@ -223,7 +237,7 @@ export default function AdminAssignMentors() {
                   <div className="bg-gradient-to-r from-[#8B5CF6]/10 to-[#EC4899]/10 p-5 border-b border-[rgba(139,92,246,0.2)]">
                     <div className="flex items-center gap-3">
                       <BookOpen className="w-5 h-5 text-[#EC4899]" />
-                      <h2 className="text-lg font-bold text-white">Mentors <span className="text-[#EC4899]">({filteredMentors.length})</span></h2>
+                      <h2 className={`text-lg font-bold ${isLight ? "text-gray-900" : "text-white"}`}>Mentors <span className="text-[#EC4899]">({filteredMentors.length})</span></h2>
                     </div>
                   </div>
                   
@@ -257,7 +271,7 @@ export default function AdminAssignMentors() {
                                 ? "bg-gradient-to-r from-[#A855F7]/20 to-transparent border-[#A855F7] shadow-[0_0_16px_rgba(168,85,247,0.2)]"
                                 : "border-transparent hover:bg-[rgba(168,85,247,0.05)] hover:border-[rgba(168,85,247,0.3)]"
                             }`}>
-                            <p className="font-semibold text-sm text-white">{mentor.name}</p>
+                            <p className={`font-semibold text-sm ${isLight ? "text-gray-900" : "text-white"}`}>{mentor.name}</p>
                             <p className="text-xs text-[#A855F7] mt-1 font-medium">{mentor.expertise}</p>
                             <p className="text-xs text-[#9A93B5] mt-1">{mentor.email}</p>
                           </div>
@@ -278,8 +292,8 @@ export default function AdminAssignMentors() {
                         From User
                       </p>
                       {selectedUser ? (
-                        <div className="bg-[var(--card-bg)] rounded-xl p-4 border border-[rgba(168,85,247,0.3)] shadow-[0_4px_16px_rgba(168,85,247,0.15)]">
-                          <p className="font-bold text-white">{selectedUser.fullName}</p>
+                        <div className={`bg-[var(--card-bg)] rounded-xl p-4 border ${isLight ? "border-gray-200" : "border-[rgba(168,85,247,0.3)]"} shadow-[0_4px_16px_rgba(168,85,247,0.15)]`}>
+                          <p className={`font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{selectedUser.fullName}</p>
                           <p className="text-sm text-[#9A93B5] mt-1">{selectedUser.email}</p>
                           {selectedUser.assignedMentor && (
                             <p className="text-xs text-yellow-300 mt-2 flex items-center gap-1.5">
@@ -307,8 +321,8 @@ export default function AdminAssignMentors() {
                         To Mentor
                       </p>
                       {selectedMentor ? (
-                        <div className="bg-[var(--card-bg)] rounded-xl p-4 border border-[rgba(168,85,247,0.3)] shadow-[0_4px_16px_rgba(168,85,247,0.15)]">
-                          <p className="font-bold text-white">{selectedMentor.name}</p>
+                        <div className={`bg-[var(--card-bg)] rounded-xl p-4 border ${isLight ? "border-gray-200" : "border-[rgba(168,85,247,0.3)]"} shadow-[0_4px_16px_rgba(168,85,247,0.15)]`}>
+                          <p className={`font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{selectedMentor.name}</p>
                           <p className="text-sm text-[#A855F7] mt-1 font-medium">{selectedMentor.expertise}</p>
                           <p className="text-xs text-[#9A93B5] mt-2">{selectedMentor.email}</p>
                         </div>
@@ -343,7 +357,7 @@ export default function AdminAssignMentors() {
                   </div>
                   <p className="text-xs text-[#A855F7] uppercase tracking-wider font-bold">Total Users</p>
                 </div>
-                <p className="text-4xl font-bold text-white">{users.length}</p>
+                <p className={`text-4xl font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{users.length}</p>
               </div>
               <div className="bg-gradient-to-br from-[#A855F7]/10 to-[#A855F7]/5 border border-[rgba(168,85,247,0.2)] rounded-2xl p-6 shadow-[0_4px_16px_rgba(168,85,247,0.1)] hover:shadow-[0_8px_24px_rgba(168,85,247,0.2)] transition-all">
                 <div className="flex items-center gap-3 mb-3">
@@ -352,7 +366,7 @@ export default function AdminAssignMentors() {
                   </div>
                   <p className="text-xs text-[#A855F7] uppercase tracking-wider font-bold">Total Mentors</p>
                 </div>
-                <p className="text-4xl font-bold text-white">{mentors.length}</p>
+                <p className={`text-4xl font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{mentors.length}</p>
               </div>
               <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-2xl p-6 shadow-[0_4px_16px_rgba(34,197,94,0.1)] hover:shadow-[0_8px_24px_rgba(34,197,94,0.2)] transition-all">
                 <div className="flex items-center gap-3 mb-3">
@@ -361,7 +375,7 @@ export default function AdminAssignMentors() {
                   </div>
                   <p className="text-xs text-green-400 uppercase tracking-wider font-bold">Assignments Done</p>
                 </div>
-                <p className="text-4xl font-bold text-white">{users.filter(u => u.assignedMentor).length}</p>
+                <p className={`text-4xl font-bold ${isLight ? "text-gray-900" : "text-white"}`}>{users.filter(u => u.assignedMentor || u.assignedInstructor).length}</p>
               </div>
             </div>
           </div>

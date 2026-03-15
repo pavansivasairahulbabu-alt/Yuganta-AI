@@ -191,27 +191,6 @@ export default function AdminDashboard() {
             </div>
           </Link>
         </div>
-
-        {/* Quick Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-[var(--card-bg)] border border-[rgba(139,92,246,0.2)] rounded-xl p-6">
-            <p className="text-sm text-[#9A93B5] font-semibold mb-3">System Status</p>
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-[#22c55e] animate-pulse"></div>
-              <span className="text-white font-semibold">All Systems Operational</span>
-            </div>
-          </div>
-
-          <div className="bg-[var(--card-bg)] border border-[rgba(139,92,246,0.2)] rounded-xl p-6">
-            <p className="text-sm text-[#9A93B5] font-semibold mb-3">Support</p>
-            <p className="text-white">Need help? Contact admin support for assistance.</p>
-          </div>
-
-          <div className="bg-[var(--card-bg)] border border-[rgba(139,92,246,0.2)] rounded-xl p-6">
-            <p className="text-sm text-[#9A93B5] font-semibold mb-3">Documentation</p>
-            <p className="text-white">View platform documentation and guides.</p>
-          </div>
-        </div>
       </div>
     </div>
   );
