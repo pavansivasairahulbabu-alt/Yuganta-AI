@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function LoginPage() {
 	const [email, setEmail] = useState("");
@@ -9,8 +10,23 @@ export default function LoginPage() {
 	const [error, setError] = useState("");
 	const [errorCode, setErrorCode] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { login } = useAuth();
+	const { login, googleLogin } = useAuth();
 	const navigate = useNavigate();
+
+	const handleGoogleSuccess = async (credentialResponse) => {
+		setLoading(true);
+		const result = await googleLogin(credentialResponse);
+		if (result.success) {
+			navigate("/");
+		} else {
+			setError(result.error);
+		}
+		setLoading(false);
+	};
+
+	const handleGoogleError = () => {
+		setError("Google login failed. Please try again.");
+	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -179,6 +195,21 @@ export default function LoginPage() {
 							{loading ? "Logging in..." : "Login"}
 						</button>
 
+						{/* Divider */}
+						<div className="my-6 flex items-center">
+							<div className="flex-grow border-t border-[var(--border-color)]"></div>
+							<span className="mx-4 text-sm text-[var(--text-muted)]">OR</span>
+							<div className="flex-grow border-t border-[var(--border-color)]"></div>
+						</div>
+
+						{/* Social Logins */}
+						<div className="space-y-3">
+							<GoogleLogin
+								onSuccess={handleGoogleSuccess}
+								onError={handleGoogleError}
+								useOneTap
+							/>
+						</div>
 					</form>
 
 					{/* Sign Up Link */}

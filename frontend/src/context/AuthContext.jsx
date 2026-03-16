@@ -116,6 +116,36 @@ export const AuthProvider = ({ children }) => {
 		}
 	};
 
+	const googleLogin = async (credentialResponse) => {
+		try {
+			const response = await fetch(`${API_URL}/api/auth/google`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(credentialResponse),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				return {
+					success: false,
+					error: data.message || "Google login failed",
+				};
+			}
+
+			localStorage.setItem("user", JSON.stringify(data));
+			localStorage.setItem("token", data.token);
+			setUser(data);
+			setToken(data.token);
+
+			return { success: true };
+		} catch (error) {
+			return { success: false, error: error.message };
+		}
+	};
+
 	const logout = () => {
 		setUser(null);
 		setToken(null);
@@ -165,6 +195,7 @@ export const AuthProvider = ({ children }) => {
 		verifySignupOtp,
 		logout,
 		enrollCourse,
+		googleLogin,
 		isAuthenticated: !!user,
 	};
 

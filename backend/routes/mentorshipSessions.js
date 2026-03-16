@@ -246,6 +246,13 @@ router.put("/:id/reject", protectInstructor, async (req, res) => {
 router.put("/:id/reschedule", protectInstructor, async (req, res) => {
 	try {
 		const { newDate, newTime, reason } = req.body;
+
+		if (!reason || reason.trim().length < 10) {
+			return res.status(400).json({ 
+				message: "A detailed reason (at least 10 characters) is mandatory for rescheduling." 
+			});
+		}
+
 		const session = await MentorshipSession.findById(req.params.id);
 
 		if (!session) {
@@ -404,6 +411,85 @@ router.put("/:id/cancel", protect, async (req, res) => {
 	} catch (error) {
 		console.error("Error cancelling session:", error);
 		res.status(500).json({ message: "Error cancelling session" });
+	}
+});
+
+// @route   PUT /api/mentorship-sessions/:id/user-reschedule
+// @desc    Reschedule a session (user only)
+// @access  Private (User)
+router.put("/:id/user-reschedule", protect, async (req, res) => {
+	try {
+		const { newDate, newTime, reason } = req.body;
+
+		if (!reason || reason.trim().length < 10) {
+			return res.status(400).json({ 
+				message: "A detailed reason (at least 10 characters) is mandatory for rescheduling." 
+			});
+		}
+
+		const session = await MentorshipSession.findById(req.params.id);
+
+		if (!session) {
+			return res.status(404).json({ message: "Session not found" });
+		}
+
+		// Verify session belongs to this user
+		if (session.userId.toString() !== req.user._id.toString()) {
+			return res.status(403).json({ message: "Not authorized" });
+		}
+
+		// Check if reschedule is requested at least 24 hours before original session
+		const sessionDateTime = new Date(`${session.date} ${session.time}`);
+		const now = new Date();
+		const diffInHours = (sessionDateTime - now) / (1000 * 60 * 60);
+
+		if (diffInHours < 24) {
+			return res.status(400).json({ 
+				message: "Rescheduling is only allowed at least 24 hours before the session start time." 
+			});
+		}
+
+		// Check if the new date is also at least 7 days in the future (reusing existing business rule if applicable)
+		// Or just allow rescheduling to any available future slot? 
+		// The original rule was 7 days for initial booking. Let's keep it consistent or follow user preference.
+		// User didn't specify, but let's at least ensure it's in the future.
+		const newSessionDate = new Date(newDate);
+		if (newSessionDate < now) {
+			return res.status(400).json({ message: "New date must be in the future." });
+		}
+
+		// Check if the new slot is available
+		const existingBooking = await MentorshipSession.findOne({
+			date: newDate,
+			time: newTime,
+			status: { $in: ["upcoming", "pending", "mentor_assigned", "scheduled", "rescheduled"] },
+			_id: { $ne: session._id }
+		});
+
+		if (existingBooking) {
+			return res.status(400).json({ 
+				message: "The new time slot is already booked. Please choose a different time." 
+			});
+		}
+
+		// Save old date/time for reference
+		session.originalDate = session.date;
+		session.originalTime = session.time;
+		session.date = newDate;
+		session.time = newTime;
+		session.status = "rescheduled";
+		session.rescheduleReason = reason || "User requested reschedule";
+		
+		await session.save();
+		
+		// Populate for frontend
+		await session.populate("instructorId", "name email expertise");
+		await session.populate("mentorId", "name email expertise");
+
+		res.json(session);
+	} catch (error) {
+		console.error("Error rescheduling session:", error);
+		res.status(500).json({ message: "Error rescheduling session" });
 	}
 });
 

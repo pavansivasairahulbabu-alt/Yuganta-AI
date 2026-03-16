@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import API_URL from "../config/api";
+import toast from "react-hot-toast";
 
 const navItems = [
   { key: "my-mentorships", label: "My Mentorships" },
@@ -17,6 +18,14 @@ export default function MentorshipPage() {
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  
+  // Reschedule state
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [rescheduleSession, setRescheduleSession] = useState(null);
+  const [newDate, setNewDate] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [rescheduleReason, setRescheduleReason] = useState("");
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   useEffect(() => {
     fetchAssignedInstructor();
@@ -78,8 +87,8 @@ export default function MentorshipPage() {
         const transformedSessions = sessions.map((session) => ({
           id: session._id,
           title: session.title,
-          mentor: session.instructorId?.name || "Industry Mentor",
-          mentorExpertise: session.instructorId?.expertise,
+          mentor: session.instructorId?.name || session.mentorId?.name || "Industry Mentor",
+          mentorExpertise: session.instructorId?.expertise || session.mentorId?.expertise,
           status: session.status,
           date: session.date,
           time: session.time,
@@ -97,6 +106,68 @@ export default function MentorshipPage() {
       console.error("Error fetching sessions:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRescheduleClick = (session) => {
+    // Check if within 24 hours
+    const sessionDateTime = new Date(`${session.date} ${session.time}`);
+    const now = new Date();
+    const diffInHours = (sessionDateTime - now) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      toast.error("Rescheduling is only allowed at least 24 hours before the session start time.");
+      return;
+    }
+
+    setRescheduleSession(session);
+    setNewDate(session.date);
+    setNewTime(session.time);
+    setShowRescheduleModal(true);
+  };
+
+  const handleRescheduleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newDate || !newTime) {
+      toast.error("Please select both date and time.");
+      return;
+    }
+
+    if (!rescheduleReason || rescheduleReason.trim().length < 10) {
+      toast.error("Please provide a detailed reason (at least 10 characters) for rescheduling.");
+      return;
+    }
+
+    setIsRescheduling(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/api/mentorship-sessions/${rescheduleSession.id}/user-reschedule`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          newDate,
+          newTime,
+          reason: rescheduleReason,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Session rescheduled successfully!");
+        setShowRescheduleModal(false);
+        fetchSessionData(); // Refresh the list
+      } else {
+        toast.error(data.message || "Failed to reschedule session.");
+      }
+    } catch (error) {
+      console.error("Error rescheduling:", error);
+      toast.error("An error occurred while rescheduling.");
+    } finally {
+      setIsRescheduling(false);
     }
   };
 
@@ -214,7 +285,10 @@ export default function MentorshipPage() {
           className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition">
           Join / Details
         </button>
-        <button className="px-4 py-2 border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-color)] hover:bg-[var(--card-bg-hover)] transition">
+        <button 
+          onClick={() => handleRescheduleClick(session)}
+          className="px-4 py-2 border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-color)] hover:bg-[var(--card-bg-hover)] transition"
+        >
           Reschedule
         </button>
       </div>
@@ -417,7 +491,16 @@ export default function MentorshipPage() {
                   </svg>
                   <p className="text-sm font-semibold text-blue-300">Meeting Link</p>
                 </div>
-                {selectedSession.meetingLink ? (
+                {selectedSession.status === "cancelled" ? (
+                  <div className="bg-red-500/10 rounded-lg p-3 flex items-center gap-3 text-red-400 border border-red-500/20">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm">
+                      This session has been cancelled. The meeting link is no longer available.
+                    </p>
+                  </div>
+                ) : selectedSession.meetingLink ? (
                   <a
                     href={selectedSession.meetingLink}
                     target="_blank"
@@ -507,7 +590,13 @@ export default function MentorshipPage() {
               </div>
 
               <div className="flex gap-3 pt-4">
-                {selectedSession.meetingLink ? (
+                {selectedSession.status === "cancelled" ? (
+                  <button
+                    disabled
+                    className="flex-1 px-6 py-3 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg font-semibold cursor-not-allowed text-center">
+                    Session Cancelled
+                  </button>
+                ) : selectedSession.meetingLink ? (
                   <a
                     href={selectedSession.meetingLink}
                     target="_blank"
@@ -528,6 +617,82 @@ export default function MentorshipPage() {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showRescheduleModal && rescheduleSession && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-fadeIn">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-[var(--text-color)]">Reschedule Session</h3>
+                <button
+                  onClick={() => setShowRescheduleModal(false)}
+                  className="p-2 hover:bg-[var(--card-bg-hover)] rounded-full transition"
+                >
+                  <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleRescheduleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">New Date</label>
+                  <input
+                    type="date"
+                    required
+                    min={new Date().toISOString().split("T")[0]}
+                    value={newDate}
+                    onChange={(e) => setNewDate(e.target.value)}
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">New Time</label>
+                  <input
+                    type="time"
+                    required
+                    value={newTime}
+                    onChange={(e) => setNewTime(e.target.value)}
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">
+                    Reason for Rescheduling <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows="3"
+                    required
+                    value={rescheduleReason}
+                    onChange={(e) => setRescheduleReason(e.target.value)}
+                    placeholder="Mandatory: Briefly explain why you need to reschedule (min 10 chars)..."
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition resize-none"
+                  ></textarea>
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowRescheduleModal(false)}
+                    className="flex-1 px-6 py-3 border border-[var(--border-color)] text-[var(--text-color)] font-semibold rounded-xl hover:bg-[var(--card-bg-hover)] transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isRescheduling}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] text-white font-semibold rounded-xl hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isRescheduling ? "Processing..." : "Confirm"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

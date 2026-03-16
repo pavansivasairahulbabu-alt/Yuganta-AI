@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function SignupPage() {
 	const [step, setStep] = useState(1);
@@ -17,9 +18,24 @@ export default function SignupPage() {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { signup, verifySignupOtp } = useAuth();
+	const { signup, verifySignupOtp, googleLogin } = useAuth();
 	const navigate = useNavigate();
 	const shouldShowError = Boolean(error);
+
+	const handleGoogleSuccess = async (credentialResponse) => {
+		setLoading(true);
+		const result = await googleLogin(credentialResponse);
+		if (result.success) {
+			navigate("/");
+		} else {
+			setError(result.error);
+		}
+		setLoading(false);
+	};
+
+	const handleGoogleError = () => {
+		setError("Google login failed. Please try again.");
+	};
 
 	const clearStatus = () => {
 		setError("");
@@ -271,6 +287,22 @@ export default function SignupPage() {
 							className='w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-[0_4px_24px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_32px_rgba(139,92,246,0.6)] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'>
 							{loading ? "Sending OTP..." : "Send Email OTP"}
 						</button>
+
+						{/* Divider */}
+						<div className="my-5 flex items-center">
+							<div className="flex-grow border-t border-[var(--border-color)]"></div>
+							<span className="mx-4 text-sm text-[var(--text-muted)]">OR</span>
+							<div className="flex-grow border-t border-[var(--border-color)]"></div>
+						</div>
+
+						{/* Social Logins */}
+						<div className="space-y-3">
+							<GoogleLogin
+								onSuccess={handleGoogleSuccess}
+								onError={handleGoogleError}
+								useOneTap
+							/>
+						</div>
 
 					</form>
 					) : step === 2 ? (
