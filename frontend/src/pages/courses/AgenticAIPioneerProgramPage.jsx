@@ -248,7 +248,7 @@ export default function AgenticAIPioneerProgramPage() {
     e.preventDefault();
 
     if (isEnrolled) {
-      toast.success("You are already enrolled in this program.");
+      toast.error("You are already enrolled in this program.");
       return;
     }
     if (!form.name || !form.phone || !form.email) return;
@@ -290,7 +290,7 @@ export default function AgenticAIPioneerProgramPage() {
       if (leadData?.alreadyEnrolled) {
         setForm({ name: "", phone: "", email: "" });
         setIsEnrolled(true);
-        toast.success("Already enrolled with this phone number or email.");
+        toast.error("Already enrolled with this phone number or email.");
         return;
       }
 
@@ -309,7 +309,7 @@ export default function AgenticAIPioneerProgramPage() {
           const enrollData = await enrollRes.json().catch(() => ({}));
           const message = (enrollData?.message || "").toLowerCase();
           if (message.includes("already enrolled")) {
-            toast.success("You are already enrolled in this program.");
+            toast.error("You are already enrolled in this program.");
           } else {
             console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
             toast.error(enrollData?.message || "Enrollment failed. Please try again.");
