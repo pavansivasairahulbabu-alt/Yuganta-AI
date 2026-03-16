@@ -296,7 +296,7 @@ export default function SignupPage() {
 						</div>
 
 						{/* Social Logins */}
-						<div className="space-y-3">
+						<div className="space-y-3 flex justify-center">
 							<GoogleLogin
 								onSuccess={handleGoogleSuccess}
 								onError={handleGoogleError}
