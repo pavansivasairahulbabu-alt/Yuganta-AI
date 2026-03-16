@@ -28,7 +28,12 @@ export default function AdminRegistrations() {
             });
             if (response.ok) {
                 const data = await response.json();
-                setLeads(data);
+                const registrationLeads = (Array.isArray(data) ? data : []).filter((lead) => {
+                    const type = String(lead?.type || "").toLowerCase();
+                    const source = String(lead?.leadSource || "").toLowerCase();
+                    return type !== "consultation" && source !== "talk to expert";
+                });
+                setLeads(registrationLeads);
             } else {
                 if (response.status === 401) {
                     navigate("/admin/login");
