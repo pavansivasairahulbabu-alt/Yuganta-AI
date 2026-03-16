@@ -7,7 +7,7 @@ export default function FreeCourses() {
 		{
 			id: "agentic-ai-crash-course",
 			title: "Agentic AI Crash Course",
-			duration: "80+ Hours",
+			duration: "30+ Hours",
 			weeks: "4 Weeks",
 			thumbnail: "https://onug.net/wp-content/uploads/2025/02/ONUG-Blog-Image-1024x512-1.jpg", 
 			topics: ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"],
@@ -16,7 +16,7 @@ export default function FreeCourses() {
 		{
 			id: "agentic-ai-pioneer-program",
 			title: "Agentic AI Pioneer Program",
-			duration: "150+ Hours",
+			duration: "150 Hours",
 			weeks: "4 Months",
 			thumbnail: "https://miro.medium.com/v2/resize:fit:1400/1*LtgPxfl-J6dJrg9rRgWdGA.png",
 			topics: ["DSA", "ML & DL", "LangChain", "CrewAI", "LangGraph", "AI Agents", "RAG", "AutoGen"],

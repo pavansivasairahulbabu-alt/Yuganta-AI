@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+const ALLOWED_CONTACT_TIME_SLOTS = [
+	"9:00 AM - 12:00 PM",
+	"1:30 PM - 4:30 PM",
+	"6:00 PM - 9:00 PM",
+];
+
 const leadSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -37,6 +43,7 @@ const leadSchema = new mongoose.Schema({
 	},
 	preferredContactTime: {
 		type: String,
+		enum: [...ALLOWED_CONTACT_TIME_SLOTS, ""],
 		default: "",
 		trim: true,
 	},

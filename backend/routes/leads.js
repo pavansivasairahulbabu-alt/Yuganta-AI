@@ -10,6 +10,12 @@ import { protect } from "../middleware/auth.js"; // Standard user auth if needed
 
 const router = express.Router();
 
+const ALLOWED_CONTACT_TIME_SLOTS = [
+	"9:00 AM - 12:00 PM",
+	"1:30 PM - 4:30 PM",
+	"6:00 PM - 9:00 PM",
+];
+
 const escapeRegExp = (value = "") =>
 	String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -82,9 +88,19 @@ router.post("/", async (req, res) => {
 		} = req.body;
 		const normalizedEmail = String(email || "").trim().toLowerCase();
 		const normalizedPhone = String(phone || "").trim();
+		const normalizedPreferredContactTime = String(preferredContactTime || "").trim();
 
 		if (!name || !normalizedEmail || !normalizedPhone || !courseId) {
 			return res.status(400).json({ message: "All fields are required" });
+		}
+
+		if (
+			normalizedPreferredContactTime
+			&& !ALLOWED_CONTACT_TIME_SLOTS.includes(normalizedPreferredContactTime)
+		) {
+			return res.status(400).json({
+				message: "Invalid preferred contact time. Please select a valid time slot.",
+			});
 		}
 
 		// Logic: For "Brochure", only 1 per phone+course. For "Enrollment", maybe allow multiple?
@@ -133,7 +149,7 @@ router.post("/", async (req, res) => {
 			type: leadType,
 			discussionTopic: discussionTopic || "",
 			preferredContactMode: preferredContactMode || "",
-			preferredContactTime: preferredContactTime || "",
+			preferredContactTime: normalizedPreferredContactTime,
 			leadSource: leadSource || "",
 		});
 

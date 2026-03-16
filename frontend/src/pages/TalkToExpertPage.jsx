@@ -11,7 +11,11 @@ const courseOptions = [
 ];
 
 const contactModes = ["Call", "WhatsApp", "Email", "Meet"];
-const contactTimeSlots = ["Morning (9 AM - 12 PM)", "1 PM - 9 PM"];
+const contactTimeSlots = [
+	"9:00 AM - 12:00 PM",
+	"1:30 PM - 4:30 PM",
+	"6:00 PM - 9:00 PM",
+];
 
 export default function TalkToExpertPage() {
 	const [submitting, setSubmitting] = useState(false);
