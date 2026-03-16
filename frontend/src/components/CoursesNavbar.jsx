@@ -114,9 +114,9 @@ export default function CoursesNavbar() {
 								onClick={() => setShowProfileMenu(!showProfileMenu)}
 								className='flex items-center space-x-3 px-4 py-2 border border-[#3B82F6] rounded-xl hover:bg-[rgba(59,130,246,0.1)] transition-all duration-200'>
 								<div className='w-8 h-8 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] rounded-full flex items-center justify-center text-white font-semibold'>
-									{user?.name?.charAt(0).toUpperCase() || 'U'}
+									{(user?.fullName || user?.user?.fullName || user?.name || user?.user?.name || user?.email || user?.user?.email || 'U').charAt(0).toUpperCase()}
 								</div>
-								<span className='text-sm font-medium'>{user?.name}</span>
+								<span className='text-sm font-medium'>{user?.fullName || user?.user?.fullName || user?.name || user?.user?.name || "User"}</span>
 								<svg
 									className={`w-4 h-4 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`}
 									fill='none'

@@ -198,6 +198,10 @@ export default function MentorshipPage() {
       const active = ["upcoming", "pending", "mentor_assigned", "scheduled", "rescheduled"];
       return sessionData.filter((s) => active.includes(s.status));
     }
+    if (activeTab === "cancelled") {
+      const cancelledKeys = ["cancelled", "rejected", "rescheduled"];
+      return sessionData.filter((s) => cancelledKeys.includes(s.status));
+    }
     return sessionData.filter((s) => s.status === activeTab);
   }, [activeTab, sessionData]);
 
