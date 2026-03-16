@@ -94,6 +94,12 @@ const authLimiter = rateLimit({
 	message: { message: "Too many authentication attempts. Please try again later." },
 });
 
+// Request logger middleware
+app.use((req, res, next) => {
+	console.log(`📡 [${new Date().toISOString()}] ${req.method} ${req.url}`);
+	next();
+});
+
 // Middleware
 app.use(cors(corsOptions));
 app.use(helmet({
@@ -123,8 +129,16 @@ app.use("/api/leads", leadRoutes);
 app.get("/", (req, res) => {
 	res.json({
 		message: "YuganthaAI API is running",
+		version: "1.0.2",
 		uptime: process.uptime(),
 		timestamp: new Date().toISOString(),
+	});
+});
+
+// 404 handler for API routes
+app.use((req, res) => {
+	res.status(404).json({
+		message: `Route ${req.method} ${req.originalUrl} not found`
 	});
 });
 

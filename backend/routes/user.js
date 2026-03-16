@@ -5,6 +5,80 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
+// Health check for user routes
+router.get("/health", (req, res) => {
+	res.json({ status: "User routes are working" });
+});
+
+// @route   DELETE /api/users/delete
+// @desc    Delete user account
+// @access  Private
+router.delete("/delete", protect, async (req, res) => {
+	try {
+		console.log(`🗑️ Deleting user account: ${req.user._id}`);
+		const user = await User.findById(req.user._id);
+
+		if (!user) {
+			console.log(`❌ User not found for deletion: ${req.user._id}`);
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		await User.findByIdAndDelete(req.user._id);
+		console.log(`✅ User account deleted successfully: ${req.user._id}`);
+
+		res.json({ message: "Account deleted successfully" });
+	} catch (error) {
+		console.error(`❌ Error deleting user account: ${error.message}`);
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
+// @route   DELETE /api/users/delete-account
+// @desc    Delete user account (legacy/alternative)
+// @access  Private
+router.delete("/delete-account", protect, async (req, res) => {
+	try {
+		console.log(`🗑️ Deleting user account (via delete-account): ${req.user._id}`);
+		const user = await User.findById(req.user._id);
+
+		if (!user) {
+			console.log(`❌ User not found for deletion: ${req.user._id}`);
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		await User.findByIdAndDelete(req.user._id);
+		console.log(`✅ User account deleted successfully: ${req.user._id}`);
+
+		res.json({ message: "Account deleted successfully" });
+	} catch (error) {
+		console.error(`❌ Error deleting user account: ${error.message}`);
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
+// @route   POST /api/users/delete-account
+// @desc    Delete user account (via POST for compatibility)
+// @access  Private
+router.post("/delete-account", protect, async (req, res) => {
+	try {
+		console.log(`🗑️ Deleting user account (via POST delete-account): ${req.user._id}`);
+		const user = await User.findById(req.user._id);
+
+		if (!user) {
+			console.log(`❌ User not found for deletion: ${req.user._id}`);
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		await User.findByIdAndDelete(req.user._id);
+		console.log(`✅ User account deleted successfully: ${req.user._id}`);
+
+		res.json({ message: "Account deleted successfully" });
+	} catch (error) {
+		console.error(`❌ Error deleting user account: ${error.message}`);
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
 // @route   GET /api/users/profile
 // @desc    Get user profile
 // @access  Private

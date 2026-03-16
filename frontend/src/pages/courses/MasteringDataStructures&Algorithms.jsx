@@ -8,14 +8,13 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function DsaMlProgramPage() {
   const { theme } = useTheme();
-  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+  const { user, token, isAuthenticated, isCourseEnrolled, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
   const [whatsapp, setWhatsapp] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [openWeek, setOpenWeek] = useState(null);
   const [showAllTools, setShowAllTools] = useState(false);
   const [loadingInstructors, setLoadingInstructors] = useState(false);
@@ -23,6 +22,24 @@ export default function DsaMlProgramPage() {
 
   const DSA_SLUG = "dsa-ml-program";
   const DSA_TITLE = "Mastering Data Structures & Algorithms";
+
+  useEffect(() => {
+    const enrolled = isCourseEnrolled(DSA_SLUG) || isCourseEnrolled(DSA_TITLE) || isCourseEnrolled("mastering data structures & algorithms") || isCourseEnrolled("dsa-ml-program");
+    setIsEnrolled(enrolled);
+  }, [isCourseEnrolled]);
+
+  useEffect(() => {
+    const fullName = user?.fullName || user?.user?.fullName || "";
+    const email = user?.email || user?.user?.email || "";
+
+    if (fullName || email) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || fullName,
+        email: prev.email || email,
+      }));
+    }
+  }, [user]);
 
   const getToolLogo = (name) => {
     const logos = {
@@ -166,41 +183,6 @@ export default function DsaMlProgramPage() {
     }));
   }, [user]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !token) {
-      setIsEnrolled(false);
-      setEnrolledCourses([]);
-      return;
-    }
-
-    const fetchEnrollmentStatus = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/users/enrolled`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) return;
-        const data = await response.json();
-        const courses = Array.isArray(data) ? data : [];
-        setEnrolledCourses(courses);
-
-        const found = courses.some((item) => {
-          const course = item?.courseId;
-          const title = (course?.title || "").toLowerCase();
-          const id = course?._id || "";
-          return title.includes("mastering data structures") || title.includes("dsa") || id === DSA_SLUG;
-        });
-
-        setIsEnrolled(found);
-      } catch {
-        setIsEnrolled(false);
-        setEnrolledCourses([]);
-      }
-    };
-
-    fetchEnrollmentStatus();
-  }, [isAuthenticated, token]);
-
   const findDsaCourseId = async () => {
     const response = await fetch(`${API_URL}/api/courses`);
     if (!response.ok) return null;
@@ -215,22 +197,8 @@ export default function DsaMlProgramPage() {
     return match?._id || null;
   };
 
-  const isCourseEnrolled = (slugOrTitle) => {
-    return enrolledCourses.some((item) => {
-      const course = item?.courseId;
-      const title = (course?.title || "").toLowerCase();
-      const id = (course?._id || "").toLowerCase();
-      const slug = slugOrTitle.toLowerCase();
-      return title.includes(slug) || id.includes(slug);
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isEnrolled) {
-      toast.success("You are already enrolled in this program.");
-      return;
-    }
     if (!form.name || !form.phone || !form.email) return;
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
@@ -244,6 +212,11 @@ export default function DsaMlProgramPage() {
     if (!isAuthenticated) {
       toast("Please sign up or log in to enroll.");
       navigate("/signup");
+      return;
+    }
+
+    if (isEnrolled) {
+      toast.success("You are already enrolled in this program.");
       return;
     }
 
@@ -267,8 +240,7 @@ export default function DsaMlProgramPage() {
       const leadData = await res.json().catch(() => ({}));
       if (leadData?.alreadyEnrolled) {
         setForm({ name: "", phone: "", email: "" });
-        setIsEnrolled(true);
-        toast.success("Already enrolled with this phone number or email.");
+        toast.success("Successfully enrolled!");
         return;
       }
 
@@ -290,7 +262,7 @@ export default function DsaMlProgramPage() {
             const enrollData = await enrollRes.json().catch(() => ({}));
             const message = (enrollData?.message || "").toLowerCase();
             if (message.includes("already enrolled")) {
-              toast.success("You are already enrolled in this program.");
+              toast.success("Successfully enrolled!");
             } else {
               console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
               toast.error(enrollData?.message || "Enrollment failed. Please try again.");
@@ -327,7 +299,6 @@ export default function DsaMlProgramPage() {
         }
 
         setForm({ name: "", phone: "", email: "" });
-        setIsEnrolled(true);
       }
     } catch (err) {
       console.error("Lead submit error", err);
@@ -993,7 +964,6 @@ export default function DsaMlProgramPage() {
               name="Mastering Data Structures & Algorithms"
               price="₹5,000"
               isAuthenticated={isAuthenticated}
-              isEnrolled={isEnrolled}
               authLoading={authLoading}
               authenticatedHref="#dsa-enroll-form"
               bullets={[
@@ -1008,7 +978,6 @@ export default function DsaMlProgramPage() {
               name="Agentic AI Pioneer program"
               price="₹12,000"
               isAuthenticated={isAuthenticated}
-              isEnrolled={isCourseEnrolled("agentic ai pioneer")}
               authLoading={authLoading}
               authenticatedHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
               bullets={[
@@ -1041,7 +1010,7 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets, isAuthenticated, isEnrolled = false, authLoading, authenticatedHref }) {
+function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticatedHref }) {
   return (
     <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
@@ -1062,10 +1031,6 @@ function Plan({ name, price, bullets, isAuthenticated, isEnrolled = false, authL
         {authLoading ? (
           <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3 opacity-70">
             Checking account...
-          </span>
-        ) : isEnrolled ? (
-          <span className="inline-flex items-center justify-center w-full rounded-xl bg-emerald-600 text-white font-semibold py-3">
-            Enrolled
           </span>
         ) : isAuthenticated && authenticatedHref?.startsWith("/") ? (
           <Link

@@ -46,6 +46,10 @@ export default function MyMentorshipSessionsPage() {
       const active = ["upcoming", "pending", "mentor_assigned", "scheduled", "rescheduled"];
       return sessions.filter((s) => active.includes(s.status));
     }
+    if (filterStatus === "cancelled") {
+      const cancelledKeys = ["cancelled", "rejected", "rescheduled"];
+      return sessions.filter((s) => cancelledKeys.includes(s.status));
+    }
     return sessions.filter((session) => session.status === filterStatus);
   }, [sessions, filterStatus]);
 
@@ -83,6 +87,7 @@ export default function MyMentorshipSessionsPage() {
         ["upcoming", "pending", "mentor_assigned", "scheduled", "rescheduled"].includes(s.status)
       ).length,
       completed: sessions.filter((s) => s.status === "completed").length,
+      cancelled: sessions.filter((s) => ["cancelled", "rejected", "rescheduled"].includes(s.status)).length,
       withMeetLink: sessions.filter((s) => s.meetingLink).length,
     };
   }, [sessions]);
@@ -156,17 +161,21 @@ export default function MyMentorshipSessionsPage() {
 
         {/* Filter Tabs */}
         <div className="flex gap-4 flex-wrap">
-          {["upcoming", "completed", "cancelled"].map((status) => (
+          {[
+            { key: "upcoming", label: "Upcoming" },
+            { key: "completed", label: "Completed" },
+            { key: "cancelled", label: "Cancelled / Rescheduled" }
+          ].map((item) => (
             <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
+              key={item.key}
+              onClick={() => setFilterStatus(item.key)}
               className={`px-6 py-2 rounded-lg font-semibold transition-all ${
-                filterStatus === status
+                filterStatus === item.key
                   ? "bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] text-white shadow-[0_0_16px_rgba(168,85,247,0.4)]"
                   : "bg-[rgba(168,85,247,0.1)] text-[#C7C3D6] hover:bg-[rgba(168,85,247,0.2)]"
               }`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {item.label}
             </button>
           ))}
         </div>

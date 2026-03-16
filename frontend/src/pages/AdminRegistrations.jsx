@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import AdminNavbar from '../components/AdminNavbar';
 import API_URL from '../config/api';
 import toast from 'react-hot-toast';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AdminRegistrations() {
     const navigate = useNavigate();
+    const { theme } = useTheme();
+    const isLight = theme === "light-theme";
     const [leads, setLeads] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
@@ -100,7 +103,7 @@ export default function AdminRegistrations() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-400">Registrations & Enquiries</h1>
+                        <h1 className={`text-3xl font-bold ${isLight ? 'text-black' : 'bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-400'}`}>Registrations & Enquiries</h1>
                         <p className="text-gray-400 mt-2">Manage student leads and brochure downloads</p>
                     </div>
                     <div className="relative">

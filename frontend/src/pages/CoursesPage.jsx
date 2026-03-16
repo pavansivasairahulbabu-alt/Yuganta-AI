@@ -8,56 +8,28 @@ export default function CoursesPage() {
 	const [selectedTab, setSelectedTab] = useState("all");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [courses, setCourses] = useState([]);
-	const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [enrolling, setEnrolling] = useState({});
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, token, user, isCourseEnrolled, refreshUser } = useAuth();
 	const navigate = useNavigate();
-
-	useEffect(() => {
-		fetchCourses();
-		if (isAuthenticated) {
-			fetchEnrolledCourses();
-		}
-	}, [isAuthenticated]);
 
 	const fetchCourses = async () => {
 		try {
 			const response = await fetch(`${API_URL}/api/courses`);
-			const data = await response.json();
-			setCourses(data);
-			setLoading(false);
-		} catch (error) {
-			console.error("Error fetching courses:", error);
-			setLoading(false);
-		}
-	};
-
-	const fetchEnrolledCourses = async () => {
-		try {
-			const token = localStorage.getItem("token");
-			if (!token) return;
-
-			const response = await fetch(`${API_URL}/api/users/enrolled`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			if (response.status === 401) {
-				return; // Token expired, user needs to login
-			}
-
 			if (response.ok) {
 				const data = await response.json();
-				// Extract course IDs from enrolled courses
-				const enrolledIds = data.map((enrollment) => enrollment.courseId?._id || enrollment._id);
-				setEnrolledCourseIds(enrolledIds);
+				setCourses(data);
 			}
 		} catch (error) {
-			console.error("Error fetching enrolled courses:", error);
+			console.error("Error fetching courses:", error);
+		} finally {
+			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		fetchCourses();
+	}, []);
 
 	const handleEnroll = async (courseId) => {
 		if (!isAuthenticated) {
@@ -91,6 +63,8 @@ export default function CoursesPage() {
 
 			if (response.ok) {
 				toast.success("Successfully enrolled in course!");
+				// Update user state immediately to reflect new enrollment in UI
+				if (refreshUser) refreshUser();
 				try {
 					const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
 						headers: { Authorization: `Bearer ${token}` },
@@ -117,8 +91,6 @@ export default function CoursesPage() {
 						});
 					}
 				} catch {}
-				// Update enrolled courses list
-				setEnrolledCourseIds([...enrolledCourseIds, courseId]);
 				setTimeout(() => navigate("/my-learning"), 1000);
 			} else {
 				if (response.status === 401 || data.message === "Please login") {
@@ -547,34 +519,28 @@ export default function CoursesPage() {
 												</div>
 
 												{/* Enroll Button */}
-												{(() => {
-													const isEnrolled = enrolledCourseIds.includes(course._id);
-													return (
-														<button
-											onClick={() => {
-												if (!isEnrolled) {
-													if (pioneer) {
-														navigate("/courses/agentic-ai-pioneer-program");
-													} else if (crash) {
-														navigate("/courses/agentic-ai-crash-course-page");
-													} else if (dsa) {
-														navigate("/courses/dsa-machine-learning#pioneer-enroll-form");
-													} else {
-														handleEnroll(course._id);
-													}
-												}
-											}}
-											disabled={isEnrolled}
-											className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 ${
-												isEnrolled
-													? "bg-gray-500 text-white cursor-not-allowed"
-													: "border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
-											}`}
-										>
-											{isEnrolled ? "Enrolled" : "Enroll Now"}
-										</button>
-													);
-												})()}
+												<button
+													disabled={enrolling[course._id] || isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)}
+													onClick={() => {
+														if (isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)) return;
+														if (pioneer) {
+															navigate("/courses/agentic-ai-pioneer-program");
+														} else if (crash) {
+															navigate("/courses/agentic-ai-crash-course-page");
+														} else if (dsa) {
+															navigate("/courses/dsa-machine-learning#pioneer-enroll-form");
+														} else {
+															handleEnroll(course._id);
+														}
+													}}
+													className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 border ${
+														isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)
+															? "border-green-500/50 text-green-500 bg-green-500/10 cursor-not-allowed"
+															: "border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
+													}`}
+												>
+													{enrolling[course._id] ? "Enrolling..." : (isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)) ? "Enrolled" : "Enroll Now"}
+												</button>
 											</div>
 										</div>
 											);

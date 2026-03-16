@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import StructuredData from "../components/StructuredData";
+import { useAuth } from "../context/AuthContext";
 
 export default function LandingPage() {
+	const { isCourseEnrolled } = useAuth();
 	return (
 		<div className="min-h-screen transition-colors duration-300">
 			<StructuredData />
@@ -175,9 +177,18 @@ export default function LandingPage() {
 
 							<Link
 								to="/courses/agentic-ai-crash-course-page"
-								className="block w-full text-center py-3.5 rounded-2xl border border-blue-300/70 text-base text-[var(--text-color)] font-semibold hover:border-blue-500 hover:text-blue-500 transition-colors"
+								className={`block w-full text-center py-3.5 rounded-2xl border text-base font-semibold transition-colors ${
+									isCourseEnrolled("agentic-ai-crash-course-page") || isCourseEnrolled("AgenticAI Crash Course Page") || isCourseEnrolled("agentic ai crash course")
+										? "border-green-500/50 text-green-500 bg-green-500/10 cursor-not-allowed"
+										: "border-blue-300/70 text-[var(--text-color)] hover:border-blue-500 hover:text-blue-500"
+								}`}
+								onClick={(e) => {
+									if (isCourseEnrolled("agentic-ai-crash-course-page") || isCourseEnrolled("AgenticAI Crash Course Page") || isCourseEnrolled("agentic ai crash course")) {
+										e.preventDefault();
+									}
+								}}
 							>
-								Enroll Now
+								{isCourseEnrolled("agentic-ai-crash-course-page") || isCourseEnrolled("AgenticAI Crash Course Page") || isCourseEnrolled("agentic ai crash course") ? "Enrolled" : "Enroll Now"}
 							</Link>
 						</div>
 
@@ -213,9 +224,18 @@ export default function LandingPage() {
 
 							<Link
 								to="/courses/agentic-ai-pioneer-program"
-								className="block w-full text-center py-3.5 rounded-2xl border border-blue-300/70 text-base text-[var(--text-color)] font-semibold hover:border-blue-500 hover:text-blue-500 transition-colors"
+								className={`block w-full text-center py-3.5 rounded-2xl border text-base font-semibold transition-colors ${
+									isCourseEnrolled("agentic-ai-pioneer-program") || isCourseEnrolled("Agentic AI Pioneer Program") || isCourseEnrolled("agentic ai pioneer program")
+										? "border-green-500/50 text-green-500 bg-green-500/10 cursor-not-allowed"
+										: "border-blue-300/70 text-[var(--text-color)] hover:border-blue-500 hover:text-blue-500"
+								}`}
+								onClick={(e) => {
+									if (isCourseEnrolled("agentic-ai-pioneer-program") || isCourseEnrolled("Agentic AI Pioneer Program") || isCourseEnrolled("agentic ai pioneer program")) {
+										e.preventDefault();
+									}
+								}}
 							>
-								Enroll Now
+								{isCourseEnrolled("agentic-ai-pioneer-program") || isCourseEnrolled("Agentic AI Pioneer Program") || isCourseEnrolled("agentic ai pioneer program") ? "Enrolled" : "Enroll Now"}
 							</Link>
 						</div>
 
@@ -248,9 +268,18 @@ export default function LandingPage() {
 
 							<Link
 								to="/courses/dsa-machine-learning"
-								className="block w-full text-center py-3.5 rounded-2xl border border-blue-300/70 text-base text-[var(--text-color)] font-semibold hover:border-blue-500 hover:text-blue-500 transition-colors"
+								className={`block w-full text-center py-3.5 rounded-2xl border text-base font-semibold transition-colors ${
+									isCourseEnrolled("dsa-ml-program") || isCourseEnrolled("Mastering Data Structures & Algorithms") || isCourseEnrolled("mastering data structures and algorithms")
+										? "border-green-500/50 text-green-500 bg-green-500/10 cursor-not-allowed"
+										: "border-blue-300/70 text-[var(--text-color)] hover:border-blue-500 hover:text-blue-500"
+								}`}
+								onClick={(e) => {
+									if (isCourseEnrolled("dsa-ml-program") || isCourseEnrolled("Mastering Data Structures & Algorithms") || isCourseEnrolled("mastering data structures and algorithms")) {
+										e.preventDefault();
+									}
+								}}
 							>
-								Enroll Now
+								{isCourseEnrolled("dsa-ml-program") || isCourseEnrolled("Mastering Data Structures & Algorithms") || isCourseEnrolled("mastering data structures and algorithms") ? "Enrolled" : "Enroll Now"}
 							</Link>
 						</div>
 						
