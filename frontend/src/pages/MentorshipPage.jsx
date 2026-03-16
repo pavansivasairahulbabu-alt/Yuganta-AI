@@ -133,6 +133,19 @@ export default function MentorshipPage() {
       return;
     }
 
+    // Validate 7-day advance rescheduling requirement
+    const chosenDate = new Date(newDate);
+    chosenDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minRescheduleDate = new Date(today);
+    minRescheduleDate.setDate(today.getDate() + 7);
+
+    if (chosenDate < minRescheduleDate) {
+      toast.error("Sessions must be rescheduled at least 7 days in advance. Please select a later date.");
+      return;
+    }
+
     if (!rescheduleReason || rescheduleReason.trim().length < 10) {
       toast.error("Please provide a detailed reason (at least 10 characters) for rescheduling.");
       return;
@@ -644,7 +657,11 @@ export default function MentorshipPage() {
                   <input
                     type="date"
                     required
-                    min={new Date().toISOString().split("T")[0]}
+                    min={(() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + 7);
+                      return d.toISOString().split("T")[0];
+                    })()}
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
                     className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition"

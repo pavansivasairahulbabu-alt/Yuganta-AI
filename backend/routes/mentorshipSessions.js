@@ -264,6 +264,20 @@ router.put("/:id/reschedule", protectInstructor, async (req, res) => {
 			return res.status(403).json({ message: "Not authorized" });
 		}
 
+		// Check if the new date is at least 7 days in the future
+		const newSessionDate = new Date(newDate);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		
+		const minRescheduleDate = new Date(today);
+		minRescheduleDate.setDate(today.getDate() + 7);
+		
+		if (newSessionDate < minRescheduleDate) {
+			return res.status(400).json({ 
+				message: "Sessions must be rescheduled to a date at least 7 days in advance. Please choose a date that is at least 7 days from today." 
+			});
+		}
+
 		// Check if the new slot is available
 		const existingBooking = await MentorshipSession.findOne({
 			date: newDate,
@@ -449,13 +463,18 @@ router.put("/:id/user-reschedule", protect, async (req, res) => {
 			});
 		}
 
-		// Check if the new date is also at least 7 days in the future (reusing existing business rule if applicable)
-		// Or just allow rescheduling to any available future slot? 
-		// The original rule was 7 days for initial booking. Let's keep it consistent or follow user preference.
-		// User didn't specify, but let's at least ensure it's in the future.
+		// Check if the new date is at least 7 days in the future
 		const newSessionDate = new Date(newDate);
-		if (newSessionDate < now) {
-			return res.status(400).json({ message: "New date must be in the future." });
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		
+		const minRescheduleDate = new Date(today);
+		minRescheduleDate.setDate(today.getDate() + 7);
+		
+		if (newSessionDate < minRescheduleDate) {
+			return res.status(400).json({ 
+				message: "Sessions must be rescheduled to a date at least 7 days in advance. Please choose a date that is at least 7 days from today." 
+			});
 		}
 
 		// Check if the new slot is available
@@ -536,6 +555,20 @@ router.patch("/:id/reschedule", protectMentor, async (req, res) => {
 
 		if (session.mentorId.toString() !== req.mentor._id.toString()) {
 			return res.status(403).json({ message: "Not authorized" });
+		}
+
+		// Check if the new date is at least 7 days in the future
+		const newSessionDate = new Date(newDate);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		
+		const minRescheduleDate = new Date(today);
+		minRescheduleDate.setDate(today.getDate() + 7);
+		
+		if (newSessionDate < minRescheduleDate) {
+			return res.status(400).json({ 
+				message: "Sessions must be rescheduled to a date at least 7 days in advance. Please choose a date that is at least 7 days from today." 
+			});
 		}
 
 		const existingBooking = await MentorshipSession.findOne({

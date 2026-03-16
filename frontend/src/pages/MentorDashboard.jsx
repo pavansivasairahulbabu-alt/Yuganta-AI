@@ -96,6 +96,24 @@ export default function MentorDashboard() {
 	};
 
 	const handleReschedule = async () => {
+		if (!rescheduleData.newDate || !rescheduleData.newTime) {
+			toast.error("Please select both date and time.");
+			return;
+		}
+
+		// Validate 7-day advance rescheduling requirement
+		const chosenDate = new Date(rescheduleData.newDate);
+		chosenDate.setHours(0, 0, 0, 0);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const minRescheduleDate = new Date(today);
+		minRescheduleDate.setDate(today.getDate() + 7);
+
+		if (chosenDate < minRescheduleDate) {
+			toast.error("Sessions must be rescheduled at least 7 days in advance. Please select a later date.");
+			return;
+		}
+
 		if (!rescheduleData.reason || rescheduleData.reason.trim().length < 10) {
 			toast.error("Please provide a detailed reason (at least 10 characters) for rescheduling.");
 			return;
@@ -577,6 +595,11 @@ export default function MentorDashboard() {
 									<label className='block text-sm font-medium text-[#C7C3D6] mb-2'>New Date</label>
 									<input
 										type='date'
+										min={(() => {
+											const d = new Date();
+											d.setDate(d.getDate() + 7);
+											return d.toISOString().split("T")[0];
+										})()}
 										value={rescheduleData.newDate}
 										onChange={(e) =>
 											setRescheduleData({

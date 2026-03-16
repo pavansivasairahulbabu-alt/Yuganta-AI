@@ -15,6 +15,7 @@ export default function DsaMlProgramPage() {
   const [whatsapp, setWhatsapp] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [openWeek, setOpenWeek] = useState(null);
   const [showAllTools, setShowAllTools] = useState(false);
   const [loadingInstructors, setLoadingInstructors] = useState(false);
@@ -168,6 +169,7 @@ export default function DsaMlProgramPage() {
   useEffect(() => {
     if (!isAuthenticated || !token) {
       setIsEnrolled(false);
+      setEnrolledCourses([]);
       return;
     }
 
@@ -179,8 +181,10 @@ export default function DsaMlProgramPage() {
 
         if (!response.ok) return;
         const data = await response.json();
+        const courses = Array.isArray(data) ? data : [];
+        setEnrolledCourses(courses);
 
-        const found = Array.isArray(data) && data.some((item) => {
+        const found = courses.some((item) => {
           const course = item?.courseId;
           const title = (course?.title || "").toLowerCase();
           const id = course?._id || "";
@@ -190,6 +194,7 @@ export default function DsaMlProgramPage() {
         setIsEnrolled(found);
       } catch {
         setIsEnrolled(false);
+        setEnrolledCourses([]);
       }
     };
 
@@ -208,6 +213,16 @@ export default function DsaMlProgramPage() {
     });
 
     return match?._id || null;
+  };
+
+  const isCourseEnrolled = (slugOrTitle) => {
+    return enrolledCourses.some((item) => {
+      const course = item?.courseId;
+      const title = (course?.title || "").toLowerCase();
+      const id = (course?._id || "").toLowerCase();
+      const slug = slugOrTitle.toLowerCase();
+      return title.includes(slug) || id.includes(slug);
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -993,7 +1008,7 @@ export default function DsaMlProgramPage() {
               name="Agentic AI Pioneer program"
               price="₹12,000"
               isAuthenticated={isAuthenticated}
-              isEnrolled={false}
+              isEnrolled={isCourseEnrolled("agentic ai pioneer")}
               authLoading={authLoading}
               authenticatedHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
               bullets={[

@@ -550,16 +550,29 @@ export default function CoursesPage() {
 												{(() => {
 													const isEnrolled = enrolledCourseIds.includes(course._id);
 													return (
-														<Link
-															to={isEnrolled ? "/my-learning" : enrollPath}
-															className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 ${
-																isEnrolled
-																	? "bg-blue-500 text-white hover:bg-blue-600"
-																	: "border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
-															}`}
-														>
-															{isEnrolled ? "Resume Learning" : "Enroll Now"}
-														</Link>
+														<button
+											onClick={() => {
+												if (!isEnrolled) {
+													if (pioneer) {
+														navigate("/courses/agentic-ai-pioneer-program");
+													} else if (crash) {
+														navigate("/courses/agentic-ai-crash-course-page");
+													} else if (dsa) {
+														navigate("/courses/dsa-machine-learning#pioneer-enroll-form");
+													} else {
+														handleEnroll(course._id);
+													}
+												}
+											}}
+											disabled={isEnrolled}
+											className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 ${
+												isEnrolled
+													? "bg-gray-500 text-white cursor-not-allowed"
+													: "border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
+											}`}
+										>
+											{isEnrolled ? "Enrolled" : "Enroll Now"}
+										</button>
 													);
 												})()}
 											</div>

@@ -188,6 +188,24 @@ export default function InstructorDashboard() {
 			return;
 		}
 
+		// Validate 7-day advance rescheduling requirement
+		const chosenDate = new Date(rescheduleData.newDate);
+		chosenDate.setHours(0, 0, 0, 0);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const minRescheduleDate = new Date(today);
+		minRescheduleDate.setDate(today.getDate() + 7);
+
+		if (chosenDate < minRescheduleDate) {
+			alert("Sessions must be rescheduled at least 7 days in advance. Please select a later date.");
+			return;
+		}
+
+		if (!rescheduleData.reason || rescheduleData.reason.trim().length < 10) {
+			alert("Please provide a detailed reason (at least 10 characters) for rescheduling.");
+			return;
+		}
+
 		try {
 			const token = localStorage.getItem("instructorToken");
 			const response = await fetch(
@@ -1325,6 +1343,11 @@ export default function InstructorDashboard() {
 								</label>
 								<input
 									type='date'
+									min={(() => {
+										const d = new Date();
+										d.setDate(d.getDate() + 7);
+										return d.toISOString().split("T")[0];
+									})()}
 									value={rescheduleData.newDate}
 									onChange={(e) =>
 										setRescheduleData({
@@ -1368,7 +1391,7 @@ export default function InstructorDashboard() {
 
 							<div>
 								<label className='block text-white mb-2 text-sm font-medium'>
-									Reason (Optional)
+									Reason <span className='text-[#EC4899]'>*</span>
 								</label>
 								<textarea
 									value={rescheduleData.reason}
@@ -1378,9 +1401,10 @@ export default function InstructorDashboard() {
 											reason: e.target.value,
 										})
 									}
-									placeholder='Explain why you need to reschedule...'
+									placeholder='Mandatory: Explain why you need to reschedule (min 10 chars)...'
 									className='w-full px-4 py-3 bg-[#0B0614] border border-[rgba(139,92,246,0.3)] rounded-lg text-white placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-transparent resize-none transition-all'
-									rows='3'></textarea>
+									rows='3'
+									required></textarea>
 							</div>
 
 							<div className='flex flex-col sm:flex-row gap-3 pt-4'>
