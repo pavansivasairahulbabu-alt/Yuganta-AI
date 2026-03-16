@@ -16,6 +16,7 @@ import mentorAuthRoutes from "./routes/mentorAuth.js";
 import blogRoutes from "./routes/blogs.js";
 import mentorshipSessionsRoutes from "./routes/mentorshipSessions.js";
 import leadRoutes from "./routes/leads.js";
+import contactRoutes from "./routes/contact.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -118,6 +119,7 @@ app.use("/api/mentor-auth", mentorAuthRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/mentorship-sessions", mentorshipSessionsRoutes);
 app.use("/api/leads", leadRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Health check
 app.get("/", (req, res) => {
