@@ -140,6 +140,27 @@ router.post("/", async (req, res) => {
 			}
 		}
 
+		if (leadType === "Consultation" || String(leadSource || "").trim() === "Talk To Expert") {
+			const startOfDay = new Date();
+			startOfDay.setHours(0, 0, 0, 0);
+
+			const endOfDay = new Date(startOfDay);
+			endOfDay.setDate(endOfDay.getDate() + 1);
+
+			const existingConsultationToday = await Lead.findOne({
+				type: "Consultation",
+				date: { $gte: startOfDay, $lt: endOfDay },
+				$or: [{ email: normalizedEmail }, { phone: normalizedPhone }],
+			});
+
+			if (existingConsultationToday) {
+				return res.status(429).json({
+					message: "Talk To Expert form can be submitted only once per day. Please try again tomorrow.",
+					alreadySubmittedToday: true,
+				});
+			}
+		}
+
 		const newLead = new Lead({
 			name,
 			email: normalizedEmail,

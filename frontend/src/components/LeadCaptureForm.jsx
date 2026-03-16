@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import API_URL from "../config/api";
 
@@ -8,6 +8,8 @@ export default function LeadCaptureForm({
 	onClose,
 	onDownload,
 	type = "Brochure",
+	initialIsEnrolled = false,
+	onEnrollSuccess,
 }) {
 	const [formData, setFormData] = useState({
 		name: "",
@@ -15,9 +17,20 @@ export default function LeadCaptureForm({
 		email: "",
 	});
 	const [loading, setLoading] = useState(false);
+	const [isEnrolled, setIsEnrolled] = useState(initialIsEnrolled);
+
+	useEffect(() => {
+		setIsEnrolled(initialIsEnrolled);
+	}, [initialIsEnrolled]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+
+		if (type === "Enrollment" && isEnrolled) {
+			toast.success("You are already enrolled in this program.");
+			return;
+		}
+
 		setLoading(true);
 
 		try {
@@ -54,6 +67,16 @@ export default function LeadCaptureForm({
 						setTimeout(() => onDownload(), 500);
 					}
 				} else {
+					if (data?.alreadyEnrolled) {
+						setIsEnrolled(true);
+						onEnrollSuccess?.();
+						toast.success("Already enrolled with this phone number or email.");
+						onClose();
+						return;
+					}
+
+					setIsEnrolled(true);
+					onEnrollSuccess?.();
 					toast.success(
 						"Enrollment request received! We will contact you shortly.",
 					);
@@ -62,6 +85,16 @@ export default function LeadCaptureForm({
 				onClose();
 			} else {
 				const errorData = await response.json().catch(() => ({}));
+				if (type === "Enrollment") {
+					const message = (errorData.message || "").toLowerCase();
+					if (message.includes("already enrolled")) {
+						setIsEnrolled(true);
+						onEnrollSuccess?.();
+						toast.success("You are already enrolled in this program.");
+						onClose();
+						return;
+					}
+				}
 				toast.error(
 					errorData.message ||
 						"Something went wrong. Please try again.",
@@ -163,7 +196,7 @@ export default function LeadCaptureForm({
 
 					<button
 						type='submit'
-						disabled={loading}
+						disabled={loading || (type === "Enrollment" && isEnrolled)}
 						className='w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#7C3AED] hover:to-[#DB2777] text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center'>
 						{loading ? (
 							<svg
@@ -185,6 +218,8 @@ export default function LeadCaptureForm({
 							</svg>
 						) : type === "Brochure" ? (
 							"Download Roadmap"
+						) : isEnrolled ? (
+							"Enrolled"
 						) : (
 							"Submit Enrollment"
 						)}

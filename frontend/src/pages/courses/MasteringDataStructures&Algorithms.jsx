@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import API_URL from "../../config/api";
 import { useTheme } from "../../context/ThemeContext";
@@ -7,15 +8,20 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function DsaMlProgramPage() {
   const { theme } = useTheme();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { user, token, isAuthenticated, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
   const [whatsapp, setWhatsapp] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
   const [openWeek, setOpenWeek] = useState(null);
   const [showAllTools, setShowAllTools] = useState(false);
   const [loadingInstructors, setLoadingInstructors] = useState(false);
   const [instructors, setInstructors] = useState([]);
+
+  const DSA_SLUG = "dsa-ml-program";
+  const DSA_TITLE = "Mastering Data Structures & Algorithms";
 
   const getToolLogo = (name) => {
     const logos = {
@@ -159,13 +165,73 @@ export default function DsaMlProgramPage() {
     }));
   }, [user]);
 
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setIsEnrolled(false);
+      return;
+    }
+
+    const fetchEnrollmentStatus = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/users/enrolled`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) return;
+        const data = await response.json();
+
+        const found = Array.isArray(data) && data.some((item) => {
+          const course = item?.courseId;
+          const title = (course?.title || "").toLowerCase();
+          const id = course?._id || "";
+          return title.includes("mastering data structures") || title.includes("dsa") || id === DSA_SLUG;
+        });
+
+        setIsEnrolled(found);
+      } catch {
+        setIsEnrolled(false);
+      }
+    };
+
+    fetchEnrollmentStatus();
+  }, [isAuthenticated, token]);
+
+  const findDsaCourseId = async () => {
+    const response = await fetch(`${API_URL}/api/courses`);
+    if (!response.ok) return null;
+    const courses = await response.json();
+    if (!Array.isArray(courses)) return null;
+
+    const match = courses.find((course) => {
+      const title = (course?.title || "").toLowerCase();
+      return title.includes("mastering data structures") || title.includes("data structures") || title.includes("dsa");
+    });
+
+    return match?._id || null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isEnrolled) {
+      toast.success("You are already enrolled in this program.");
+      return;
+    }
     if (!form.name || !form.phone || !form.email) return;
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
       return;
     }
+    if (!agree) {
+      toast.error("Please accept Terms & Conditions to continue.");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast("Please sign up or log in to enroll.");
+      navigate("/signup");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch(`${API_URL}/api/leads`, {
@@ -175,23 +241,82 @@ export default function DsaMlProgramPage() {
           name: form.name,
           phone: form.phone,
           email: form.email,
-          courseId: "dsa-ml-program",
-          courseName: "Mastering Data Structures & Algorithms",
+          courseId: DSA_SLUG,
+          courseName: DSA_TITLE,
           type: "Enrollment",
           agreeTerms: agree,
           whatsappUpdates: whatsapp,
         }),
       });
+
+      const leadData = await res.json().catch(() => ({}));
+      if (leadData?.alreadyEnrolled) {
+        setForm({ name: "", phone: "", email: "" });
+        setIsEnrolled(true);
+        toast.success("Already enrolled with this phone number or email.");
+        return;
+      }
+
       if (!res.ok) {
         console.warn("Lead submit failed");
         toast.error("Something went wrong. Please try again.");
       } else {
-        toast.success("Enrolled successfully! We'll be in touch soon.");
+        const courseId = await findDsaCourseId();
+        if (courseId) {
+          const enrollRes = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!enrollRes.ok) {
+            const enrollData = await enrollRes.json().catch(() => ({}));
+            const message = (enrollData?.message || "").toLowerCase();
+            if (message.includes("already enrolled")) {
+              toast.success("You are already enrolled in this program.");
+            } else {
+              console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
+              toast.error(enrollData?.message || "Enrollment failed. Please try again.");
+            }
+          } else {
+            toast.success("Successfully enrolled!");
+            try {
+              const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (mentorRes.ok) {
+                const mentor = await mentorRes.json();
+                const d = new Date();
+                d.setDate(d.getDate() + 8);
+                const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                const time = "7:00pm";
+                await fetch(`${API_URL}/api/mentorship-sessions`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    title: "First Mentorship",
+                    mentorId: mentor?._id,
+                    date: dateStr,
+                    time,
+                    notes: "Auto-created on enrollment",
+                  }),
+                });
+              }
+            } catch {}
+          }
+        }
+
         setForm({ name: "", phone: "", email: "" });
+        setIsEnrolled(true);
       }
     } catch (err) {
       console.error("Lead submit error", err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Unable to complete enrollment right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -203,10 +328,10 @@ export default function DsaMlProgramPage() {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-6 text-sm">
-              <a href="#expect" className="text-[#C7C3D6] hover:text-white font-semibold">What to Expect</a>
-              <a href="#curriculum-detailed" className="text-[#C7C3D6] hover:text-white font-semibold">Curriculum</a>
-              <a href="#instructors" className="text-[#C7C3D6] hover:text-white font-semibold">Instructors</a>
-              <a href="#fees" className="text-[#C7C3D6] hover:text-white font-semibold">Fees</a>
+              <a href="#expect" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">What to Expect</a>
+              <a href="#curriculum-detailed" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">Curriculum</a>
+              <a href="#instructors" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">Instructors</a>
+              <a href="#fees" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">Fees</a>
              </div>
             
           </div>
@@ -280,10 +405,10 @@ export default function DsaMlProgramPage() {
                   </div>
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || isEnrolled}
                     className="w-full bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_24px_rgba(37,99,235,0.5)] disabled:opacity-60"
                   >
-                    {submitting ? "Submitting..." : "Enroll Now"}
+                    {submitting ? "Submitting..." : isEnrolled ? "Enrolled" : "Enroll Now"}
                   </button>
                 </form>
               </div>
@@ -853,6 +978,7 @@ export default function DsaMlProgramPage() {
               name="Mastering Data Structures & Algorithms"
               price="₹5,000"
               isAuthenticated={isAuthenticated}
+              isEnrolled={isEnrolled}
               authLoading={authLoading}
               authenticatedHref="#dsa-enroll-form"
               bullets={[
@@ -867,6 +993,7 @@ export default function DsaMlProgramPage() {
               name="Agentic AI Pioneer program"
               price="₹12,000"
               isAuthenticated={isAuthenticated}
+              isEnrolled={false}
               authLoading={authLoading}
               authenticatedHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
               bullets={[
@@ -899,7 +1026,7 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticatedHref }) {
+function Plan({ name, price, bullets, isAuthenticated, isEnrolled = false, authLoading, authenticatedHref }) {
   return (
     <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
@@ -920,6 +1047,10 @@ function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticate
         {authLoading ? (
           <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3 opacity-70">
             Checking account...
+          </span>
+        ) : isEnrolled ? (
+          <span className="inline-flex items-center justify-center w-full rounded-xl bg-emerald-600 text-white font-semibold py-3">
+            Enrolled
           </span>
         ) : isAuthenticated && authenticatedHref?.startsWith("/") ? (
           <Link

@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import { protect } from "../middleware/auth.js";
 import User from "../models/User.js";
 
@@ -101,13 +102,16 @@ router.put("/profile", protect, async (req, res) => {
 // @access  Private
 router.post("/enroll/:courseId", protect, async (req, res) => {
 	try {
-		const user = await User.findById(req.user._id);
-		
+		const courseId = req.params.courseId;
+
+		if (!mongoose.Types.ObjectId.isValid(courseId)) {
+			return res.status(400).json({ message: "Invalid course id" });
+		}
+
+		const user = await User.findById(req.user._id).select("enrolledCourses");
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
 		}
-		
-		const courseId = req.params.courseId;
 
 		// Check if already enrolled
 		const alreadyEnrolled = user.enrolledCourses.find(
@@ -120,14 +124,28 @@ router.post("/enroll/:courseId", protect, async (req, res) => {
 				.json({ message: "Already enrolled in this course" });
 		}
 
-		user.enrolledCourses.push({
-			courseId,
-			enrolledAt: Date.now(),
-			progress: 0,
-			completed: false,
-		});
+		const enrollResult = await User.updateOne(
+			{
+				_id: req.user._id,
+				"enrolledCourses.courseId": { $ne: courseId },
+			},
+			{
+				$push: {
+					enrolledCourses: {
+						courseId,
+						enrolledAt: Date.now(),
+						progress: 0,
+						completed: false,
+					},
+				},
+			},
+		);
 
-		await user.save();
+		if (enrollResult.modifiedCount === 0) {
+			return res.status(400).json({ message: "Already enrolled in this course" });
+		}
+
+		const updatedUser = await User.findById(req.user._id).select("enrolledCourses");
 
 		// Increment student count in course
 		const Course = (await import("../models/Course.js")).default;
@@ -137,7 +155,7 @@ router.post("/enroll/:courseId", protect, async (req, res) => {
 
 		res.json({
 			message: "Successfully enrolled",
-			enrolledCourses: user.enrolledCourses,
+			enrolledCourses: updatedUser?.enrolledCourses || [],
 		});
 	} catch (error) {
 		console.error("Enrollment error:", error);

@@ -76,6 +76,9 @@ export default function TalkToExpertPage() {
 
 			const data = await response.json();
 			if (!response.ok) {
+				if (data?.alreadySubmittedToday) {
+					throw new Error("You can submit Talk To Expert form only once per day. Please try again tomorrow.");
+				}
 				throw new Error(data.message || "Failed to submit request");
 			}
 

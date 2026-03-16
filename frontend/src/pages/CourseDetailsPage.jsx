@@ -4,14 +4,17 @@ import toast from "react-hot-toast";
 import LeadCaptureForm from "../components/LeadCaptureForm";
 import CoursesNavbar from "../components/CoursesNavbar";
 import API_URL from "../config/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function CourseDetailsPage() {
 	const { courseId } = useParams();
 	const navigate = useNavigate();
+	const { token, isAuthenticated } = useAuth();
 	const [showLeadForm, setShowLeadForm] = useState(false);
 	const [leadType, setLeadType] = useState("Brochure"); // "Brochure" or "Enrollment"
 	const [course, setCourse] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [isEnrolled, setIsEnrolled] = useState(false);
 
 	useEffect(() => {
 		const fetchCourse = async () => {
@@ -39,7 +42,43 @@ export default function CourseDetailsPage() {
 		}
 	}, [courseId]);
 
+	useEffect(() => {
+		if (!course || !isAuthenticated || !token) {
+			setIsEnrolled(false);
+			return;
+		}
+
+		const fetchEnrollmentStatus = async () => {
+			try {
+				const response = await fetch(`${API_URL}/api/users/enrolled`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+
+				if (!response.ok) return;
+				const data = await response.json();
+
+				const found = Array.isArray(data) && data.some((item) => {
+					const enrolledCourse = item?.courseId;
+					const enrolledId = enrolledCourse?._id || "";
+					const enrolledTitle = (enrolledCourse?.title || "").toLowerCase();
+					const currentTitle = (course?.title || "").toLowerCase();
+					return enrolledId === courseId || (currentTitle && enrolledTitle === currentTitle);
+				});
+
+				setIsEnrolled(found);
+			} catch {
+				setIsEnrolled(false);
+			}
+		};
+
+		fetchEnrollmentStatus();
+	}, [course, courseId, isAuthenticated, token]);
+
 	const handleAction = (type) => {
+		if (type === "Enrollment" && isEnrolled) {
+			toast.success("You are already enrolled in this program.");
+			return;
+		}
 		setLeadType(type);
 		setShowLeadForm(true);
 	};
@@ -184,8 +223,9 @@ export default function CourseDetailsPage() {
 						<div className='flex flex-col sm:flex-row gap-4'>
 							<button
 								onClick={() => handleAction("Enrollment")}
+								disabled={isEnrolled}
 									className='bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all'>
-								Enroll Now
+									{isEnrolled ? "Enrolled" : "Enroll Now"}
 							</button>
 							<button
 								onClick={() => handleAction("Brochure")}
@@ -317,8 +357,9 @@ export default function CourseDetailsPage() {
 			<div className='md:hidden fixed bottom-0 left-0 w-full bg-[var(--card-bg)]/95 backdrop-blur-lg border-t border-[var(--border-color)] p-3 md:p-4 z-40 flex gap-2'>
 				<button
 					onClick={() => handleAction("Enrollment")}
+					disabled={isEnrolled}
 					className='flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 md:py-3 rounded-lg font-bold text-sm md:text-base transition-all'>
-					Enroll Now
+					{isEnrolled ? "Enrolled" : "Enroll Now"}
 				</button>
 				<button
 					onClick={() => handleAction("Brochure")}
@@ -336,6 +377,8 @@ export default function CourseDetailsPage() {
 					courseId={courseId}
 					courseName={course.title}
 					type={leadType}
+					initialIsEnrolled={isEnrolled}
+					onEnrollSuccess={() => setIsEnrolled(true)}
 					onClose={() => setShowLeadForm(false)}
 					onDownload={handleDownload}
 				/>
