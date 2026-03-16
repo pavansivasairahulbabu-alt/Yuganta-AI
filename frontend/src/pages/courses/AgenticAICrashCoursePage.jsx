@@ -360,10 +360,10 @@ export default function AgenticAICrashCoursePage() {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-6 text-sm">
-              <a href="#expect" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">What to Expect</a>
-              <a href="#curriculum" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">Curriculum</a>
-              <a href="#instructors" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">Instructors</a>
-              <a href="#fees" className="text-[var(--text-muted)] hover:text-[#2563EB] dark:hover:text-white font-semibold transition-colors duration-200">Fees</a>
+              <a href="#expect" className="text-[var(--text-muted)] hover:text-[#1D4ED8] font-semibold transition-colors duration-200">What to Expect</a>
+              <a href="#curriculum" className="text-[var(--text-muted)] hover:text-[#1D4ED8] font-semibold transition-colors duration-200">Curriculum</a>
+              <a href="#instructors" className="text-[var(--text-muted)] hover:text-[#1D4ED8] font-semibold transition-colors duration-200">Instructors</a>
+              <a href="#fees" className="text-[var(--text-muted)] hover:text-[#1D4ED8] font-semibold transition-colors duration-200">Fees</a>
                </div>
          
           </div>
