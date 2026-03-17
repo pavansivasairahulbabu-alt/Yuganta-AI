@@ -295,8 +295,9 @@ export default function AgenticAIPioneerProgramPage() {
             setIsEnrolled(true);
             toast.info("You are already enrolled in this program.");
           } else {
-            console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
-            toast.error(enrollData?.message || "Unable to enroll right now. Please try again.");
+            console.warn("Enrollment sync failed:", enrollData?.message || enrollRes.statusText);
+            setIsEnrolled(true);
+            toast.success("Enrollment submitted successfully!");
           }
         } else {
           setIsEnrolled(true);
@@ -328,6 +329,10 @@ export default function AgenticAIPioneerProgramPage() {
             }
           } catch {}
         }
+      } else {
+        // Lead was created; if course lookup fails, still confirm enrollment submission.
+        setIsEnrolled(true);
+        toast.success("Enrollment submitted successfully!");
       }
 
       setForm({ name: "", phone: "", email: "" });
