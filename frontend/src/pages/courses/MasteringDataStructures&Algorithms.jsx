@@ -347,15 +347,15 @@ export default function DsaMlProgramPage() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">100+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">DSA Problems</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#22C55E]">Job</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Readiness</div>
               </div>
