@@ -372,16 +372,30 @@ export const AuthProvider = ({ children }) => {
 
 	const isCourseEnrolled = (idOrTitle) => {
 		if (!idOrTitle || !enrolledCourses) return false;
-		const searchStr = idOrTitle.toString().toLowerCase();
+		const normalize = (value) =>
+			String(value || "")
+				.toLowerCase()
+				.trim()
+				.replace(/[^a-z0-9]+/g, "-")
+				.replace(/^-+|-+$/g, "");
+
+		const searchStr = normalize(idOrTitle);
+		if (!searchStr) return false;
+
 		return enrolledCourses.some((item) => {
 			const course = item?.courseId || item;
 			if (!course) return false;
-			const id = (course._id || "").toString().toLowerCase();
-			const title = (course.title || "").toString().toLowerCase();
-			return id === searchStr || 
-				   title === searchStr || 
-				   title.includes(searchStr) ||
-				   searchStr.includes(title);
+
+			const candidates = [
+				course?._id,
+				course?.title,
+				item?.courseName,
+				item?.courseId,
+			]
+				.map((value) => normalize(value))
+				.filter(Boolean);
+
+			return candidates.includes(searchStr);
 		});
 	};
 
