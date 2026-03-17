@@ -963,9 +963,7 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Mastering Data Structures & Algorithms"
               price="₹5,000"
-              isAuthenticated={isAuthenticated}
-              authLoading={authLoading}
-              authenticatedHref="#dsa-enroll-form"
+              viewDetailsHref="/courses/dsa-machine-learning"
               bullets={[
                 "6 weeks Structured Learning",
                 "100+ DSA Problems",
@@ -977,9 +975,7 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Agentic AI Pioneer program"
               price="₹12,000"
-              isAuthenticated={isAuthenticated}
-              authLoading={authLoading}
-              authenticatedHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
+              viewDetailsHref="/courses/agentic-ai-pioneer-program"
               bullets={[
                 "4 Months of Power Learning",
                 "25+ Deep-Dive Mentorship Sessions",
@@ -1010,7 +1006,7 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticatedHref }) {
+function Plan({ name, price, bullets, viewDetailsHref }) {
   return (
     <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
@@ -1028,32 +1024,12 @@ function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticate
         ))}
       </ul>
       <div className="mt-8">
-        {authLoading ? (
-          <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3 opacity-70">
-            Checking account...
-          </span>
-        ) : isAuthenticated && authenticatedHref?.startsWith("/") ? (
-          <Link
-            to={authenticatedHref}
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </Link>
-        ) : isAuthenticated ? (
-          <a
-            href={authenticatedHref || "#dsa-enroll-form"}
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </a>
-        ) : (
-          <Link
-            to="/signup"
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </Link>
-        )}
+        <Link
+          to={viewDetailsHref}
+          className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );

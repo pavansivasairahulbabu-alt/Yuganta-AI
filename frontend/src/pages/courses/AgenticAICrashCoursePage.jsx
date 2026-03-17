@@ -1059,21 +1059,12 @@ export default function AgenticAICrashCoursePage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isAuthenticated ? (
-                  <a
-                    href="agentic-ai-pioneer-program"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </a>
-                ) : (
-                  <Link
-                    to="/signup"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </Link>
-                )}
+                <Link
+                  to="/courses/agentic-ai-pioneer-program"
+                  className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                >
+                  View Details
+                </Link>
               </div>
             </div>
 
@@ -1097,21 +1088,12 @@ export default function AgenticAICrashCoursePage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isAuthenticated ? (
-                  <a
-                    href="#agentic-enroll-form"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </a>
-                ) : (
-                  <Link
-                    to="/signup"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </Link>
-                )}
+                <Link
+                  to="/courses/agentic-ai-crash-course-page"
+                  className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                >
+                  View Details
+                </Link>
               </div>
             </div>
           </div>
