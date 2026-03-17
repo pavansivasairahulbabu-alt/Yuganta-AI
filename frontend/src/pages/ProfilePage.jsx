@@ -4,9 +4,11 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
-	const { user, logout, isAuthenticated } = useAuth();
+	const { user, logout, isAuthenticated, updateProfile, deleteAccount } = useAuth();
 	const navigate = useNavigate();
 	const [activeTab, setActiveTab] = useState("profile");
+	const [isUpdating, setIsUpdating] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const [formData, setFormData] = useState({
 		fullName: "",
 		email: "",
@@ -41,18 +43,56 @@ export default function ProfilePage() {
 
 	const handleUpdateProfile = async (e) => {
 		e.preventDefault();
-		// TODO: Implement profile update API call
-		toast.success("Profile update functionality will be implemented with backend API");
+		if (!formData.fullName.trim()) {
+			toast.error("Full Name is required");
+			return;
+		}
+
+		setIsUpdating(true);
+		const result = await updateProfile({
+			fullName: formData.fullName,
+		});
+		setIsUpdating(false);
+
+		if (result.success) {
+			toast.success("Profile updated successfully!");
+		} else {
+			toast.error(result.error || "Failed to update profile");
+		}
 	};
 
 	const handleChangePassword = async (e) => {
 		e.preventDefault();
+		if (!formData.currentPassword) {
+			toast.error("Current password is required");
+			return;
+		}
+		if (formData.newPassword.length < 6) {
+			toast.error("New password must be at least 6 characters");
+			return;
+		}
 		if (formData.newPassword !== formData.confirmPassword) {
 			toast.error("New passwords don't match!");
 			return;
 		}
-		// TODO: Implement password change API call
-		toast.success("Password change functionality will be implemented with backend API");
+
+		setIsUpdating(true);
+		const result = await updateProfile({
+			password: formData.newPassword,
+		});
+		setIsUpdating(false);
+
+		if (result.success) {
+			toast.success("Password updated successfully!");
+			setFormData((prev) => ({
+				...prev,
+				currentPassword: "",
+				newPassword: "",
+				confirmPassword: "",
+			}));
+		} else {
+			toast.error(result.error || "Failed to update password");
+		}
 	};
 
 	const handleDeleteAccount = async () => {
@@ -60,10 +100,17 @@ export default function ProfilePage() {
 			toast.error('Please type "DELETE" to confirm account deletion');
 			return;
 		}
-		// TODO: Implement account deletion API call
-		toast.success("Account deletion functionality will be implemented with backend API");
-		logout();
-		navigate("/", { replace: true });
+
+		setIsDeleting(true);
+		const result = await deleteAccount();
+		setIsDeleting(false);
+
+		if (result.success) {
+			toast.success("Account deleted successfully");
+			navigate("/", { replace: true });
+		} else {
+			toast.error(result.error || "Failed to delete account");
+		}
 	};
 
 	if (!user) {
@@ -139,15 +186,17 @@ export default function ProfilePage() {
 									type='email'
 									name='email'
 									value={formData.email}
-									onChange={handleInputChange}
-									className='w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-color)] focus:outline-none focus:border-purple-500 transition-colors duration-300'
+									readOnly
+									className='w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-muted)] cursor-not-allowed outline-none transition-colors duration-300'
 								/>
+								<p className='text-xs text-[var(--text-muted)] mt-1'>Email address cannot be changed.</p>
 							</div>
 
 							<button
 								type='submit'
-								className='w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition duration-200'>
-								Save Changes
+								disabled={isUpdating}
+								className='w-full md:w-auto bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white px-8 py-3 rounded-lg font-medium transition duration-200'>
+								{isUpdating ? "Saving..." : "Save Changes"}
 							</button>
 						</form>
 
@@ -194,8 +243,9 @@ export default function ProfilePage() {
 
 							<button
 								type='submit'
-								className='w-full md:w-auto bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition duration-200'>
-								Update Password
+								disabled={isUpdating}
+								className='w-full md:w-auto bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white px-8 py-3 rounded-lg font-medium transition duration-200'>
+								{isUpdating ? "Updating..." : "Update Password"}
 							</button>
 						</form>
 					</div>
@@ -275,9 +325,9 @@ export default function ProfilePage() {
 								<div className='flex flex-col md:flex-row gap-4'>
 									<button
 										onClick={handleDeleteAccount}
-										disabled={deleteConfirm !== "DELETE"}
+										disabled={deleteConfirm !== "DELETE" || isDeleting}
 										className='flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-700 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-medium transition duration-200'>
-										Permanently Delete My Account
+										{isDeleting ? "Deleting..." : "Permanently Delete My Account"}
 									</button>
 									<button
 										onClick={() => {

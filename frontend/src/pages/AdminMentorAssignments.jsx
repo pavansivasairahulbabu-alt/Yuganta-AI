@@ -42,18 +42,22 @@ export default function AdminMentorAssignments() {
       // Map users to their assigned instructors
       // Note: assignedInstructor is already populated by the backend
       const assignments = users.map((user) => {
-        const assignedInstructor = user.assignedInstructor;
-        // Check if assignedInstructor exists and is an object (populated)
-        const isAssigned = assignedInstructor && typeof assignedInstructor === 'object' && assignedInstructor._id;
+        // Detect assigned mentor/instructor and ensure it's a valid populated object
+        const assignedMentorObj = user.assignedMentor && typeof user.assignedMentor === 'object' && user.assignedMentor._id ? user.assignedMentor : null;
+        const assignedInstructorObj = user.assignedInstructor && typeof user.assignedInstructor === 'object' && user.assignedInstructor._id ? user.assignedInstructor : null;
+        
+        // Final effective mentor object
+        const activeMentor = assignedMentorObj || assignedInstructorObj;
+        const isAssigned = !!activeMentor;
         
         return {
           userId: user._id,
           userName: user.fullName,
           userEmail: user.email,
-          mentorId: isAssigned ? assignedInstructor._id : null,
-          mentorName: isAssigned ? assignedInstructor.name : "Not Assigned",
-          mentorExpertise: isAssigned ? assignedInstructor.expertise : "-",
-          mentorEmail: isAssigned ? assignedInstructor.email : "-",
+          mentorId: isAssigned ? activeMentor._id : null,
+          mentorName: isAssigned ? activeMentor.name : "Not Assigned",
+          mentorExpertise: isAssigned ? activeMentor.expertise : "-",
+          mentorEmail: isAssigned ? activeMentor.email : "-",
           isAssigned: isAssigned,
         };
       });

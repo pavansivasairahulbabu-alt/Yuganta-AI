@@ -118,7 +118,7 @@ export default function Navbar() {
 									setShowProfileMenu(!showProfileMenu)
 								}
 								className='w-[50px] h-[50px] bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] rounded-full flex items-center justify-center text-lg font-bold text-white shadow-[0_4px_20px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_30px_rgba(59,130,246,0.6)] hover:scale-105 transition-all duration-200'>
-								{user?.fullName?.charAt(0).toUpperCase()}
+								{(user?.fullName || user?.user?.fullName || user?.name || user?.user?.name || user?.email || user?.user?.email || 'U').charAt(0).toUpperCase()}
 							</button>
 
 							{showProfileMenu && (
@@ -230,9 +230,9 @@ export default function Navbar() {
 								<div className='border-t border-[rgba(59,130,246,0.2)] my-2'></div>
 								<div className='px-4 py-2 flex items-center space-x-3'>
 									<div className='w-10 h-10 bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] rounded-full flex items-center justify-center font-bold shadow-[0_4px_15px_rgba(59,130,246,0.4)]'>
-										{user?.fullName?.charAt(0).toUpperCase()}
+										{(user?.fullName || user?.user?.fullName || user?.name || user?.user?.name || user?.email || user?.user?.email || 'U').charAt(0).toUpperCase()}
 									</div>
-									<span className='font-semibold text-white'>{user?.fullName}</span>
+									<span className='font-semibold text-white'>{user?.fullName || user?.user?.fullName || user?.name || user?.user?.name || "User"}</span>
 								</div>
 								<Link
 									to='/profile'

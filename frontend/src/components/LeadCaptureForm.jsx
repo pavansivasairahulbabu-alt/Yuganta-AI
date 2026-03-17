@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import API_URL from "../config/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function LeadCaptureForm({
 	courseId,
@@ -8,26 +9,29 @@ export default function LeadCaptureForm({
 	onClose,
 	onDownload,
 	type = "Brochure",
-	initialIsEnrolled = false,
-	onEnrollSuccess,
 }) {
+	const { isCourseEnrolled } = useAuth();
 	const [formData, setFormData] = useState({
 		name: "",
 		phone: "",
 		email: "",
 	});
 	const [loading, setLoading] = useState(false);
-	const [isEnrolled, setIsEnrolled] = useState(initialIsEnrolled);
+	const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
 
 	useEffect(() => {
-		setIsEnrolled(initialIsEnrolled);
-	}, [initialIsEnrolled]);
+		if (type === "Enrollment") {
+			const enrolled = isCourseEnrolled(courseId) || isCourseEnrolled(courseName);
+			setIsAlreadyEnrolled(enrolled);
+		}
+	}, [courseId, courseName, isCourseEnrolled, type]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
-		if (type === "Enrollment" && isEnrolled) {
+		if (type === "Enrollment" && isAlreadyEnrolled) {
 			toast.success("You are already enrolled in this program.");
+			onClose();
 			return;
 		}
 
@@ -68,15 +72,11 @@ export default function LeadCaptureForm({
 					}
 				} else {
 					if (data?.alreadyEnrolled) {
-						setIsEnrolled(true);
-						onEnrollSuccess?.();
-						toast.success("Already enrolled with this phone number or email.");
+						toast.success("Successfully enrolled!");
 						onClose();
 						return;
 					}
 
-					setIsEnrolled(true);
-					onEnrollSuccess?.();
 					toast.success(
 						"Enrollment request received! We will contact you shortly.",
 					);
@@ -88,9 +88,7 @@ export default function LeadCaptureForm({
 				if (type === "Enrollment") {
 					const message = (errorData.message || "").toLowerCase();
 					if (message.includes("already enrolled")) {
-						setIsEnrolled(true);
-						onEnrollSuccess?.();
-						toast.success("You are already enrolled in this program.");
+						toast.success("Successfully enrolled!");
 						onClose();
 						return;
 					}
@@ -196,7 +194,7 @@ export default function LeadCaptureForm({
 
 					<button
 						type='submit'
-						disabled={loading || (type === "Enrollment" && isEnrolled)}
+						disabled={loading || (type === "Enrollment" && isAlreadyEnrolled)}
 						className='w-full bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#7C3AED] hover:to-[#DB2777] text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center'>
 						{loading ? (
 							<svg
@@ -218,7 +216,7 @@ export default function LeadCaptureForm({
 							</svg>
 						) : type === "Brochure" ? (
 							"Download Roadmap"
-						) : isEnrolled ? (
+						) : isAlreadyEnrolled ? (
 							"Enrolled"
 						) : (
 							"Submit Enrollment"
