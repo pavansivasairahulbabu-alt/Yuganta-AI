@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 
 export default function FreeCourses() {
 	const navigate = useNavigate();
-	const { isCourseEnrolled } = useAuth();
 
 	const staticCourses = [
 		{
@@ -82,18 +81,12 @@ export default function FreeCourses() {
 
 							{/* Enroll Button */}
 							<button
-								disabled={isCourseEnrolled(course.id) || isCourseEnrolled(course.title)}
 								onClick={() => {
-									if (isCourseEnrolled(course.id) || isCourseEnrolled(course.title)) return;
 									navigate(course.path);
 								}}
-								className={`block w-full text-center py-3.5 rounded-2xl border text-base font-semibold transition-all duration-300 ${
-									isCourseEnrolled(course.id) || isCourseEnrolled(course.title)
-										? "border-green-500/50 text-green-500 bg-green-500/10 cursor-not-allowed"
-										: "border-blue-400/50 text-[var(--text-color)] hover:bg-blue-500 hover:text-white hover:border-blue-500"
-								}`}
+								className="block w-full text-center py-3.5 rounded-2xl border text-base font-semibold transition-all duration-300 border-blue-400/50 text-[var(--text-color)] hover:bg-blue-500 hover:text-white hover:border-blue-500"
 							>
-								{isCourseEnrolled(course.id) || isCourseEnrolled(course.title) ? "Enrolled" : "Enroll Now"}
+								Enroll Now
 							</button>
 						</div>
 					))}
