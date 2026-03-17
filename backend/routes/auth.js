@@ -408,4 +408,56 @@ router.post(
 	}
 );
 
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// @route   POST /api/auth/google
+// @desc    Authenticate user with Google
+// @access  Public
+router.post("/google", async (req, res) => {
+	const { credential } = req.body;
+	try {
+		const ticket = await client.verifyIdToken({
+			idToken: credential,
+			audience: process.env.GOOGLE_CLIENT_ID,
+		});
+		const payload = ticket.getPayload();
+		const { name, email, picture } = payload;
+
+		let user = await User.findOne({ email });
+
+		if (user) {
+			// User exists, log them in
+			res.json({
+				_id: user._id,
+				fullName: user.fullName,
+				email: user.email,
+				avatar: user.avatar,
+				enrolledCourses: user.enrolledCourses,
+				token: generateToken(user._id),
+			});
+		} else {
+			// User does not exist, create a new user
+			const newUser = await User.create({
+				fullName: name,
+				email,
+				avatar: picture,
+				isVerified: true, // Google users are considered verified
+			});
+
+			res.status(201).json({
+				_id: newUser._id,
+				fullName: newUser.fullName,
+				email: newUser.email,
+				avatar: newUser.avatar,
+				enrolledCourses: newUser.enrolledCourses,
+				token: generateToken(newUser._id),
+			});
+		}
+	} catch (error) {
+		res.status(400).json({ message: "Google authentication failed", error });
+	}
+});
+
 export default router;

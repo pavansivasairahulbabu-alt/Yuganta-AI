@@ -9,7 +9,7 @@ import { LayoutGrid, Clock, Code2, ClipboardList, Users, CheckCircle } from "luc
 
 export default function AgenticAIPioneerProgramPage() {
   const { theme } = useTheme();
-  const { isAuthenticated, user, token } = useAuth();
+  const { isAuthenticated, user, token, isCourseEnrolled } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
@@ -20,6 +20,14 @@ export default function AgenticAIPioneerProgramPage() {
   const [instructors, setInstructors] = useState([]);
   const [loadingInstructors, setLoadingInstructors] = useState(true);
   const [showAllTools, setShowAllTools] = useState(false);
+
+  const PIONEER_SLUG = "agentic-ai-pioneer-program";
+  const PIONEER_TITLE = "Agentic AI Pioneer Program";
+
+  useEffect(() => {
+    const enrolled = isCourseEnrolled(PIONEER_SLUG) || isCourseEnrolled(PIONEER_TITLE) || isCourseEnrolled("agentic ai pioneer program");
+    setIsEnrolled(enrolled);
+  }, [isCourseEnrolled]);
 
   const getToolLogo = (name) => {
     const logos = {
@@ -79,9 +87,6 @@ export default function AgenticAIPioneerProgramPage() {
     };
     return logos[name] || `https://via.placeholder.com/24?text=${name[0]}`;
   };
-
-  const PIONEER_SLUG = "agentic-ai-pioneer-program";
-  const PIONEER_TITLE = "Agentic AI Pioneer Program";
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -199,37 +204,6 @@ export default function AgenticAIPioneerProgramPage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !token) {
-      setIsEnrolled(false);
-      return;
-    }
-
-    const fetchEnrollmentStatus = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/users/enrolled`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) return;
-        const data = await response.json();
-
-        const found = Array.isArray(data) && data.some((item) => {
-          const course = item?.courseId;
-          const title = (course?.title || "").toLowerCase();
-          const id = course?._id || "";
-          return title.includes("agentic ai pioneer program") || title.includes("agentic ai pioneer") || id === PIONEER_SLUG;
-        });
-
-        setIsEnrolled(found);
-      } catch {
-        setIsEnrolled(false);
-      }
-    };
-
-    fetchEnrollmentStatus();
-  }, [isAuthenticated, token]);
-
   const findPioneerCourseId = async () => {
     const response = await fetch(`${API_URL}/api/courses`);
     if (!response.ok) return null;
@@ -247,10 +221,6 @@ export default function AgenticAIPioneerProgramPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isEnrolled) {
-      toast.error("You are already enrolled in this program.");
-      return;
-    }
     if (!form.name || !form.phone || !form.email) return;
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
@@ -264,6 +234,11 @@ export default function AgenticAIPioneerProgramPage() {
     if (!isAuthenticated) {
       toast("Please sign up or log in to enroll.");
       navigate("/signup");
+      return;
+    }
+
+    if (isEnrolled) {
+      toast.success("You are already enrolled in this program.");
       return;
     }
 
@@ -289,8 +264,7 @@ export default function AgenticAIPioneerProgramPage() {
 
       if (leadData?.alreadyEnrolled) {
         setForm({ name: "", phone: "", email: "" });
-        setIsEnrolled(true);
-        toast.error("Already enrolled with this phone number or email.");
+        toast.success("Successfully enrolled!");
         return;
       }
 
@@ -309,7 +283,7 @@ export default function AgenticAIPioneerProgramPage() {
           const enrollData = await enrollRes.json().catch(() => ({}));
           const message = (enrollData?.message || "").toLowerCase();
           if (message.includes("already enrolled")) {
-            toast.error("You are already enrolled in this program.");
+            toast.success("Successfully enrolled!");
           } else {
             console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
             toast.error(enrollData?.message || "Enrollment failed. Please try again.");
@@ -346,7 +320,6 @@ export default function AgenticAIPioneerProgramPage() {
       }
 
       setForm({ name: "", phone: "", email: "" });
-      setIsEnrolled(true);
     } catch (err) {
       console.error("Lead submit error", err);
       toast.error("Unable to complete enrollment right now. Please try again.");
@@ -1084,18 +1057,12 @@ export default function AgenticAIPioneerProgramPage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isEnrolled ? (
-                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
-                    Enrolled
-                  </span>
-                ) : (
-                  <Link
-                    to="/courses/agentic-ai-crash-course-page#agentic-enroll-form"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </Link>
-                )}
+                <Link
+                  to="/courses/agentic-ai-crash-course-page#agentic-enroll-form"
+                  className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                >
+                  Enroll Now
+                </Link>
               </div>
             </div>
 
@@ -1119,11 +1086,7 @@ export default function AgenticAIPioneerProgramPage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isEnrolled ? (
-                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
-                    Enrolled
-                  </span>
-                ) : isAuthenticated ? (
+                {isAuthenticated ? (
                   <a
                     href="#pioneer-enroll-form"
                     className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"

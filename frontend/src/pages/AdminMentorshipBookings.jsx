@@ -57,16 +57,26 @@ export default function AdminMentorshipBookings() {
   const filtered = useMemo(() => {
     let list = sessions;
     if (statusFilter !== "all") {
-      list = list.filter((s) => s.status === statusFilter);
+      list = list.filter((s) => {
+        const isMissingMentor = !s.mentorId || typeof s.mentorId !== "object" || !s.mentorId._id;
+        const displayStatus = isMissingMentor && s.status === "mentor_assigned" ? "pending" : s.status;
+        return displayStatus === statusFilter;
+      });
     }
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(
-        (s) =>
-          s.userId?.fullName?.toLowerCase().includes(q) ||
-          s.title?.toLowerCase().includes(q) ||
-          s.mentorId?.name?.toLowerCase().includes(q)
-      );
+      list = list.filter((s) => {
+        const userName = s.userId?.fullName?.toLowerCase() || "";
+        const title = s.title?.toLowerCase() || "";
+        const mentorName =
+          s.mentorId && typeof s.mentorId === "object" && s.mentorId.name
+            ? s.mentorId.name.toLowerCase()
+            : "";
+
+        return (
+          userName.includes(q) || title.includes(q) || mentorName.includes(q)
+        );
+      });
     }
     return list;
   }, [sessions, statusFilter, search]);
@@ -83,7 +93,10 @@ export default function AdminMentorshipBookings() {
     try {
       // Prevent duplicate assignment if status already changed
       const target = sessions.find((x) => x._id === sessionId);
-      if (target && target.status !== "pending") {
+      const isMissingMentor = !target?.mentorId || typeof target.mentorId !== "object" || !target.mentorId._id;
+      
+      // Allow assignment if status is pending OR if the mentor is missing/deleted
+      if (target && target.status !== "pending" && !isMissingMentor) {
         toast.error("This session is no longer pending");
         setAssigningFor(null);
         return;
@@ -189,12 +202,23 @@ export default function AdminMentorshipBookings() {
                       <div className="text-xs text-[#9A93B5]">{s.time}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-xs border border-[rgba(139,92,246,0.3)]">
-                        {s.status}
-                      </span>
+                      {(() => {
+                        const isMissingMentor = !s.mentorId || typeof s.mentorId !== "object" || !s.mentorId._id;
+                        const displayStatus = isMissingMentor && s.status === "mentor_assigned" ? "pending" : s.status;
+                        
+                        return (
+                          <span className={`px-3 py-1 rounded-full text-xs border ${
+                            displayStatus === 'pending' 
+                              ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' 
+                              : 'border-[rgba(139,92,246,0.3)]'
+                          }`}>
+                            {displayStatus}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4">
-                      {s.mentorId ? (
+                      {s.mentorId && typeof s.mentorId === "object" && s.mentorId._id ? (
                         <div>
                           <div className="text-white font-medium">{s.mentorId.name}</div>
                           <div className="text-xs text-[#9A93B5]">
@@ -202,19 +226,23 @@ export default function AdminMentorshipBookings() {
                           </div>
                         </div>
                       ) : (
-                        <span className="text-[#9A93B5] text-sm">None</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-yellow-400 text-sm font-semibold flex items-center gap-1">
+                            ⚠️ Not Assigned
+                          </span>
+                          <span className="text-[#9A93B5] text-[10px] uppercase">Waiting for mentor</span>
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {s.status === "pending" ? (
+                      {/* Show assign button if pending OR if status is mentor_assigned but the mentor is missing/deleted */}
+                      {(s.status === "pending" || (s.status === "mentor_assigned" && (!s.mentorId || typeof s.mentorId !== "object" || !s.mentorId._id))) ? (
                         <button
                           onClick={() => {
-                            // Guard to prevent duplicate open if status changed meanwhile
-                            if (s.status !== "pending") return;
                             setAssigningFor(s._id);
                             setTopicFilter(s.title || "");
                           }}
-                          className="px-4 py-2 rounded-lg border border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10"
+                          className="px-4 py-2 rounded-lg border border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/10 font-bold transition-all shadow-sm hover:shadow-[#8B5CF6]/20"
                         >
                           Assign Mentor
                         </button>
@@ -222,9 +250,9 @@ export default function AdminMentorshipBookings() {
                         <button
                           type="button"
                           disabled
-                          className="px-4 py-2 rounded-lg border border-[#8B5CF6]/40 text-[#8B5CF6]/60 cursor-not-allowed"
+                          className="px-4 py-2 rounded-lg border border-green-500/40 text-green-500/60 cursor-not-allowed font-bold"
                         >
-                          Assigned
+                          ✓ Assigned
                         </button>
                       ) : null}
                     </td>

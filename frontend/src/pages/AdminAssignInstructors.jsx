@@ -116,8 +116,12 @@ export default function AdminAssignMentors() {
 
   // Filter users - ONLY show those who don't have a mentor assigned
   const filteredUsers = users.filter(user => {
-    // Exclude users who already have an assigned mentor/instructor
-    if (user.assignedMentor || user.assignedInstructor) {
+    // Exclude users who already have a valid assigned mentor/instructor
+    // We check if the object exists AND has a valid _id (meaning it was successfully populated)
+    const hasActiveMentor = (user.assignedMentor && typeof user.assignedMentor === 'object' && user.assignedMentor._id) || 
+                           (user.assignedInstructor && typeof user.assignedInstructor === 'object' && user.assignedInstructor._id);
+    
+    if (hasActiveMentor) {
       return false;
     }
 
@@ -216,10 +220,12 @@ export default function AdminAssignMentors() {
                             }`}>
                             <p className={`font-semibold text-sm ${isLight ? "text-gray-900" : "text-white"}`}>{user.fullName}</p>
                             <p className="text-xs text-[#9A93B5] mt-1">{user.email}</p>
-                            {user.assignedInstructor && (
+                            {/* Only show "assigned" tag if the mentor still exists (is an object with _id) */}
+                            {((user.assignedInstructor && typeof user.assignedInstructor === 'object' && user.assignedInstructor._id) || 
+                              (user.assignedMentor && typeof user.assignedMentor === 'object' && user.assignedMentor._id)) && (
                               <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-[#8B5CF6]/20 to-[#EC4899]/20 border border-[#8B5CF6]/30 rounded-lg text-xs text-[#A855F7] font-medium">
                                 <Check className="w-3 h-3" />
-                                {user.assignedMentor?.name || user.assignedInstructor.name}
+                                {user.assignedMentor?.name || user.assignedInstructor?.name}
                               </div>
                             )}
                           </div>

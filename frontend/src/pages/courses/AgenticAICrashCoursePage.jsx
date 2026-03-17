@@ -9,7 +9,7 @@ import { LayoutGrid, Clock, Code2, ClipboardList, Users, CheckCircle } from "luc
 
 export default function AgenticAICrashCoursePage() {
   const { theme } = useTheme();
-  const { isAuthenticated, user, token } = useAuth();
+  const { isAuthenticated, user, token, isCourseEnrolled } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
@@ -20,6 +20,14 @@ export default function AgenticAICrashCoursePage() {
   const [showAllTools, setShowAllTools] = useState(false);
   const [instructors, setInstructors] = useState([]);
   const [loadingInstructors, setLoadingInstructors] = useState(true);
+
+  const AGENTIC_SLUG = "agentic-ai-crash-course-page";
+  const AGENTIC_TITLE = "AgenticAI Crash Course Page";
+
+  useEffect(() => {
+    const enrolled = isCourseEnrolled(AGENTIC_SLUG) || isCourseEnrolled(AGENTIC_TITLE) || isCourseEnrolled("agentic ai crash course");
+    setIsEnrolled(enrolled);
+  }, [isCourseEnrolled]);
 
   const getToolLogo = (name) => {
     const logos = {
@@ -78,9 +86,6 @@ export default function AgenticAICrashCoursePage() {
     };
     return logos[name] || `https://via.placeholder.com/24?text=${name[0]}`;
   };
-
-  const AGENTIC_SLUG = "agentic-ai-crash-course-page";
-  const AGENTIC_TITLE = "AgenticAI Crash Course Page";
 
   const resolveDriveId = (raw) => {
     if (!raw) return null;
@@ -198,37 +203,6 @@ export default function AgenticAICrashCoursePage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !token) {
-      setIsEnrolled(false);
-      return;
-    }
-
-    const fetchEnrollmentStatus = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/users/enrolled`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) return;
-        const data = await response.json();
-
-        const found = Array.isArray(data) && data.some((item) => {
-          const course = item?.courseId;
-          const title = (course?.title || "").toLowerCase();
-          const id = course?._id || "";
-          return title.includes("agenticai crash course page") || title.includes("agentic ai crash course") || id === AGENTIC_SLUG;
-        });
-
-        setIsEnrolled(found);
-      } catch {
-        setIsEnrolled(false);
-      }
-    };
-
-    fetchEnrollmentStatus();
-  }, [isAuthenticated, token]);
-
   const findAgenticCourseId = async () => {
     const response = await fetch(`${API_URL}/api/courses`);
     if (!response.ok) return null;
@@ -247,9 +221,10 @@ export default function AgenticAICrashCoursePage() {
     e.preventDefault();
 
     if (isEnrolled) {
-      toast.error("You are already enrolled in this program.");
+      toast.success("You are already enrolled in this program.");
       return;
     }
+
     if (!form.name || !form.phone || !form.email) return;
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
@@ -288,8 +263,7 @@ export default function AgenticAICrashCoursePage() {
 
       if (leadData?.alreadyEnrolled) {
         setForm({ name: "", phone: "", email: "" });
-        setIsEnrolled(true);
-        toast.error("Already enrolled with this phone number or email.");
+        toast.success("Successfully enrolled!");
         return;
       }
 
@@ -308,7 +282,7 @@ export default function AgenticAICrashCoursePage() {
           const enrollData = await enrollRes.json().catch(() => ({}));
           const message = (enrollData?.message || "").toLowerCase();
           if (message.includes("already enrolled")) {
-            toast.error("You are already enrolled in this program.");
+            toast.success("Successfully enrolled!");
           } else {
             console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
             toast.error(enrollData?.message || "Enrollment failed. Please try again.");
@@ -345,7 +319,6 @@ export default function AgenticAICrashCoursePage() {
       }
 
       setForm({ name: "", phone: "", email: "" });
-      setIsEnrolled(true);
     } catch (err) {
       console.error("Lead submit error", err);
       toast.error("Unable to complete enrollment right now. Please try again.");
@@ -1086,11 +1059,7 @@ export default function AgenticAICrashCoursePage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isEnrolled ? (
-                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
-                    Enrolled
-                  </span>
-                ) : isAuthenticated ? (
+                {isAuthenticated ? (
                   <a
                     href="agentic-ai-pioneer-program"
                     className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
@@ -1128,11 +1097,7 @@ export default function AgenticAICrashCoursePage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isEnrolled ? (
-                  <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3">
-                    Enrolled
-                  </span>
-                ) : isAuthenticated ? (
+                {isAuthenticated ? (
                   <a
                     href="#agentic-enroll-form"
                     className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"

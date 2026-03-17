@@ -96,6 +96,29 @@ export default function MentorDashboard() {
 	};
 
 	const handleReschedule = async () => {
+		if (!rescheduleData.newDate || !rescheduleData.newTime) {
+			toast.error("Please select both date and time.");
+			return;
+		}
+
+		// Validate 7-day advance rescheduling requirement
+		const chosenDate = new Date(rescheduleData.newDate);
+		chosenDate.setHours(0, 0, 0, 0);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const minRescheduleDate = new Date(today);
+		minRescheduleDate.setDate(today.getDate() + 7);
+
+		if (chosenDate < minRescheduleDate) {
+			toast.error("Sessions must be rescheduled at least 7 days in advance. Please select a later date.");
+			return;
+		}
+
+		if (!rescheduleData.reason || rescheduleData.reason.trim().length < 10) {
+			toast.error("Please provide a detailed reason (at least 10 characters) for rescheduling.");
+			return;
+		}
+
 		try {
 			setRescheduleSubmitting(true);
 			const token = localStorage.getItem("mentorToken");
@@ -194,7 +217,7 @@ export default function MentorDashboard() {
 	};
 
 	const upcomingSessions = mentorshipSessions.filter((s) =>
-		["upcoming", "pending", "mentor_assigned", "scheduled", "rescheduled"].includes(s.status)
+		["upcoming", "pending", "mentor_assigned", "scheduled", "rescheduled", "cancelled"].includes(s.status)
 	);
 	const completedSessions = mentorshipSessions.filter(
 		(s) => s.status === "completed"
@@ -400,7 +423,11 @@ export default function MentorDashboard() {
 											</td>
 											<td className='py-5 px-6'>
 												<div className='flex flex-col space-y-2'>
-													{!session.meetingLink ? (
+													{session.status === "cancelled" ? (
+														<div className="bg-red-500/10 rounded-lg p-3 text-red-400 border border-red-500/20 text-xs font-medium text-center">
+															Session Cancelled
+														</div>
+													) : !session.meetingLink ? (
 														editingMeetingLink === session._id ? (
 															<div className='flex gap-2'>
 																<input
@@ -459,36 +486,40 @@ export default function MentorDashboard() {
 														</a>
 													)}
 
-													<div className='flex gap-2'>
-														<button
-															onClick={() => {
-																setRescheduleSessionId(session._id);
-																setShowRescheduleModal(true);
-															}}
-															disabled={rescheduleSubmitting}
-															className='flex-1 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm font-medium'>
-															Reschedule
-														</button>
+													{session.status !== "cancelled" && (
+														<>
+															<div className='flex gap-2'>
+																<button
+																	onClick={() => {
+																		setRescheduleSessionId(session._id);
+																		setShowRescheduleModal(true);
+																	}}
+																	disabled={rescheduleSubmitting}
+																	className='flex-1 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm font-medium'>
+																	Reschedule
+																</button>
 
-														<button
-															onClick={() => {
-																setRejectSessionId(session._id);
-																setShowRejectModal(true);
-															}}
-															disabled={rejectSubmitting}
-															className='flex-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition text-sm font-medium'>
-															Reject
-														</button>
-													</div>
+																<button
+																	onClick={() => {
+																		setRejectSessionId(session._id);
+																		setShowRejectModal(true);
+																	}}
+																	disabled={rejectSubmitting}
+																	className='flex-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition text-sm font-medium'>
+																	Reject
+																</button>
+															</div>
 
-													<button
-														onClick={() =>
-															handleCompleteSession(session._id)
-														}
-														disabled={completingId === session._id}
-														className='px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg transition text-sm font-medium'>
-														Mark Complete
-													</button>
+															<button
+																onClick={() =>
+																	handleCompleteSession(session._id)
+																}
+																disabled={completingId === session._id}
+																className='px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg transition text-sm font-medium'>
+																Mark Complete
+															</button>
+														</>
+													)}
 												</div>
 											</td>
 										</tr>
@@ -564,6 +595,11 @@ export default function MentorDashboard() {
 									<label className='block text-sm font-medium text-[#C7C3D6] mb-2'>New Date</label>
 									<input
 										type='date'
+										min={(() => {
+											const d = new Date();
+											d.setDate(d.getDate() + 7);
+											return d.toISOString().split("T")[0];
+										})()}
 										value={rescheduleData.newDate}
 										onChange={(e) =>
 											setRescheduleData({
@@ -589,9 +625,12 @@ export default function MentorDashboard() {
 									/>
 								</div>
 								<div>
-									<label className='block text-sm font-medium text-[#C7C3D6] mb-2'>Reason</label>
+									<label className='block text-sm font-medium text-[#C7C3D6] mb-2'>
+										Reason <span className="text-red-500">*</span>
+									</label>
 									<textarea
-										placeholder='Reason for rescheduling'
+										placeholder='Mandatory: Briefly explain why you need to reschedule (min 10 chars)...'
+										required
 										value={rescheduleData.reason}
 										onChange={(e) =>
 											setRescheduleData({
