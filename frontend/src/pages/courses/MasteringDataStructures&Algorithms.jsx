@@ -1026,6 +1026,7 @@ function Plan({ name, price, bullets, viewDetailsHref }) {
       <div className="mt-8">
         <Link
           to={viewDetailsHref}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
         >
           View Details
