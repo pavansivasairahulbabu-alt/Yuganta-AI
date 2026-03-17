@@ -358,42 +358,45 @@ export default function AgenticAICrashCoursePage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="flex flex-col items-center text-center gap-8">
-            <h1 className={theme === "light-theme"
-              ? "text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-color)]"
-              : "text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#60A5FA]"
-            }>
-              AgenticAI Crash Course
-            </h1>
-            <p className="text-lg md:text-xl text-[var(--text-muted)] max-w-2xl">
-              A structured journey to master agentic AI systems, from core foundations to
-              production-grade autonomous agents, with hands-on mentorship and capstone projects.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
+            {/* Left column: title, description, stats */}
+            <div className="flex flex-col gap-8 text-center md:text-left">
+              <h1 className={theme === "light-theme"
+                ? "text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-color)]"
+                : "text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#60A5FA]"
+              }>
+                AgenticAI Crash Course
+              </h1>
+              <p className="text-lg md:text-xl text-[var(--text-muted)]">
+                A structured journey to master agentic AI systems, from core foundations to
+                production-grade autonomous agents, with hands-on mentorship and capstone projects.
+              </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">30+</div>
-                <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
-                <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
-              </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Live Weekly</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
-              </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#F59E0B]">100%</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Placement Assistance</div>
-              </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
-                <div className="text-2xl font-extrabold text-[#22C55E]">10+</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Hours of Live Workshops</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">and</div>
-                <div className="mt-1 text-sm text-[var(--text-color)]">Recordings</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
+                  <div className="text-2xl font-extrabold text-[#3B82F6]">30+</div>
+                  <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
+                  <div className="mt-1 text-sm text-[var(--text-color)]">Learning</div>
+                </div>
+                <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
+                  <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
+                  <div className="mt-3 text-sm text-[var(--text-color)]">Live Weekly</div>
+                  <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
+                </div>
+                <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
+                  <div className="text-2xl font-extrabold text-[#F59E0B]">100%</div>
+                  <div className="mt-3 text-sm text-[var(--text-color)]">Placement Assistance</div>
+                </div>
+                <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
+                  <div className="text-2xl font-extrabold text-[#22C55E]">10+</div>
+                  <div className="mt-3 text-sm text-[var(--text-color)]">Live Workshops &amp;</div>
+                  <div className="mt-1 text-sm text-[var(--text-color)]">Recordings</div>
+                </div>
               </div>
             </div>
 
-            <div id="agentic-enroll-form" className="w-full max-w-lg">
+            {/* Right column: enrollment form */}
+            <div id="agentic-enroll-form" className="w-full">
               <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
                 <h3 className="text-xl font-bold mb-4">Become a GenAI and Agentic AI Expert: Start Now</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
