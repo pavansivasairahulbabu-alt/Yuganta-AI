@@ -27,7 +27,7 @@ export default function AgenticAIPioneerProgramPage() {
   useEffect(() => {
     const enrolled = isCourseEnrolled(PIONEER_SLUG) || isCourseEnrolled(PIONEER_TITLE) || isCourseEnrolled("agentic ai pioneer program");
     setIsEnrolled(enrolled);
-  }, [isCourseEnrolled]);
+  }, [isCourseEnrolled, isAuthenticated, user]);
 
   const getToolLogo = (name) => {
     const logos = {
@@ -221,7 +221,10 @@ export default function AgenticAIPioneerProgramPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.phone || !form.email) return;
+    if (!form.name || !form.phone || !form.email) {
+      toast.error("Please fill in name, phone, and email.");
+      return;
+    }
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
       return;
@@ -238,7 +241,7 @@ export default function AgenticAIPioneerProgramPage() {
     }
 
     if (isEnrolled) {
-      toast.success("You are already enrolled in this program.");
+      toast.info("You are already enrolled in this program.");
       return;
     }
 
@@ -263,8 +266,14 @@ export default function AgenticAIPioneerProgramPage() {
       const leadData = await leadRes.json().catch(() => ({}));
 
       if (leadData?.alreadyEnrolled) {
+        setIsEnrolled(true);
         setForm({ name: "", phone: "", email: "" });
-        toast.success("Successfully enrolled!");
+        toast.info("You are already enrolled in this program.");
+        return;
+      }
+
+      if (!leadRes.ok) {
+        toast.error(leadData?.message || "Unable to submit enrollment right now. Please try again.");
         return;
       }
 
@@ -283,12 +292,14 @@ export default function AgenticAIPioneerProgramPage() {
           const enrollData = await enrollRes.json().catch(() => ({}));
           const message = (enrollData?.message || "").toLowerCase();
           if (message.includes("already enrolled")) {
-            toast.success("Successfully enrolled!");
+            setIsEnrolled(true);
+            toast.info("You are already enrolled in this program.");
           } else {
             console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
             toast.error(enrollData?.message || "Enrollment failed. Please try again.");
           }
         } else {
+          setIsEnrolled(true);
           toast.success("Successfully enrolled!");
           try {
             const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
