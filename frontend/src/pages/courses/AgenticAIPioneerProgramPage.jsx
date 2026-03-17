@@ -273,7 +273,7 @@ export default function AgenticAIPioneerProgramPage() {
       }
 
       if (!leadRes.ok) {
-        toast.error(leadData?.message || "Unable to submit enrollment right now. Please try again.");
+        toast.error(leadData?.message || "Unable to enroll right now. Please try again.");
         return;
       }
 
@@ -296,7 +296,7 @@ export default function AgenticAIPioneerProgramPage() {
             toast.info("You are already enrolled in this program.");
           } else {
             console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
-            toast.error(enrollData?.message || "Enrollment failed. Please try again.");
+            toast.error(enrollData?.message || "Unable to enroll right now. Please try again.");
           }
         } else {
           setIsEnrolled(true);
@@ -333,7 +333,7 @@ export default function AgenticAIPioneerProgramPage() {
       setForm({ name: "", phone: "", email: "" });
     } catch (err) {
       console.error("Lead submit error", err);
-      toast.error("Unable to complete enrollment right now. Please try again.");
+      toast.error("Unable to enroll right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
