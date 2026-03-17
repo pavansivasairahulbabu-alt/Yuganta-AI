@@ -372,22 +372,22 @@ export default function AgenticAIPioneerProgramPage() {
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">150</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Live Weekly</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#F59E0B]">14+</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Industry Project</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Builds</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#22C55E]">30+</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Hours of Live Workshops</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">and</div>
