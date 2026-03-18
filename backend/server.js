@@ -16,6 +16,7 @@ import mentorAuthRoutes from "./routes/mentorAuth.js";
 import blogRoutes from "./routes/blogs.js";
 import mentorshipSessionsRoutes from "./routes/mentorshipSessions.js";
 import leadRoutes from "./routes/leads.js";
+import contactRoutes from "./routes/contact.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,7 +54,7 @@ const envOrigins = (process.env.FRONTEND_URL || '')
 	.map(url => url.trim())
 	.filter(Boolean);
 const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-const prodDefaultOrigins = ['https://yuganthaai.vercel.app', 'https://yugantaai.com'];
+const prodDefaultOrigins = ['https://yuganthgit aai.vercel.app', 'https://yugantaai.com'];
 
 const allowedOrigins = [
 	...(process.env.NODE_ENV === "production" ? prodDefaultOrigins : defaultDevOrigins),
@@ -124,6 +125,7 @@ app.use("/api/mentor-auth", mentorAuthRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/mentorship-sessions", mentorshipSessionsRoutes);
 app.use("/api/leads", leadRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Health check
 app.get("/", (req, res) => {

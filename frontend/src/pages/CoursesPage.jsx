@@ -520,9 +520,8 @@ export default function CoursesPage() {
 
 												{/* Enroll Button */}
 												<button
-													disabled={enrolling[course._id] || isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)}
+													disabled={enrolling[course._id]}
 													onClick={() => {
-														if (isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)) return;
 														if (pioneer) {
 															navigate("/courses/agentic-ai-pioneer-program");
 														} else if (crash) {
@@ -533,13 +532,9 @@ export default function CoursesPage() {
 															handleEnroll(course._id);
 														}
 													}}
-													className={`block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 border ${
-														isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)
-															? "border-green-500/50 text-green-500 bg-green-500/10 cursor-not-allowed"
-															: "border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
-													}`}
+													className="block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
 												>
-													{enrolling[course._id] ? "Enrolling..." : (isCourseEnrolled(course._id) || isCourseEnrolled(courseTitle)) ? "Enrolled" : "Enroll Now"}
+													{enrolling[course._id] ? "Enrolling..." : "Enroll Now"}
 												</button>
 											</div>
 										</div>

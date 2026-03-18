@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SEO from "../components/SEO";
+import API_URL from "../config/api";
 
 export default function ContactPage() {
 	const [formData, setFormData] = useState({
@@ -8,6 +9,8 @@ export default function ContactPage() {
 		subject: "",
 		message: "",
 	});
+	const [submitState, setSubmitState] = useState("idle"); // idle | loading | success | error
+	const [submitMessage, setSubmitMessage] = useState("");
 
 	const handleFormChange = (e) => {
 		const { name, value } = e.target;
@@ -17,16 +20,29 @@ export default function ContactPage() {
 		}));
 	};
 
-	const handleContactSubmit = (e) => {
+	const handleContactSubmit = async (e) => {
 		e.preventDefault();
-		console.log("Contact form data:", formData);
-		// Reset form
-		setFormData({
-			email: "",
-			name: "",
-			subject: "",
-			message: "",
-		});
+		setSubmitState("loading");
+		setSubmitMessage("");
+		try {
+			const res = await fetch(`${API_URL}/api/contact`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(formData),
+			});
+			const data = await res.json();
+			if (!res.ok) {
+				setSubmitState("error");
+				setSubmitMessage(data.error || "Something went wrong. Please try again.");
+			} else {
+				setSubmitState("success");
+				setSubmitMessage(data.message || "Your message has been sent successfully!");
+				setFormData({ email: "", name: "", subject: "", message: "" });
+			}
+		} catch {
+			setSubmitState("error");
+			setSubmitMessage("Network error. Please check your connection and try again.");
+		}
 	};
 
 	return (
@@ -208,11 +224,17 @@ export default function ContactPage() {
 
 							{/* Submit Button */}
 							<div className="text-center">
+								{submitMessage && (
+									<p className={`mb-4 text-sm font-medium ${submitState === "success" ? "text-green-400" : "text-red-400"}`}>
+										{submitMessage}
+									</p>
+								)}
 								<button
 									type="submit"
-									className="px-12 py-4 bg-gradient-to-r from-[#00BCD4] to-[#4DD0E1] text-white font-semibold rounded-full hover:shadow-[0_0_30px_rgba(0,188,212,0.5)] hover:scale-105 transition-all duration-200 text-lg"
+									disabled={submitState === "loading"}
+									className="px-12 py-4 bg-gradient-to-r from-[#00BCD4] to-[#4DD0E1] text-white font-semibold rounded-full hover:shadow-[0_0_30px_rgba(0,188,212,0.5)] hover:scale-105 transition-all duration-200 text-lg disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
 								>
-									Submit Now
+									{submitState === "loading" ? "Sending..." : "Submit Now"}
 								</button>
 							</div>
 						</form>

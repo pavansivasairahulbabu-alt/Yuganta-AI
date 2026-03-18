@@ -27,7 +27,7 @@ export default function AgenticAIPioneerProgramPage() {
   useEffect(() => {
     const enrolled = isCourseEnrolled(PIONEER_SLUG) || isCourseEnrolled(PIONEER_TITLE) || isCourseEnrolled("agentic ai pioneer program");
     setIsEnrolled(enrolled);
-  }, [isCourseEnrolled]);
+  }, [isCourseEnrolled, isAuthenticated, user]);
 
   const getToolLogo = (name) => {
     const logos = {
@@ -221,7 +221,10 @@ export default function AgenticAIPioneerProgramPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.phone || !form.email) return;
+    if (!form.name || !form.phone || !form.email) {
+      toast.error("Please fill in name, phone, and email.");
+      return;
+    }
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
       return;
@@ -238,7 +241,7 @@ export default function AgenticAIPioneerProgramPage() {
     }
 
     if (isEnrolled) {
-      toast.success("You are already enrolled in this program.");
+      toast.info("You are already enrolled in this program.");
       return;
     }
 
@@ -263,8 +266,14 @@ export default function AgenticAIPioneerProgramPage() {
       const leadData = await leadRes.json().catch(() => ({}));
 
       if (leadData?.alreadyEnrolled) {
+        setIsEnrolled(true);
         setForm({ name: "", phone: "", email: "" });
-        toast.success("Successfully enrolled!");
+        toast.info("You are already enrolled in this program.");
+        return;
+      }
+
+      if (!leadRes.ok) {
+        toast.error(leadData?.message || "Unable to enroll right now. Please try again.");
         return;
       }
 
@@ -283,12 +292,15 @@ export default function AgenticAIPioneerProgramPage() {
           const enrollData = await enrollRes.json().catch(() => ({}));
           const message = (enrollData?.message || "").toLowerCase();
           if (message.includes("already enrolled")) {
-            toast.success("Successfully enrolled!");
+            setIsEnrolled(true);
+            toast.info("You are already enrolled in this program.");
           } else {
-            console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
-            toast.error(enrollData?.message || "Enrollment failed. Please try again.");
+            console.warn("Enrollment sync failed:", enrollData?.message || enrollRes.statusText);
+            setIsEnrolled(true);
+            toast.success("Enrollment submitted successfully!");
           }
         } else {
+          setIsEnrolled(true);
           toast.success("Successfully enrolled!");
           try {
             const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
@@ -317,12 +329,16 @@ export default function AgenticAIPioneerProgramPage() {
             }
           } catch {}
         }
+      } else {
+        // Lead was created; if course lookup fails, still confirm enrollment submission.
+        setIsEnrolled(true);
+        toast.success("Enrollment submitted successfully!");
       }
 
       setForm({ name: "", phone: "", email: "" });
     } catch (err) {
       console.error("Lead submit error", err);
-      toast.error("Unable to complete enrollment right now. Please try again.");
+      toast.error("Unable to enroll right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -356,22 +372,22 @@ export default function AgenticAIPioneerProgramPage() {
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">150</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Hours of Immersive</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">Learning</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Live Weekly</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#F59E0B]">14+</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Industry Project</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Builds</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#22C55E]">30+</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Hours of Live Workshops</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">and</div>
@@ -1058,10 +1074,11 @@ export default function AgenticAIPioneerProgramPage() {
               </ul>
               <div className="mt-8">
                 <Link
-                  to="/courses/agentic-ai-crash-course-page#agentic-enroll-form"
+                  to="/courses/agentic-ai-crash-course-page"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
                 >
-                  Enroll Now
+                  View Details
                 </Link>
               </div>
             </div>
@@ -1086,21 +1103,13 @@ export default function AgenticAIPioneerProgramPage() {
                 ))}
               </ul>
               <div className="mt-8">
-                {isAuthenticated ? (
-                  <a
-                    href="#pioneer-enroll-form"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </a>
-                ) : (
-                  <Link
-                    to="/signup"
-                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-                  >
-                    Enroll Now
-                  </Link>
-                )}
+                <Link
+                  to="/courses/agentic-ai-pioneer-program"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+                >
+                  View Details
+                </Link>
               </div>
             </div>
           </div>

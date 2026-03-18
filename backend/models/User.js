@@ -81,9 +81,9 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ createdAt: -1 });
 userSchema.index({ "enrolledCourses.courseId": 1 });
 
-// Hash password before saving
+// Hash password before saving (skip for Google users who have no password)
 userSchema.pre("save", async function (next) {
-	if (!this.isModified("password")) {
+	if (!this.isModified("password") || !this.password) {
 		return next();
 	}
 	const salt = await bcrypt.genSalt(10);

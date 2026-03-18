@@ -26,7 +26,7 @@ export default function DsaMlProgramPage() {
   useEffect(() => {
     const enrolled = isCourseEnrolled(DSA_SLUG) || isCourseEnrolled(DSA_TITLE) || isCourseEnrolled("mastering data structures & algorithms") || isCourseEnrolled("dsa-ml-program");
     setIsEnrolled(enrolled);
-  }, [isCourseEnrolled]);
+  }, [isCourseEnrolled, isAuthenticated, user, authLoading]);
 
   useEffect(() => {
     const fullName = user?.fullName || user?.user?.fullName || "";
@@ -199,7 +199,10 @@ export default function DsaMlProgramPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.phone || !form.email) return;
+    if (!form.name || !form.phone || !form.email) {
+      toast.error("Please fill in name, phone, and email.");
+      return;
+    }
     if (!/^\d{10}$/.test(form.phone)) {
       toast.error("Please enter a valid 10-digit phone number.");
       return;
@@ -216,7 +219,7 @@ export default function DsaMlProgramPage() {
     }
 
     if (isEnrolled) {
-      toast.success("You are already enrolled in this program.");
+      toast.info("You are already enrolled in this program.");
       return;
     }
 
@@ -239,14 +242,15 @@ export default function DsaMlProgramPage() {
 
       const leadData = await res.json().catch(() => ({}));
       if (leadData?.alreadyEnrolled) {
+        setIsEnrolled(true);
         setForm({ name: "", phone: "", email: "" });
-        toast.success("Successfully enrolled!");
+        toast.info("You are already enrolled in this program.");
         return;
       }
 
       if (!res.ok) {
         console.warn("Lead submit failed");
-        toast.error("Something went wrong. Please try again.");
+        toast.error(leadData?.message || "Unable to enroll right now. Please try again.");
       } else {
         const courseId = await findDsaCourseId();
         if (courseId) {
@@ -262,12 +266,15 @@ export default function DsaMlProgramPage() {
             const enrollData = await enrollRes.json().catch(() => ({}));
             const message = (enrollData?.message || "").toLowerCase();
             if (message.includes("already enrolled")) {
-              toast.success("Successfully enrolled!");
+              setIsEnrolled(true);
+              toast.info("You are already enrolled in this program.");
             } else {
-              console.warn("Enrollment failed:", enrollData?.message || enrollRes.statusText);
-              toast.error(enrollData?.message || "Enrollment failed. Please try again.");
+              console.warn("Enrollment sync failed:", enrollData?.message || enrollRes.statusText);
+              setIsEnrolled(true);
+              toast.success("Enrollment submitted successfully!");
             }
           } else {
+            setIsEnrolled(true);
             toast.success("Successfully enrolled!");
             try {
               const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
@@ -296,13 +303,17 @@ export default function DsaMlProgramPage() {
               }
             } catch {}
           }
+        } else {
+          // Lead was created; if course lookup fails, still confirm enrollment submission.
+          setIsEnrolled(true);
+          toast.success("Enrollment submitted successfully!");
         }
 
         setForm({ name: "", phone: "", email: "" });
       }
     } catch (err) {
       console.error("Lead submit error", err);
-      toast.error("Unable to complete enrollment right now. Please try again.");
+      toast.error("Unable to enroll right now. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -336,15 +347,15 @@ export default function DsaMlProgramPage() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">100+</div>
                 <div className="mt-3 text-sm text-[var(--text-color)]">DSA Problems</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#3B82F6]">1:1</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Mentorship</div>
               </div>
-              <div className="rounded-xl border bg-white dark:bg-[var(--card-bg)] border-[#94BDFB] dark:border-[var(--border-primary)] p-4 text-center shadow-sm">
+              <div className="rounded-xl border bg-[var(--card-bg)] border-[var(--border-primary)] p-4 text-center shadow-sm">
                 <div className="text-2xl font-extrabold text-[#22C55E]">Job</div>
                 <div className="mt-1 text-sm text-[var(--text-color)]">Readiness</div>
               </div>
@@ -963,9 +974,7 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Mastering Data Structures & Algorithms"
               price="₹5,000"
-              isAuthenticated={isAuthenticated}
-              authLoading={authLoading}
-              authenticatedHref="#dsa-enroll-form"
+              viewDetailsHref="/courses/dsa-machine-learning"
               bullets={[
                 "6 weeks Structured Learning",
                 "100+ DSA Problems",
@@ -977,9 +986,7 @@ export default function DsaMlProgramPage() {
             <Plan
               name="Agentic AI Pioneer program"
               price="₹12,000"
-              isAuthenticated={isAuthenticated}
-              authLoading={authLoading}
-              authenticatedHref="/courses/agentic-ai-pioneer-program#pioneer-enroll-form"
+              viewDetailsHref="/courses/agentic-ai-pioneer-program"
               bullets={[
                 "4 Months of Power Learning",
                 "25+ Deep-Dive Mentorship Sessions",
@@ -1010,7 +1017,7 @@ function Item({ title, desc }) {
   );
 }
 
-function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticatedHref }) {
+function Plan({ name, price, bullets, viewDetailsHref }) {
   return (
     <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.12)] mx-auto w-full max-w-md">
       <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">{name}</h3>
@@ -1028,32 +1035,13 @@ function Plan({ name, price, bullets, isAuthenticated, authLoading, authenticate
         ))}
       </ul>
       <div className="mt-8">
-        {authLoading ? (
-          <span className="inline-flex items-center justify-center w-full rounded-xl border border-[var(--border-primary)] text-[var(--text-color)] font-semibold py-3 opacity-70">
-            Checking account...
-          </span>
-        ) : isAuthenticated && authenticatedHref?.startsWith("/") ? (
-          <Link
-            to={authenticatedHref}
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </Link>
-        ) : isAuthenticated ? (
-          <a
-            href={authenticatedHref || "#dsa-enroll-form"}
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </a>
-        ) : (
-          <Link
-            to="/signup"
-            className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
-          >
-            Enroll Now
-          </Link>
-        )}
+        <Link
+          to={viewDetailsHref}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#0EA5E9] text-white font-semibold py-3 transition-all"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );
