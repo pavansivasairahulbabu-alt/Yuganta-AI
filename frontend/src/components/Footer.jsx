@@ -63,7 +63,10 @@ export default function Footer() {
 								</svg>
 							</a>
 							<a
-								href='#'
+								href='https://www.instagram.com/yugantaai?igsh=MTBjbnc3OGhiaXV4aA=='
+								target='_blank'
+								rel='noopener noreferrer'
+								aria-label='Open YugantaAI Instagram page in a new tab'
 								style={{ backgroundColor: '#12091F', borderColor: 'rgba(139,92,246,0.3)' }}
 								className='w-10 h-10 border hover:bg-[rgba(139,92,246,0.2)] hover:border-[#8B5CF6] rounded-full flex items-center justify-center transition-all duration-200'>
 								<svg
