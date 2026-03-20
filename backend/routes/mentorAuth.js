@@ -303,7 +303,7 @@ router.post(
 			// Check if mentor exists
 			const mentor = await Mentor.findOne({ email });
 			if (!mentor) {
-				return res.status(401).json({ message: "Invalid credentials" });
+				return res.status(401).json({ message: "User does not exist" });
 			}
 
 			// Check if mentor has set password
