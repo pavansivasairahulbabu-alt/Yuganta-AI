@@ -2,8 +2,48 @@ import express from "express";
 import mongoose from "mongoose";
 import { protect } from "../middleware/auth.js";
 import User from "../models/User.js";
+import MentorshipSession from "../models/MentorshipSession.js";
+import Lead from "../models/Lead.js";
+import Mentor from "../models/Mentor.js";
 
 const router = express.Router();
+
+// Helper function to perform cascading delete of user data
+const performUserCascadingDelete = async (userId) => {
+	const user = await User.findById(userId);
+	if (!user) return null;
+
+	const userEmail = user.email;
+
+	// 1. Delete all MentorshipSessions for this user
+	// Before deleting sessions, we might want to remove their references from Mentors
+	const sessions = await MentorshipSession.find({ userId });
+	const sessionIds = sessions.map(s => s._id);
+
+	if (sessionIds.length > 0) {
+		// Remove session references from Mentors
+		await Mentor.updateMany(
+			{ assignedSessions: { $in: sessionIds } },
+			{ $pull: { assignedSessions: { $in: sessionIds } } }
+		);
+		
+		// Delete the sessions
+		await MentorshipSession.deleteMany({ userId });
+		console.log(`✅ Deleted ${sessionIds.length} mentorship sessions for user ${userId}`);
+	}
+
+	// 2. Delete all Leads associated with this user's email
+	const leadsDeleteResult = await Lead.deleteMany({ email: userEmail });
+	if (leadsDeleteResult.deletedCount > 0) {
+		console.log(`✅ Deleted ${leadsDeleteResult.deletedCount} leads for email ${userEmail}`);
+	}
+
+	// 3. Delete the user account itself
+	await User.findByIdAndDelete(userId);
+	console.log(`✅ User account ${userId} deleted successfully`);
+
+	return user;
+};
 
 // Health check for user routes
 router.get("/health", (req, res) => {
@@ -16,15 +56,12 @@ router.get("/health", (req, res) => {
 router.delete("/delete", protect, async (req, res) => {
 	try {
 		console.log(`🗑️ Deleting user account: ${req.user._id}`);
-		const user = await User.findById(req.user._id);
+		const user = await performUserCascadingDelete(req.user._id);
 
 		if (!user) {
 			console.log(`❌ User not found for deletion: ${req.user._id}`);
 			return res.status(404).json({ message: "User not found" });
 		}
-
-		await User.findByIdAndDelete(req.user._id);
-		console.log(`✅ User account deleted successfully: ${req.user._id}`);
 
 		res.json({ message: "Account deleted successfully" });
 	} catch (error) {
@@ -39,15 +76,12 @@ router.delete("/delete", protect, async (req, res) => {
 router.delete("/delete-account", protect, async (req, res) => {
 	try {
 		console.log(`🗑️ Deleting user account (via delete-account): ${req.user._id}`);
-		const user = await User.findById(req.user._id);
+		const user = await performUserCascadingDelete(req.user._id);
 
 		if (!user) {
 			console.log(`❌ User not found for deletion: ${req.user._id}`);
 			return res.status(404).json({ message: "User not found" });
 		}
-
-		await User.findByIdAndDelete(req.user._id);
-		console.log(`✅ User account deleted successfully: ${req.user._id}`);
 
 		res.json({ message: "Account deleted successfully" });
 	} catch (error) {
@@ -62,15 +96,12 @@ router.delete("/delete-account", protect, async (req, res) => {
 router.post("/delete-account", protect, async (req, res) => {
 	try {
 		console.log(`🗑️ Deleting user account (via POST delete-account): ${req.user._id}`);
-		const user = await User.findById(req.user._id);
+		const user = await performUserCascadingDelete(req.user._id);
 
 		if (!user) {
 			console.log(`❌ User not found for deletion: ${req.user._id}`);
 			return res.status(404).json({ message: "User not found" });
 		}
-
-		await User.findByIdAndDelete(req.user._id);
-		console.log(`✅ User account deleted successfully: ${req.user._id}`);
 
 		res.json({ message: "Account deleted successfully" });
 	} catch (error) {

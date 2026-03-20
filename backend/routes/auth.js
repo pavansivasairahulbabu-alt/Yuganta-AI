@@ -376,7 +376,7 @@ router.post(
 			// Check if user exists
 			const user = await User.findOne({ email });
 			if (!user) {
-				return res.status(401).json({ message: "Invalid credentials" });
+				return res.status(401).json({ message: "User does not exist" });
 			}
 
 			if (!user.isVerified) {
