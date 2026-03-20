@@ -429,6 +429,9 @@ export default function CoursesPage() {
 												: crash
 													? "Agentic AI Crash Course"
 													: course.title;
+											const courseThumbnail = pioneer
+												? "/Agentic_AI_DSA.png"
+												: course.thumbnail;
 											const coursePath = pioneer
 												? "/courses/agentic-ai-pioneer-program"
 												: crash
@@ -477,9 +480,9 @@ export default function CoursesPage() {
 														}}>
 														<source src={course.videoUrl} type='video/mp4' />
 													</video>
-												) : course.thumbnail ? (
+												) : courseThumbnail ? (
 													<img
-														src={course.thumbnail}
+														src={courseThumbnail}
 														alt={course.title}
 														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
 													/>

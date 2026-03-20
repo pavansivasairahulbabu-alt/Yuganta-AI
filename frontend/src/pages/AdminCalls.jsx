@@ -89,12 +89,12 @@ export default function AdminCalls() {
 	}, [calls, searchQuery]);
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-24 pb-12">
+		<div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-32 pb-12">
 			<AdminNavbar />
 			<div className="max-w-7xl mx-auto px-6">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 					<div>
-						<h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">Calls</h1>
+						<h1 className="text-3xl font-bold text-[var(--text-color)] dark:bg-clip-text dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-blue-400">Calls</h1>
 						<p className="text-gray-400 mt-2">Talk-to-Expert responses from website visitors</p>
 					</div>
 					<input
@@ -130,7 +130,7 @@ export default function AdminCalls() {
 									{visibleCalls.map((call) => (
 										<tr key={call._id} className="hover:bg-white/5 transition-colors">
 											<td className="px-4 py-3 text-gray-400 text-xs">{new Date(call.date).toLocaleDateString()}</td>
-											<td className="px-4 py-3 text-white font-medium text-sm">{call.name}</td>
+											<td className="px-4 py-3 text-[var(--text-color)] font-medium text-sm">{call.name}</td>
 											<td className="px-4 py-3 text-gray-300 text-sm">{call.email}</td>
 											<td className="px-4 py-3 text-gray-300 text-sm">{call.phone}</td>
 											<td className="px-4 py-3 text-blue-300 text-sm">{call.courseName}</td>

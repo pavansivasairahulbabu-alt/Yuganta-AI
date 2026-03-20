@@ -134,7 +134,7 @@ export default function AdminMentorAssignments() {
   }, [mentorAssignments, mentorGroups]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-28 pb-16">
+    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-32 pb-16">
       <AdminNavbar />
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
         {/* Header */}
@@ -143,9 +143,6 @@ export default function AdminMentorAssignments() {
             <div className="w-1 h-8 bg-gradient-to-b from-[#8B5CF6] to-[#EC4899] rounded-full"></div>
             <p className="text-sm font-semibold text-[#A855F7]">Admin Panel</p>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-[#C7C3D6] to-[#9A93B5] bg-clip-text text-transparent">
-            Mentor Assignments
-          </h1>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-[#C7C3D6] to-[#9A93B5] bg-clip-text text-transparent">
             Mentor Assignments
           </h1>

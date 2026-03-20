@@ -19,7 +19,7 @@ export default function FreeCourses() {
 			title: "Agentic AI Pioneer Program",
 			duration: "150 Hours",
 			weeks: "4 Months",
-			thumbnail: "https://miro.medium.com/v2/resize:fit:1400/1*LtgPxfl-J6dJrg9rRgWdGA.png",
+			thumbnail: "/Agentic_AI_DSA.png",
 			topics: ["DSA", "ML & DL", "LangChain", "CrewAI", "LangGraph", "AI Agents", "RAG", "AutoGen"],
 			path: "/courses/agentic-ai-pioneer-program"
 		},

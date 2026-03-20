@@ -128,7 +128,7 @@ export default function AdminMentorshipBookings() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-24 md:pt-28 pb-16">
+    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-32 pb-12">
       <AdminNavbar />
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
         <div>

@@ -75,6 +75,15 @@ export default function MyLearningPage() {
 		return course.progress || 0;
 	};
 
+	// Helper to get the correct course thumbnail
+	const getCourseThumbnail = (course) => {
+		const title = (course?.title || "").toLowerCase();
+		if (title.includes("agentic") && title.includes("pioneer")) {
+			return "/Agentic_AI_DSA.png";
+		}
+		return course?.thumbnail;
+	};
+
 	// Filter courses based on search and selected tab
 	const getFilteredCourses = () => {
 		const query = searchQuery.toLowerCase().trim();
@@ -148,9 +157,9 @@ export default function MyLearningPage() {
 						<div className='bg-[var(--card-bg)] rounded-2xl overflow-hidden shadow-2xl transition-colors duration-300'>
 							<div className='flex flex-col lg:flex-row'>
 								<div className='lg:w-1/2 relative h-64 lg:h-auto'>
-									{featuredCourse.thumbnail ? (
+									{getCourseThumbnail(featuredCourse) ? (
 										<img
-											src={featuredCourse.thumbnail}
+											src={getCourseThumbnail(featuredCourse)}
 											alt={featuredCourse.title}
 											className='w-full h-full object-cover'
 										/>
@@ -205,9 +214,9 @@ export default function MyLearningPage() {
 										to={`/courses/${course._id}`}
 										className='bg-[var(--card-bg)] rounded-xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 border border-[var(--border-color)] hover:border-purple-500 flex flex-col'>
 										<div className='relative h-48 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900'>
-											{course.thumbnail ? (
+											{getCourseThumbnail(course) ? (
 												<img
-													src={course.thumbnail}
+													src={getCourseThumbnail(course)}
 													alt={course.title}
 													className='w-full h-full object-cover'
 												/>
@@ -385,9 +394,9 @@ export default function MyLearningPage() {
 												key={course._id}
 												className='bg-[var(--card-bg)] rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-[var(--border-color)] hover:border-purple-500 flex flex-col'>
 												<div className='relative h-48'>
-													{course.thumbnail ? (
+													{getCourseThumbnail(course) ? (
 														<img
-															src={course.thumbnail}
+															src={getCourseThumbnail(course)}
 															alt={course.title}
 															className='w-full h-full object-cover'
 														/>

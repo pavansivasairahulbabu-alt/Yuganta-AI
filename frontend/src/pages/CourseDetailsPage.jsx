@@ -110,6 +110,16 @@ export default function CourseDetailsPage() {
 		}
 	};
 
+	// Helper to get the correct course thumbnail
+	const getCourseThumbnail = (course) => {
+		if (!course) return "";
+		const title = (course.title || "").toLowerCase();
+		if (title.includes("agentic") && title.includes("pioneer")) {
+			return "/Agentic_AI_DSA.png";
+		}
+		return course.thumbnail;
+	};
+
 	if (loading) {
 		return (
 			<>
@@ -201,11 +211,11 @@ export default function CourseDetailsPage() {
 					<div className='relative hidden lg:block'>
 						<div className='bg-[var(--card-bg)] p-8 rounded-3xl border border-[var(--border-color)] relative z-10 text-center transition-all duration-300'>
 							<div className='relative rounded-2xl overflow-hidden mb-6 shadow-lg group'>
-								{course.thumbnail && course.thumbnail.trim() ? (
+								{getCourseThumbnail(course) && getCourseThumbnail(course).trim() ? (
 									<>
 										<div className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10'></div>
 										<img
-											src={course.thumbnail}
+											src={getCourseThumbnail(course)}
 											alt={course.title}
 											className='w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-500'
 											onError={(e) => {

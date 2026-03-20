@@ -98,7 +98,7 @@ export default function AdminRegistrations() {
     );
 
     return (
-        <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-24 pb-12">
+        <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-32 pb-12">
             <AdminNavbar />
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
@@ -156,7 +156,7 @@ export default function AdminRegistrations() {
                                             <td className="px-6 py-4 text-gray-400 text-sm">
                                                 {new Date(lead.date).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 font-medium text-white">
+                                            <td className="px-6 py-4 font-medium text-[var(--text-color)]">
                                                 {lead.name}
                                             </td>
                                             <td className="px-6 py-4 text-gray-300 text-sm">
