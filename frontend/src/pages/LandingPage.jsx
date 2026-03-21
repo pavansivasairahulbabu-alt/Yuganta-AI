@@ -186,7 +186,7 @@ export default function LandingPage() {
 						<div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl">
 							<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
 								<img
-									src="https://miro.medium.com/v2/resize:fit:1400/1*LtgPxfl-J6dJrg9rRgWdGA.png"
+									src="/pioneerthumb.png"
 									alt="Agentic AI Pioneer Program"
 									className="w-full h-full object-cover"
 								/>

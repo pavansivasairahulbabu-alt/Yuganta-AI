@@ -288,4 +288,101 @@ router.get("/enrolled", protect, async (req, res) => {
 	}
 });
 
+// @route   GET /api/users/progress/:courseId
+// @desc    Get progress for a specific enrolled course
+// @access  Private
+router.get("/progress/:courseId", protect, async (req, res) => {
+	try {
+		const { courseId } = req.params;
+		if (!mongoose.Types.ObjectId.isValid(courseId)) {
+			return res.status(400).json({ message: "Invalid course id" });
+		}
+
+		const user = await User.findById(req.user._id).select("enrolledCourses");
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		const enrollment = user.enrolledCourses.find(
+			(item) => item.courseId && item.courseId.toString() === courseId,
+		);
+
+		if (!enrollment) {
+			return res.status(404).json({ message: "Enrollment not found" });
+		}
+
+		res.json({
+			courseId,
+			progress: enrollment.progress || 0,
+			completed: Boolean(enrollment.completed),
+			completedVideos: enrollment.completedVideos || [],
+		});
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
+// @route   PUT /api/users/progress/:courseId
+// @desc    Update video-level progress for an enrolled course
+// @access  Private
+router.put("/progress/:courseId", protect, async (req, res) => {
+	try {
+		const { courseId } = req.params;
+		const { videoKey, markComplete } = req.body || {};
+
+		if (!mongoose.Types.ObjectId.isValid(courseId)) {
+			return res.status(400).json({ message: "Invalid course id" });
+		}
+
+		if (!videoKey || typeof videoKey !== "string") {
+			return res.status(400).json({ message: "videoKey is required" });
+		}
+
+		const user = await User.findById(req.user._id).select("enrolledCourses");
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		const enrollment = user.enrolledCourses.find(
+			(item) => item.courseId && item.courseId.toString() === courseId,
+		);
+
+		if (!enrollment) {
+			return res.status(404).json({ message: "Enrollment not found" });
+		}
+
+		enrollment.completedVideos = enrollment.completedVideos || [];
+
+		if (markComplete === true && !enrollment.completedVideos.includes(videoKey)) {
+			enrollment.completedVideos.push(videoKey);
+		}
+
+		const Course = (await import("../models/Course.js")).default;
+		const course = await Course.findById(courseId).select("modules").lean();
+		const totalVideos = (course?.modules || []).reduce(
+			(sum, module) => sum + (module?.videos?.length || 0),
+			0,
+		);
+
+		const completedCount = new Set(enrollment.completedVideos).size;
+		const progress = totalVideos > 0 ? Math.min(100, Math.round((completedCount / totalVideos) * 100)) : 0;
+
+		enrollment.progress = progress;
+		enrollment.completed = totalVideos > 0 ? completedCount >= totalVideos : false;
+
+		await user.save();
+
+		res.json({
+			message: "Progress updated",
+			courseId,
+			progress: enrollment.progress,
+			completed: enrollment.completed,
+			completedVideos: enrollment.completedVideos,
+			totalVideos,
+		});
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
 export default router;

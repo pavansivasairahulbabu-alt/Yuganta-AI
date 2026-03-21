@@ -7,6 +7,35 @@ import upload from "../middleware/upload.js"; // Import upload middleware
 
 const router = express.Router();
 
+const normalizeCourseModules = (modules) => {
+	if (!Array.isArray(modules)) return [];
+
+	return modules
+		.filter((module) => module && typeof module === "object")
+		.map((module, moduleIndex) => {
+			const videos = Array.isArray(module.videos)
+				? module.videos
+						.filter((video) => video && typeof video === "object")
+						.map((video, videoIndex) => ({
+							title: String(video.title || "").trim(),
+							url: String(video.url || ""),
+							publicId: String(video.publicId || ""),
+							duration: String(video.duration || ""),
+							description: String(video.description || ""),
+							order: Number(video.order) || videoIndex + 1,
+						}))
+				: [];
+
+			return {
+				title: String(module.title || "").trim(),
+				description: String(module.description || ""),
+				order: Number(module.order) || moduleIndex + 1,
+				videos,
+			};
+		})
+		.filter((module) => module.title.length > 0);
+};
+
 // @route   GET /api/courses
 // @desc    Get all courses
 // @access  Public
@@ -134,6 +163,7 @@ router.post(
 					modules = [];
 				}
 			}
+			modules = normalizeCourseModules(modules);
 
 			if (!title || !description || !category) {
 				return res
@@ -263,6 +293,10 @@ router.put(
 				} catch (e) {
 					console.error("Error parsing modules on update:", e);
 				}
+			}
+
+			if (updateData.modules !== undefined) {
+				updateData.modules = normalizeCourseModules(updateData.modules);
 			}
 
 			// Handle file uploads
@@ -591,6 +625,31 @@ router.delete("/instructor/:courseId/modules/:moduleId/videos/:videoId", protect
 	} catch (error) {
 		console.error("Error deleting video:", error);
 		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
+// @route   POST /api/courses/instructor/upload-video
+// @desc    Upload a video as instructor
+// @access  Private (Instructor)
+router.post("/instructor/upload-video", protectInstructor, upload.single("video"), async (req, res) => {
+	try {
+		if (!req.file) {
+			return res.status(400).json({ message: "No video file provided" });
+		}
+
+		// Extract duration if available (Cloudinary provides this for videos)
+		const duration = req.file.duration ? Math.round(req.file.duration) : 0;
+
+		res.json({
+			message: "Video uploaded successfully",
+			url: req.file.path,
+			publicId: req.file.filename,
+			duration: duration,
+			thumbnail: req.file.thumbnail || null,
+		});
+	} catch (error) {
+		console.error("Error uploading video:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
 	}
 });
 

@@ -39,6 +39,11 @@ export default function InstructorDashboard() {
 		order: 1,
 	});
 	const [showAddVideoToModule, setShowAddVideoToModule] = useState(false);
+	const [expandedModuleIndex, setExpandedModuleIndex] = useState(null);
+	const [uploadingVideo, setUploadingVideo] = useState({});
+	const [newVideoTitle, setNewVideoTitle] = useState("");
+	const [newVideoDescription, setNewVideoDescription] = useState("");
+	const [newVideoFile, setNewVideoFile] = useState(null);
 	const [mentorshipSessions, setMentorshipSessions] = useState([]);
 	const [editingMeetingLink, setEditingMeetingLink] = useState(null);
 	const [meetingLinkInput, setMeetingLinkInput] = useState("");
@@ -487,6 +492,85 @@ export default function InstructorDashboard() {
 			...formData,
 			modules: updatedModules,
 		});
+	};
+
+	const handleAddVideoToModuleWithUpload = async (moduleIndex) => {
+		if (!newVideoTitle.trim() || !newVideoFile) {
+			alert("Please enter video title and select a file");
+			return;
+		}
+
+		try {
+			setUploadingVideo({ ...uploadingVideo, [moduleIndex]: true });
+
+			// Step 1: Upload video to Cloudinary
+			const formDataForUpload = new FormData();
+			formDataForUpload.append("video", newVideoFile);
+
+			const token = localStorage.getItem("instructorToken");
+			const uploadRes = await fetch(`${API_URL}/api/courses/instructor/upload-video`, {
+				method: "POST",
+				headers: { Authorization: `Bearer ${token}` },
+				body: formDataForUpload,
+			});
+
+			const uploadData = await uploadRes.json();
+
+			if (!uploadRes.ok) {
+				throw new Error(uploadData.message || "Video upload failed");
+			}
+
+			// Step 2: Add video to module
+			const updatedModules = [...formData.modules];
+			updatedModules[moduleIndex].videos = updatedModules[moduleIndex].videos || [];
+			updatedModules[moduleIndex].videos.push({
+				title: newVideoTitle,
+				url: uploadData.url,
+				publicId: uploadData.publicId,
+				duration: uploadData.duration || "",
+				description: newVideoDescription,
+				order: updatedModules[moduleIndex].videos.length + 1,
+			});
+
+			setFormData({ ...formData, modules: updatedModules });
+
+			// Reset form
+			setNewVideoTitle("");
+			setNewVideoDescription("");
+			setNewVideoFile(null);
+			setExpandedModuleIndex(null);
+			alert("Video added successfully!");
+		} catch (error) {
+			console.error("Video upload error:", error);
+			alert(error.message || "Failed to upload video");
+		} finally {
+			setUploadingVideo({ ...uploadingVideo, [moduleIndex]: false });
+		}
+	};
+
+	const handleRemoveVideoWithUpload = async (moduleIndex, videoIndex) => {
+		try {
+			const updatedModules = [...formData.modules];
+			const video = updatedModules[moduleIndex].videos[videoIndex];
+
+			// Delete from Cloudinary if publicId exists
+			if (video.publicId) {
+				const token = localStorage.getItem("instructorToken");
+				// Note: This assumes you have a delete endpoint - otherwise just remove locally
+				console.log("Video would be deleted from Cloudinary:", video.publicId);
+			}
+
+			// Remove from module
+			updatedModules[moduleIndex].videos = updatedModules[moduleIndex].videos.filter(
+				(_, i) => i !== videoIndex
+			);
+
+			setFormData({ ...formData, modules: updatedModules });
+			alert("Video removed");
+		} catch (error) {
+			console.error("Error removing video:", error);
+			alert("Failed to remove video");
+		}
 	};
 
 	const handleLogout = () => {
@@ -1828,127 +1912,356 @@ export default function InstructorDashboard() {
 
 								{formData.modules &&
 								formData.modules.length > 0 ? (
-									<div className='space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar'>
-										{formData.modules.map((module, idx) => (
+									<div className='space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar'>
+										{formData.modules.map((module, moduleIdx) => (
 											<div
-												key={idx}
-												className='bg-[#0B0614] border border-[rgba(139,92,246,0.2)] rounded-lg p-4 hover:border-[rgba(139,92,246,0.4)] transition-all'>
-												<div className='flex items-start justify-between'>
-													<div className='flex-1'>
-														<h5 className='text-white font-semibold mb-2 flex items-center'>
-															<span className='inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-[#A855F7] to-[#EC4899] text-white text-xs font-bold mr-2'>
+												key={moduleIdx}
+												className='bg-[#0B0614] border border-[rgba(139,92,246,0.2)] rounded-lg overflow-hidden hover:border-[rgba(139,92,246,0.4)] transition-all'>
+												{/* Module Header - Clickable */}
+												<button
+													type='button'
+													onClick={() =>
+														setExpandedModuleIndex(
+															expandedModuleIndex === moduleIdx
+																? null
+																: moduleIdx,
+														)
+													}
+													className='w-full p-4 flex items-center justify-between hover:bg-[rgba(139,92,246,0.05)] transition-all'>
+													<div className='flex items-start flex-1'>
+														<h5 className='text-white font-semibold flex items-center'>
+															<span className='inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-[#A855F7] to-[#EC4899] text-white text-xs font-bold mr-3'>
 																{module.order}
 															</span>
-															{module.title}
+															<div className='text-left'>
+																<div className='font-semibold'>
+																	{module.title}
+																</div>
+																<div className='text-xs text-[#9A93B5] mt-1'>
+																	{module.videos
+																		?.length ||
+																		0}{" "}
+																	video(s)
+																</div>
+															</div>
 														</h5>
-														<p className='text-[#C7C3D6] text-sm mb-3'>
-															{module.description}
-														</p>
-														<div className='flex items-center space-x-2 text-sm text-[#A855F7]'>
-															<svg
-																className='w-4 h-4'
-																fill='none'
-																stroke='currentColor'
-																viewBox='0 0 24 24'>
-																<path
-																	strokeLinecap='round'
-																	strokeLinejoin='round'
-																	strokeWidth={
-																		2
-																	}
-																	d='M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z'
-																/>
-															</svg>
-															<span>
-																{module.videos
-																	?.length ||
-																	0}{" "}
-																video(s)
-															</span>
+													</div>
+													<svg
+														className={`w-5 h-5 text-[#A855F7] transition-transform ${
+															expandedModuleIndex ===
+															moduleIdx
+																? "rotate-180"
+																: ""
+														}`}
+														fill='none'
+														stroke='currentColor'
+														viewBox='0 0 24 24'>
+														<path
+															strokeLinecap='round'
+															strokeLinejoin='round'
+															strokeWidth={2}
+															d='M19 14l-7 7m0 0l-7-7m7 7V3'
+														/>
+													</svg>
+												</button>
+
+												{/* Expanded Content */}
+												{expandedModuleIndex === moduleIdx && (
+													<div className='border-t border-[rgba(139,92,246,0.2)] p-4 space-y-4 bg-[rgba(139,92,246,0.02)]'>
+														{/* Module Description */}
+														<div className='pb-4 border-b border-[rgba(139,92,246,0.1)]'>
+															<p className='text-[#C7C3D6] text-sm'>
+																{module.description}
+															</p>
 														</div>
+
+														{/* Video List */}
 														{module.videos &&
-															module.videos
-																.length > 0 && (
-																<div className='mt-3 ml-8 space-y-2'>
-																	{module.videos.map(
-																		(
-																			video,
-																			vIdx,
-																		) => (
-																			<div
-																				key={
-																					vIdx
-																				}
-																				className='flex items-center justify-between text-sm bg-[rgba(139,92,246,0.05)] border border-[rgba(139,92,246,0.15)] p-3 rounded-lg'>
-																				<div className='flex items-center space-x-3 flex-1'>
-																					<span className='text-[#A855F7] font-medium'>
-																						{
-																							video.order
-																						}
-																						.
-																					</span>
-																					<span className='text-white'>
+														module.videos.length >
+															0 ? (
+															<div className='space-y-2'>
+																<h6 className='text-white font-semibold text-sm'>
+																	Videos in
+																	this module:
+																</h6>
+																{module.videos.map(
+																	(
+																		video,
+																		vidIdx,
+																	) => (
+																		<div
+																			key={
+																				vidIdx
+																			}
+																			className='flex items-center justify-between p-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.15)] rounded-lg'>
+																			<div className='flex items-center space-x-3 flex-1'>
+																				<svg
+																					className='w-4 h-4 text-[#A855F7]'
+																					fill='currentColor'
+																					viewBox='0 0 20 20'>
+																					<path
+																						fillRule='evenodd'
+																						d='M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0015.5 2h-11zm1 13a.5.5 0 00.5.5h6a.5.5 0 000-1H6a.5.5 0 00-.5.5zm0-3a.5.5 0 00.5.5h6a.5.5 0 000-1H6a.5.5 0 00-.5.5z'
+																						clipRule='evenodd'
+																					/>
+																				</svg>
+																				<div className='min-w-0 flex-1'>
+																					<p className='text-white text-sm font-medium truncate'>
 																						{
 																							video.title
 																						}
-																					</span>
-																				</div>
-																				<button
-																					type='button'
-																					onClick={() =>
-																						handleRemoveVideoFromModule(
-																							module.order,
-																							video.order,
-																						)
-																					}
-																					className='text-[#EC4899] hover:text-white hover:bg-[rgba(236,72,153,0.2)] p-1.5 rounded transition-all'>
-																					<svg
-																						className='w-4 h-4'
-																						fill='none'
-																						stroke='currentColor'
-																						viewBox='0 0 24 24'>
-																						<path
-																							strokeLinecap='round'
-																							strokeLinejoin='round'
-																							strokeWidth={
-																								2
+																					</p>
+																					{video.description && (
+																						<p className='text-[#9A93B5] text-xs truncate'>
+																							{
+																								video.description
 																							}
-																							d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-																						/>
-																					</svg>
-																				</button>
+																						</p>
+																					)}
+																				</div>
 																			</div>
-																		),
-																	)}
+																			<button
+																				type='button'
+																				onClick={() =>
+																					handleRemoveVideoWithUpload(
+																						moduleIdx,
+																						vidIdx,
+																					)
+																				}
+																				className='ml-2 p-1.5 text-[#EC4899] hover:bg-[rgba(236,72,153,0.2)] rounded transition-all'>
+																				<svg
+																					className='w-4 h-4'
+																					fill='none'
+																					stroke='currentColor'
+																					viewBox='0 0 24 24'>
+																					<path
+																						strokeLinecap='round'
+																						strokeLinejoin='round'
+																						strokeWidth={
+																							2
+																						}
+																						d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
+																					/>
+																				</svg>
+																			</button>
+																		</div>
+																	),
+																)}
+															</div>
+														) : (
+															<div className='p-3 bg-[rgba(168,85,247,0.05)] border border-[rgba(168,85,247,0.2)] rounded-lg'>
+																<p className='text-[#9A93B5] text-sm'>
+																	No videos yet.
+																	Add one below!
+																</p>
+															</div>
+														)}
+
+														{/* Video Upload Form */}
+														<div className='pt-4 border-t border-[rgba(139,92,246,0.1)]'>
+															<h6 className='text-white font-semibold text-sm mb-3 flex items-center'>
+																<svg
+																	className='w-4 h-4 mr-2 text-[#10B981]'
+																	fill='none'
+																	stroke='currentColor'
+																	viewBox='0 0 24 24'>
+																	<path
+																		strokeLinecap='round'
+																		strokeLinejoin='round'
+																		strokeWidth={
+																			2
+																		}
+																		d='M12 4v16m8-8H4'
+																	/>
+																</svg>
+																Add Video to Module
+															</h6>
+															<div className='space-y-3'>
+																<div>
+																	<label className='block text-[#C7C3D6] text-sm font-medium mb-1.5'>
+																		Video Title
+																	</label>
+																	<input
+																		type='text'
+																		value={
+																			newVideoTitle
+																		}
+																		onChange={
+																			(
+																				e,
+																			) =>
+																				setNewVideoTitle(
+																					e
+																						.target
+																						.value,
+																				)
+																		}
+																		placeholder='e.g., Python Basics Part 1'
+																		className='w-full px-3 py-2 bg-[#0B0614] border border-[rgba(139,92,246,0.2)] rounded-lg text-white text-sm placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-transparent'
+																	/>
 																</div>
-															)}
+
+																<div>
+																	<label className='block text-[#C7C3D6] text-sm font-medium mb-1.5'>
+																		Description (optional)
+																	</label>
+																	<textarea
+																		value={
+																			newVideoDescription
+																		}
+																		onChange={
+																			(
+																				e,
+																			) =>
+																				setNewVideoDescription(
+																					e
+																						.target
+																						.value,
+																				)
+																		}
+																		placeholder='Brief description of this video...'
+																		className='w-full px-3 py-2 bg-[#0B0614] border border-[rgba(139,92,246,0.2)] rounded-lg text-white text-sm placeholder-[#9A93B5] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-transparent resize-none'
+																		rows='2'
+																	/>
+																</div>
+
+																<div>
+																	<label className='block text-[#C7C3D6] text-sm font-medium mb-1.5'>
+																		Video File
+																	</label>
+																	<div className='relative'>
+																		<input
+																			type='file'
+																			accept='video/*'
+																			onChange={
+																				(
+																					e,
+																				) =>
+																					setNewVideoFile(
+																						e
+																							.target
+																							.files
+																							? e
+																								.target
+																								.files[0]
+																							: null,
+																					)
+																			}
+																			className='hidden'
+																			id={`video-file-${moduleIdx}`}
+																		/>
+																		<label
+																			htmlFor={`video-file-${moduleIdx}`}
+																			className='flex items-center justify-center w-full px-3 py-2 bg-[rgba(16,185,129,0.1)] border-2 border-dashed border-[#10B981] rounded-lg cursor-pointer hover:bg-[rgba(16,185,129,0.15)] transition-all'>
+																			<svg
+																				className='w-4 h-4 text-[#10B981] mr-2'
+																				fill='none'
+																				stroke='currentColor'
+																				viewBox='0 0 24 24'>
+																				<path
+																					strokeLinecap='round'
+																					strokeLinejoin='round'
+																					strokeWidth={
+																						2
+																					}
+																					d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
+																				/>
+																			</svg>
+																			<span className='text-[#10B981] text-sm font-medium'>
+																				{newVideoFile
+																					? newVideoFile.name
+																					: "Choose video file"}
+																			</span>
+																		</label>
+																	</div>
+																</div>
+
+																<button
+																	type='button'
+																	onClick={() =>
+																		handleAddVideoToModuleWithUpload(
+																			moduleIdx,
+																		)
+																	}
+																	disabled={
+																		uploadingVideo[
+																			moduleIdx
+																		] ||
+																		!newVideoTitle.trim() ||
+																		!newVideoFile
+																	}
+																	className={`w-full px-4 py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center space-x-2 ${
+																		uploadingVideo[
+																			moduleIdx
+																		] ||
+																		!newVideoTitle.trim() ||
+																		!newVideoFile
+																			? "bg-[rgba(139,92,246,0.2)] text-[#9A93B5] cursor-not-allowed"
+																			: "bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.4)]"
+																	}`}>
+																	{uploadingVideo[
+																		moduleIdx
+																	] ? (
+																		<>
+																			<svg
+																				className='animate-spin w-4 h-4'
+																				fill='none'
+																				stroke='currentColor'
+																				viewBox='0 0 24 24'>
+																				<path
+																					strokeLinecap='round'
+																					strokeLinejoin='round'
+																					strokeWidth={
+																						2
+																					}
+																					d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+																				/>
+																			</svg>
+																			<span>
+																				Uploading...
+																			</span>
+																		</>
+																	) : (
+																		<>
+																			<svg
+																				className='w-4 h-4'
+																				fill='none'
+																				stroke='currentColor'
+																				viewBox='0 0 24 24'>
+																				<path
+																					strokeLinecap='round'
+																					strokeLinejoin='round'
+																					strokeWidth={
+																						2
+																					}
+																					d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
+																				/>
+																			</svg>
+																			<span>
+																				Upload
+																				Video
+																			</span>
+																		</>
+																	)}
+																</button>
+															</div>
+														</div>
+
+														{/* Module Actions */}
+														<div className='pt-4 border-t border-[rgba(139,92,246,0.1)] flex gap-2'>
+															<button
+																type='button'
+																onClick={() =>
+																	handleRemoveModule(
+																		module.order,
+																	)
+																}
+																className='flex-1 px-3 py-2 bg-transparent border border-[#EC4899] text-[#EC4899] hover:bg-[rgba(236,72,153,0.1)] rounded-lg text-sm font-semibold transition-all'>
+																Delete Module
+															</button>
+														</div>
 													</div>
-													<div className='flex space-x-2 ml-4'>
-														<button
-															type='button'
-															onClick={() => {
-																setCurrentCourseForModule(
-																	module.order,
-																);
-																setShowAddVideoToModule(
-																	true,
-																);
-															}}
-															className='px-3 py-2 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#2563EB] hover:to-[#1D4ED8] text-white rounded-lg text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(59,130,246,0.3)]'>
-															+ Video
-														</button>
-														<button
-															type='button'
-															onClick={() =>
-																handleRemoveModule(
-																	module.order,
-																)
-															}
-															className='px-3 py-2 bg-transparent border border-[#EC4899] text-[#EC4899] hover:bg-[rgba(236,72,153,0.1)] rounded-lg text-xs font-semibold transition-all'>
-															Remove
-														</button>
-													</div>
-												</div>
+												)}
 											</div>
 										))}
 									</div>

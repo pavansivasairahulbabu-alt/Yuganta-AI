@@ -13,6 +13,8 @@ export default function AdminRegistrations() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
+    const normalizeStatus = (status) => String(status || "new").toLowerCase();
+
     useEffect(() => {
         // Auth Check (Reusing existing patterns)
         const authed = localStorage.getItem("adminAuthed") === "true";
@@ -65,7 +67,7 @@ export default function AdminRegistrations() {
             if (response.ok) {
                 const data = await response.json();
                 setLeads(prev => prev.map(lead =>
-                    lead._id === id ? { ...lead, status: newStatus } : lead
+                    lead._id === id ? { ...lead, status: normalizeStatus(newStatus) } : lead
                 ));
 
                 // Show appropriate message based on enrollment status
@@ -175,23 +177,24 @@ export default function AdminRegistrations() {
                                                 {lead.courseName}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${lead.status === 'New' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
-                                                    lead.status === 'Contacted' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
-                                                        'bg-green-500/10 border-green-500/20 text-green-400'
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${normalizeStatus(lead.status) === 'new' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
+                                                    normalizeStatus(lead.status) === 'contacted' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                                                        normalizeStatus(lead.status) === 'closed' ? 'bg-gray-500/10 border-gray-500/20 text-gray-400' :
+                                                            'bg-green-500/10 border-green-500/20 text-green-400'
                                                     }`}>
-                                                    {lead.status}
+                                                    {normalizeStatus(lead.status)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <select
                                                     className="bg-[var(--card-bg)] border border-white/10 rounded px-2 py-1 text-xs outline-none focus:border-purple-500"
-                                                    value={lead.status}
+                                                    value={normalizeStatus(lead.status)}
                                                     onChange={(e) => handleStatusUpdate(lead._id, e.target.value)}
                                                 >
-                                                    <option value="New">New</option>
-                                                    <option value="Contacted">Contacted</option>
-                                                    <option value="Enrolled">Enrolled</option>
-                                                    <option value="Closed">Closed</option>
+                                                    <option value="new">new</option>
+                                                    <option value="contacted">contacted</option>
+                                                    <option value="enrolled">enrolled</option>
+                                                    <option value="closed">closed</option>
                                                 </select>
                                             </td>
                                         </tr>

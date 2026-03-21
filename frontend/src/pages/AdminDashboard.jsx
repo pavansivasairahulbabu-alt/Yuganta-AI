@@ -144,6 +144,56 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
+          {/* Course Management Card */}
+          <Link
+            to="/admin/courses"
+            className="group bg-[var(--card-bg)] border border-[rgba(59,130,246,0.3)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(59,130,246,0.1)] hover:shadow-[0_12px_48px_rgba(59,130,246,0.25)] hover:border-[rgba(59,130,246,0.6)] transition-all duration-300 hover:-translate-y-2">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider mb-2">Management</p>
+                <h2 className="text-3xl font-bold text-white mb-2">Course Management</h2>
+                <p className="text-[#C7C3D6]">View, edit, and delete courses. Manage course details, modules, content, thumbnails, and instructor assignments.</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-[rgba(59,130,246,0.2)] to-[rgba(59,130,246,0.1)] rounded-xl group-hover:scale-110 transition-transform duration-300">
+                <svg className='w-8 h-8 text-[#3B82F6]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path d='M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z' />
+                </svg>
+              </div>
+            </div>
+
+            {/* Features */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-3">
+                <svg className='w-5 h-5 text-[#3B82F6]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                </svg>
+                <span className="text-sm text-[#C7C3D6]">Edit course details & modules</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className='w-5 h-5 text-[#3B82F6]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                </svg>
+                <span className="text-sm text-[#C7C3D6]">Update course thumbnails</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className='w-5 h-5 text-[#3B82F6]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                </svg>
+                <span className="text-sm text-[#C7C3D6]">Assign instructors to courses</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-[#3B82F6] font-semibold group-hover:gap-3 transition-all duration-300">
+              <span>Manage Courses</span>
+              <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
+              </svg>
+            </div>
+          </Link>
+        </div>
+
+        {/* Second Row - Additional Management Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Assign Mentors Card */}
           <Link
             to="/admin/assign-mentors"

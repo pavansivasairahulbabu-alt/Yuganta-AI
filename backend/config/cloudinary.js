@@ -3,17 +3,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-// Debug: Check if env vars are loaded
-console.log("Cloudinary Config:", {
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY ? "Loaded" : "Missing",
-    api_secret: process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Missing"
-});
+if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
+    });
+} else {
+    console.warn('[Cloudinary] Missing CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET. Upload features will be unavailable until configured.');
+}
 
 export default cloudinary;

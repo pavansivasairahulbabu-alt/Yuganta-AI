@@ -39,6 +39,7 @@ import AdminAssignInstructors from "./pages/AdminAssignInstructors";
 import AdminMentorAssignments from "./pages/AdminMentorAssignments";
 import AdminRegistrations from "./pages/AdminRegistrations";
 import AdminBlogManagement from "./pages/AdminBlogManagement";
+import AdminCourseManagement from "./pages/AdminCourseManagement";
 import AdminMentorshipBookings from "./pages/AdminMentorshipBookings";
 import AdminCalls from "./pages/AdminCalls";
 import InstructorForgotPasswordPage from "./pages/InstructorForgotPasswordPage";
@@ -389,7 +390,10 @@ export default function App() {
 									<Route path='/admin/login' element={<AdminLoginPage />} />
 									<Route path='/admin/dashboard' element={<AdminDashboard />} />
 									<Route path='/admin/mentors' element={<AdminMentorManagement />} />
-									<Route path='/admin/instructors' element={<AdminInstructorManagement />} />							<Route path='/admin/blogs' element={<AdminBlogManagement />} />											<Route path='/admin/assign-mentors' element={<AdminAssignMentors />} />
+									<Route path='/admin/instructors' element={<AdminInstructorManagement />} />
+									<Route path='/admin/blogs' element={<AdminBlogManagement />} />
+									<Route path='/admin/courses' element={<AdminCourseManagement />} />
+									<Route path='/admin/assign-mentors' element={<AdminAssignMentors />} />
 									<Route path='/admin/mentorships' element={<AdminMentorAssignments />} />
 									<Route path='/admin/bookings' element={<AdminMentorshipBookings />} />
 									<Route path='/admin/calls' element={<AdminCalls />} />

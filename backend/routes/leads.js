@@ -211,16 +211,29 @@ router.put("/:id", async (req, res) => {
 			return res.status(400).json({ message: "Invalid lead id" });
 		}
 
-		const { status } = req.body;
-		const lead = await Lead.findById(req.params.id);
+		const normalizedStatus = String(req.body?.status || "").trim().toLowerCase();
+		const allowedStatuses = new Set(["new", "contacted", "enrolled", "closed"]);
+		if (!allowedStatuses.has(normalizedStatus)) {
+			return res.status(400).json({ message: "Invalid status value" });
+		}
+
+		// Use findByIdAndUpdate to update only the status field, bypassing full document validation
+		const lead = await Lead.findByIdAndUpdate(
+			req.params.id,
+			{ status: normalizedStatus },
+			{ new: true, runValidators: false }
+		);
 
 		if (!lead) {
 			return res.status(404).json({ message: "Lead not found" });
 		}
 
-		lead.status = status;
-		await lead.save();
+		// For simple status updates (new, contacted, closed), return immediately without lookups
+		if (normalizedStatus !== "enrolled") {
+			return res.json({ lead, message: "Lead status updated successfully" });
+		}
 
+		// Only perform enrollment logic if status is being changed to "enrolled"
 		const User = (await import("../models/User.js")).default;
 		const Course = (await import("../models/Course.js")).default;
 		const course = await resolveLeadCourse(lead, Course);
@@ -229,75 +242,50 @@ router.put("/:id", async (req, res) => {
 			? await User.findOne({ email: normalizedEmail })
 			: null;
 
-		// If status is changed to "Enrolled", automatically enroll the user if they have an account
-		if (status === "Enrolled") {
-			if (!course) {
-				return res.json({
-					lead,
-					enrolled: false,
-					message: "Lead status updated, but matching course was not found for auto-enrollment.",
-				});
-			}
-
-			if (!user) {
-				return res.json({
-					lead,
-					enrolled: false,
-					message: "Lead status updated. Note: Student doesn't have an account yet. They need to register first to access the course.",
-				});
-			}
-
-			const alreadyEnrolled = user.enrolledCourses.find(
-				(courseEnrollment) => courseEnrollment.courseId.toString() === course._id.toString(),
-			);
-
-			if (alreadyEnrolled) {
-				return res.json({
-					lead,
-					enrolled: true,
-					alreadyEnrolled: true,
-					message: "Lead status updated. Student was already enrolled in this course",
-				});
-			}
-
-			user.enrolledCourses.push({
-				courseId: course._id,
-				enrolledAt: Date.now(),
-				progress: 0,
-				completed: false,
+		if (!course) {
+			return res.json({
+				lead,
+				enrolled: false,
+				message: "Lead status updated, but matching course was not found for auto-enrollment.",
 			});
+		}
 
-			await user.save();
-			await Course.findByIdAndUpdate(course._id, { $inc: { students: 1 } });
+		if (!user) {
+			return res.json({
+				lead,
+				enrolled: false,
+				message: "Lead status updated. Note: Student doesn't have an account yet. They need to register first to access the course.",
+			});
+		}
 
+		const alreadyEnrolled = user.enrolledCourses.find(
+			(courseEnrollment) => courseEnrollment.courseId.toString() === course._id.toString(),
+		);
+
+		if (alreadyEnrolled) {
 			return res.json({
 				lead,
 				enrolled: true,
-				message: "Lead status updated and student enrolled in course successfully",
+				alreadyEnrolled: true,
+				message: "Lead status updated. Student was already enrolled in this course",
 			});
 		}
 
-		if (course && user) {
-			const originalCount = user.enrolledCourses.length;
-			user.enrolledCourses = user.enrolledCourses.filter(
-				(courseEnrollment) => courseEnrollment.courseId.toString() !== course._id.toString(),
-			);
+		user.enrolledCourses.push({
+			courseId: course._id,
+			enrolledAt: Date.now(),
+			progress: 0,
+			completed: false,
+		});
 
-			if (user.enrolledCourses.length !== originalCount) {
-				await user.save();
-				if ((course.students || 0) > 0) {
-					await Course.findByIdAndUpdate(course._id, { $inc: { students: -1 } });
-				}
+		await user.save();
+		await Course.findByIdAndUpdate(course._id, { $inc: { students: 1 } });
 
-				return res.json({
-					lead,
-					accessRevoked: true,
-					message: `Lead status updated to ${status}. Course access removed for this student.`,
-				});
-			}
-		}
-
-		res.json({ lead, message: "Lead status updated successfully" });
+		res.json({
+			lead,
+			enrolled: true,
+			message: "Lead status updated and student enrolled in course successfully",
+		});
 	} catch (error) {
 		console.error("Error updating lead:", error);
 		res.status(500).json({ message: "Server error" });

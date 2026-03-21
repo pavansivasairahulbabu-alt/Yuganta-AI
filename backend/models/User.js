@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema({
 				type: Boolean,
 				default: false,
 			},
+				completedVideos: {
+					type: [String],
+					default: [],
+				},
 		},
 	],
 	assignedInstructor: {
