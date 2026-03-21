@@ -9,7 +9,6 @@ export default function CoursesPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [courses, setCourses] = useState([]);
 	const [loading, setLoading] = useState(true);
-	const [enrolling, setEnrolling] = useState({});
 	const { isAuthenticated, token, user, isCourseEnrolled, refreshUser } = useAuth();
 	const navigate = useNavigate();
 
@@ -49,39 +48,6 @@ export default function CoursesPage() {
 	useEffect(() => {
 		fetchCourses();
 	}, []);
-
-	const handleEnroll = async (courseId) => {
-		if (!isAuthenticated) {
-			toast.error("Please log in to enroll");
-			navigate("/login");
-			return;
-		}
-
-		setEnrolling(prev => ({ ...prev, [courseId]: true }));
-		try {
-			const response = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-			});
-
-			const data = await response.json();
-
-			if (response.ok) {
-				toast.success("Successfully enrolled!");
-				if (refreshUser) refreshUser();
-			} else {
-				toast.error(data.message || "Failed to enroll");
-			}
-		} catch (error) {
-			console.error("Enrollment error:", error);
-			toast.error("An error occurred during enrollment");
-		} finally {
-			setEnrolling(prev => ({ ...prev, [courseId]: false }));
-		}
-	};
 
 	// Build the three instructor-added course cards in a fixed order.
 	const normalize = (value = "") => value.toLowerCase().replace(/\s+/g, " ").trim();
@@ -501,25 +467,10 @@ export default function CoursesPage() {
 
 												{/* Enroll Button */}
 												<button
-													disabled={enrolling[course._id]}
-													onClick={() => {
-														if (isAuthenticated) {
-															handleEnroll(course._id);
-														} else {
-															if (pioneer) {
-																navigate("/courses/agentic-ai-pioneer-program");
-															} else if (crash) {
-																navigate("/courses/agentic-ai-crash-course-page");
-															} else if (dsa) {
-																navigate("/courses/dsa-machine-learning#pioneer-enroll-form");
-															} else {
-																handleEnroll(course._id);
-															}
-														}
-													}}
+													onClick={() => navigate(coursePath)}
 													className="block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"
 												>
-													{enrolling[course._id] ? "Enrolling..." : "Enroll Now"}
+													Enroll Now
 												</button>
 											</div>
 										</div>
