@@ -1,0 +1,307 @@
+PROJECT HANDOVER DOCUMENTATION
+
+1. Project Overview
+- Project Name: YugantaAI
+- Purpose: Production EdTech platform for selling and delivering  courses, capturing leads, and managing mentorship workflows for learners.
+- Target Users:
+  - Students/Learners
+  - Instructors
+  - Mentors
+  - Admin
+
+2. Tech Stack
+- Frontend: React 19, Vite, React Router v7, Tailwind CSS
+- Backend: Node.js, Express, JWT auth, helmet, cors, compression, express-rate-limit
+- Database: MongoDB with Mongoose
+-Google OAuth API and Cloudinary API are used
+- Hosting: Frontend on Vercel, Backend on Render
+
+3. GitHub Repository
+- Repository Link: https://github.com/KaryampudiMadhav/MeroSphere.git
+- Branches:
+  - main
+  - yoshitha 
+  - features/t-changes
+  
+- Important Notes:
+  - Project is split into frontend and backend folders.
+  - Backend includes scripts for seeding and diagnostics.
+  - backend/RENDER_SETUP.md currently contains sensitive values in plain text. Rotate credentials and remove secrets from version history.
+
+4. Project Setup (How to Run)
+1) Clone repository
+2) Backend:
+   - cd backend
+   - npm install
+   - create .env 
+   - set required variables: MONGODB_URI, JWT_SECRET
+   - set recommended email variables: BREVO_API_KEY, BREVO_FROM_EMAIL
+   - npm run dev
+3) Frontend:
+   - cd ../frontend
+   - npm install
+   - create .env with VITE_API_URL (if needed)
+   - npm run dev
+4) Open app at http://localhost:5173
+
+Additional requirements:
+- MongoDB connectivity
+- Cloudinary keys for media upload flows
+- Google OAuth client for social login
+
+5. Folder Structure (Important Folders)
+Root:
+- backend/ : API server, models, middleware, routes, scripts
+- frontend/ : React app
+
+Backend:
+- backend/config/ : db, mailer, cloudinary config
+- backend/middleware/ : auth/upload middleware
+- backend/models/ : Mongoose schemas
+- backend/routes/ : API handlers
+- backend/scripts/ : utility/diagnostic scripts
+
+Frontend:
+- frontend/src/components/ : UI components
+- frontend/src/pages/ : page-level views
+- frontend/src/context/ : app state contexts
+- frontend/src/config/ : API config
+- frontend/public/ : static files
+
+6. Backend API Endpoints
+Base prefixes:
+- /api/auth
+- /api/users
+- /api/courses
+- /api/admin
+- /api/instructor-auth
+- /api/mentor-auth
+- /api/blogs
+- /api/mentorship-sessions
+- /api/leads
+- /api/contact
+
+Auth (/api/auth)
+- POST /signup
+- POST /verify-signup-otp
+- POST /login
+- POST /forgot-password
+- POST /reset-password
+- POST /google
+
+Users (/api/users)
+- GET /health
+- DELETE /delete
+- DELETE /delete-account
+- POST /delete-account
+- GET /profile
+- PUT /profile
+- GET /assigned-instructor
+- GET /assigned-mentor
+- POST /enroll/:courseId
+- GET /enrolled
+
+Courses (/api/courses)
+- GET /
+- GET /instructors/public
+- GET /instructor/:instructorId
+- GET /my-courses/list
+- GET /:id
+- POST /
+- POST /instructor/create
+- PUT /:id
+- PUT /instructor/:id
+- DELETE /:id
+- DELETE /instructor/:id
+- POST /instructor/:courseId/modules
+- PUT /instructor/:courseId/modules/:moduleId
+- DELETE /instructor/:courseId/modules/:moduleId
+- POST /instructor/:courseId/modules/:moduleId/videos
+- PUT /instructor/:courseId/modules/:moduleId/videos/:videoId
+- DELETE /instructor/:courseId/modules/:moduleId/videos/:videoId
+
+Admin (/api/admin)
+- POST /login
+- GET /mentors
+- POST /mentors
+- PUT /mentors/:id/activate
+- PUT /mentors/:id/deactivate
+- PUT /mentors/:id
+- DELETE /mentors/:id
+- GET /mentorship-sessions
+- PUT /mentorship-sessions/:id/assign-mentor
+- GET /users
+- POST /assign-instructor
+- POST /instructors
+- GET /instructors
+- PUT /instructors/:id/approve
+- PUT /instructors/:id/deactivate
+- PUT /instructors/:id/activate
+- DELETE /instructors/:id
+- POST /assign-mentor
+- GET /blogs
+- POST /blogs
+- PUT /blogs/:id
+- DELETE /blogs/:id
+- PUT /blogs/:id/toggle-featured
+- POST /upload-instructor-photo
+- POST /upload-image
+
+Instructor Auth (/api/instructor-auth)
+- POST /register
+- POST /setup-password
+- POST /forgot-password
+- POST /reset-password
+- POST /login
+
+Mentor Auth (/api/mentor-auth)
+- POST /forgot-password
+- POST /reset-password
+- POST /login
+
+Blogs (/api/blogs)
+- GET /
+- GET /featured
+- GET /:slug
+- POST /:slug/like
+
+Mentorship Sessions (/api/mentorship-sessions)
+- POST /
+- GET /user
+- GET /booked-slots
+- GET /instructor
+- PUT /:id/meeting-link
+- PUT /:id/status
+- PUT /:id/reject
+- PUT /:id/reschedule
+- GET /mentor/:id
+- PUT /:id/complete
+- PATCH /:id/complete
+- GET /mentor-bookings
+- PUT /:id/cancel
+- PUT /:id/user-reschedule
+- PATCH /:id/reject
+- PATCH /:id/reschedule
+- PUT /:id/add-meet-link
+
+Leads (/api/leads)
+- POST /
+- GET /
+- PUT /:id
+
+Contact (/api/contact)
+- POST /
+
+Request/response examples:
+- Login request: {"email":"user@example.com","password":"..."}
+- Login response: {"token":"<jwt>","user":{...}}
+- Enroll: POST /api/users/enroll/:courseId with Bearer token
+- Lead create: {"name","email","phone","courseName",...}
+- Contact create: {"name","email","phone","message"}
+
+7. Database Structure
+- users: fullName, email, password, verification/otp fields, enrolledCourses, assignedInstructor, assignedMentor
+- instructors: name, email, password, bio, photo, expertise, approval/status, courses
+- mentors: name, expertise, email, password, bio, photo, approval/status, assignedSessions
+- courses: title, description, instructor data, category/level/pricing, modules/videos, media links
+- blogs: title, slug, excerpt, content, author, category, tags, featured, likes/views
+- leads: contact details, course info, preferred mode/time, status/type/source
+- mentorshipsessions: user/instructor/mentor links, date/time, notes, meeting link, status lifecycle fields
+
+8. Environment Variables (Names Only)
+Backend:
+- PORT
+- MONGODB_URI
+- JWT_SECRET
+- NODE_ENV
+- BREVO_API_KEY
+- BREVO_FROM_EMAIL
+- FRONTEND_URL
+- GOOGLE_CLIENT_ID
+- API_RATE_LIMIT_MAX
+- AUTH_RATE_LIMIT_MAX
+- MONGO_MAX_POOL_SIZE
+- MONGO_MIN_POOL_SIZE
+- CLOUDINARY_CLOUD_NAME
+- CLOUDINARY_API_KEY
+- CLOUDINARY_API_SECRET
+- 
+- INSTRUCTOR_TOKEN
+- MONGO_URI
+
+Frontend:
+- VITE_API_URL
+- VITE_GOOGLE_CLIENT_ID
+- VITE_CLOUDINARY_CLOUD_NAME
+- VITE_CLOUDINARY_UPLOAD_PRESET
+
+9. Features Implemented
+- Multi-role auth and OTP flows
+- Google OAuth login
+- Course and module/video management
+- Enrollment APIs and checks
+- Mentorship booking and session management
+- Admin management APIs (users, instructors, mentors, sessions, blogs)
+- Lead capture and contact form flows
+- Security middleware (CORS, helmet, rate limiting, JWT)
+- Deployment configs and Dockerfiles
+
+10. Pending Work
+- Add OpenAPI/Swagger docs
+- Add robust automated tests
+- Replace hardcoded-style admin auth approach with hardened strategy
+- Normalize mentorship status transitions
+- Add payment integration for business use-cases
+- Add observability and alerting
+- Improve role-based authorization consistency
+
+11. Known Bugs / Issues
+- Sensitive values are present in a setup doc and must be rotated/removed.
+- OTP emails fail when Brevo vars are missing.
+- Frontend/backend URL mismatches can cause CORS and auth issues.
+- Session status enum overlap may create edge-case logic issues.
+
+12. Deployment
+Frontend:
+- Vercel build: npm run build
+- Output: dist
+- SPA rewrite to index.html
+
+Backend:
+- Render-hosted Node/Express API
+- Dockerfile available
+- Requires environment variables on hosting platform
+
+Database:
+- MongoDB Atlas
+
+Domain:
+- Frontend on Vercel domain, backend on Render URL used via VITE_API_URL
+
+Deployment flow:
+1) Push to GitHub
+2) Deploy backend on Render with env vars
+3) Deploy frontend on Vercel with VITE_API_URL set
+4) Validate auth, emails, CORS, media, and mentorship flows
+
+13. Accounts Used
+- MongoDB Atlas
+- GitHub
+- Vercel
+- Render
+- Brevo
+- Google Cloud Console (OAuth)
+- Cloudinary
+
+
+Credentials are stored in environment variables.
+
+14. Additional Notes
+- This is a production/business project. Treat security and uptime as critical.
+- Immediate hardening recommended:
+  - Rotate exposed secrets
+  - Remove secrets from docs/history
+  - Enforce branch protection and PR reviews
+  - Add CI checks before merges
+- Frontend and backend can deploy independently; keep API contracts version-safe.
+

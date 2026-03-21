@@ -45,16 +45,24 @@ if (process.env.BREVO_API_KEY) {
 const app = express();
 app.set("trust proxy", 1);
 
-// Connect to MongoDB
-connectDB();
+// Initialize server
+const initializeServer = async () => {
+	// Connect to MongoDB
+	try {
+		await connectDB();
+	} catch (error) {
+		console.error("❌ DATABASE CONNECTION FAILED");
+		console.error(error.message);
+		process.exit(1);
+	}
 
-// CORS configuration
+	// CORS configuration
 const envOrigins = (process.env.FRONTEND_URL || '')
 	.split(',')
 	.map(url => url.trim())
 	.filter(Boolean);
 const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-const prodDefaultOrigins = ['https://yuganthgit aai.vercel.app', 'https://yugantaai.com'];
+const prodDefaultOrigins = ['https://yugantha-ai.vercel.app', 'https://yugantaai.com'];
 
 const allowedOrigins = [
 	...(process.env.NODE_ENV === "production" ? prodDefaultOrigins : defaultDevOrigins),
@@ -158,7 +166,9 @@ const MAX_PORT_RETRIES = 10;
 
 const startServer = (port, retriesLeft = MAX_PORT_RETRIES) => {
 	const server = app.listen(port, () => {
-		console.log(`Server running on port ${port}`);
+		console.log(`✅ Express server running on port ${port}`);
+		console.log(`🌐 API: http://localhost:${port}`);
+		console.log(`📊 Health check: http://localhost:${port}/`);
 	});
 
 	server.keepAliveTimeout = 65000;
@@ -176,4 +186,12 @@ const startServer = (port, retriesLeft = MAX_PORT_RETRIES) => {
 	});
 };
 
-startServer(PORT);
+	// Start server after DB connection
+	startServer(PORT);
+};
+
+// Execute initialization
+initializeServer().catch((err) => {
+	console.error("❌ Failed to initialize server:", err);
+	process.exit(1);
+});

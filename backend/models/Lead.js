@@ -54,8 +54,9 @@ const leadSchema = new mongoose.Schema({
 	},
 	status: {
 		type: String,
-		enum: ["New", "Contacted", "Enrolled", "Closed"],
-		default: "New",
+		enum: ["new", "contacted", "enrolled", "closed", "New", "Contacted", "Enrolled", "Closed"],
+		default: "new",
+		set: (value) => String(value || "new").trim().toLowerCase(),
 	},
 	type: {
 		type: String, // "Brochure" or "Enrollment"

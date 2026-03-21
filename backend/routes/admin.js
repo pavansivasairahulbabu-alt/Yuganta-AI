@@ -5,6 +5,7 @@ import Mentor from "../models/Mentor.js";
 import User from "../models/User.js";
 import Instructor from "../models/Instructor.js";
 import Blog from "../models/Blog.js";
+import Course from "../models/Course.js";
 import MentorshipSession from "../models/MentorshipSession.js";
 import sgMail from "../config/mailer.js";
 import upload from "../middleware/upload.js";
@@ -737,6 +738,91 @@ router.put("/blogs/:id/toggle-featured", verifyAdmin, async (req, res) => {
 	}
 });
 
+// ==================== COURSE MANAGEMENT ROUTES ====================
+
+// Get all courses (admin) - with instructor info
+router.get("/courses", verifyAdmin, async (req, res) => {
+	try {
+		const courses = await Course.find()
+			.populate("instructorId", "name email expertise")
+			.sort({ createdAt: -1 });
+		res.json(courses);
+	} catch (error) {
+		console.error("Get courses error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
+// Update course (admin can edit course details, modules, content, thumbnail)
+router.put("/courses/:id", verifyAdmin, async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { title, description, category, level, thumbnail, image, price, isFree, modules, instructor, instructorId } = req.body;
+
+		console.log("📝 Updating course:", id);
+		console.log("📦 Update payload:", { title, description, category, level, modules: modules?.length });
+
+		const course = await Course.findById(id);
+		if (!course) {
+			return res.status(404).json({ message: "Course not found" });
+		}
+
+		// Update basic fields
+		if (title !== undefined) course.title = title;
+		if (description !== undefined) course.description = description;
+		if (category !== undefined) course.category = category;
+		if (level !== undefined) course.level = level;
+		if (thumbnail !== undefined) course.thumbnail = thumbnail;
+		if (image !== undefined) course.image = image;
+		if (price !== undefined) course.price = price;
+		if (isFree !== undefined) course.isFree = isFree;
+		if (instructor !== undefined) course.instructor = instructor;
+		
+		// Handle instructorId: set to null if empty string or invalid, otherwise use provided value
+		if (instructorId !== undefined) {
+			if (typeof instructorId === 'string' && instructorId.trim()) {
+				course.instructorId = instructorId.trim();
+			} else if (instructorId === null || instructorId === '') {
+				course.instructorId = null;
+			} else if (instructorId) {
+				course.instructorId = instructorId;
+			}
+		}
+
+		// Update modules if provided
+		if (modules !== undefined && Array.isArray(modules)) {
+			course.modules = modules;
+		}
+
+		await course.save();
+
+		// Populate instructor info before sending response
+		const updatedCourse = await Course.findById(id).populate("instructorId", "name email expertise");
+
+		res.json({ message: "Course updated successfully", course: updatedCourse });
+	} catch (error) {
+		console.error("❌ Update course error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
+// Delete course (admin)
+router.delete("/courses/:id", verifyAdmin, async (req, res) => {
+	try {
+		const { id } = req.params;
+		const course = await Course.findByIdAndDelete(id);
+
+		if (!course) {
+			return res.status(404).json({ message: "Course not found" });
+		}
+
+		res.json({ message: "Course deleted successfully", courseTitle: course.title });
+	} catch (error) {
+		console.error("Delete course error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
 // Upload instructor profile photo (memory storage → base64 data URL, no Cloudinary needed)
 router.post("/upload-instructor-photo", verifyAdmin, memStorage.single("photo"), async (req, res) => {
 	try {
@@ -766,6 +852,109 @@ router.post("/upload-image", verifyAdmin, upload.single("image"), async (req, re
 		});
 	} catch (error) {
 		console.error("Image upload error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
+// Upload video for module
+router.post("/upload-video", verifyAdmin, upload.single("video"), async (req, res) => {
+	try {
+		if (!req.file) {
+			return res.status(400).json({ message: "No video file provided" });
+		}
+
+		// Extract duration if available (Cloudinary provides this for videos)
+		const duration = req.file.duration ? Math.round(req.file.duration) : 0;
+
+		res.json({
+			message: "Video uploaded successfully",
+			url: req.file.path,
+			publicId: req.file.filename,
+			duration: duration,
+			thumbnail: req.file.thumbnail || null,
+		});
+	} catch (error) {
+		console.error("Video upload error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
+// Add video to module
+router.post("/courses/:courseId/modules/:moduleId/videos", verifyAdmin, async (req, res) => {
+	try {
+		const { courseId, moduleId } = req.params;
+		const { title, url, publicId, duration, description } = req.body;
+
+		const course = await Course.findById(courseId);
+
+		if (!course) {
+			return res.status(404).json({ message: "Course not found" });
+		}
+
+		const moduleIndex = course.modules.findIndex(
+			m => m._id.toString() === moduleId
+		);
+
+		if (moduleIndex === -1) {
+			return res.status(404).json({ message: "Module not found" });
+		}
+
+		const newVideo = {
+			title: title || "Untitled Video",
+			url: url || "",
+			publicId: publicId || "",
+			duration: duration || "",
+			description: description || "",
+			order: (course.modules[moduleIndex].videos?.length || 0) + 1,
+		};
+
+		course.modules[moduleIndex].videos = course.modules[moduleIndex].videos || [];
+		course.modules[moduleIndex].videos.push(newVideo);
+
+		await course.save();
+
+		res.json({
+			message: "Video added successfully",
+			course,
+			video: course.modules[moduleIndex].videos[course.modules[moduleIndex].videos.length - 1],
+		});
+	} catch (error) {
+		console.error("Error adding video:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
+// Delete video from module
+router.delete("/courses/:courseId/modules/:moduleId/videos/:videoId", verifyAdmin, async (req, res) => {
+	try {
+		const { courseId, moduleId, videoId } = req.params;
+
+		const course = await Course.findById(courseId);
+
+		if (!course) {
+			return res.status(404).json({ message: "Course not found" });
+		}
+
+		const moduleIndex = course.modules.findIndex(
+			m => m._id.toString() === moduleId
+		);
+
+		if (moduleIndex === -1) {
+			return res.status(404).json({ message: "Module not found" });
+		}
+
+		course.modules[moduleIndex].videos = (course.modules[moduleIndex].videos || []).filter(
+			v => v._id.toString() !== videoId
+		);
+
+		await course.save();
+
+		res.json({
+			message: "Video deleted successfully",
+			course,
+		});
+	} catch (error) {
+		console.error("Error deleting video:", error);
 		res.status(500).json({ message: "Server error", details: error.message });
 	}
 });

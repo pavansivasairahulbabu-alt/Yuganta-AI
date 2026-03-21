@@ -9,6 +9,12 @@ export default function AdminCalls() {
 	const [loading, setLoading] = useState(true);
 	const [calls, setCalls] = useState([]);
 	const [searchQuery, setSearchQuery] = useState("");
+	const normalizeStatus = (status) => String(status || "new").trim().toLowerCase();
+	const formatStatus = (status) => {
+		const normalized = normalizeStatus(status);
+		if (normalized === "contacted") return "Contacted";
+		return "New";
+	};
 
 	useEffect(() => {
 		const authed = localStorage.getItem("adminAuthed") === "true";
@@ -53,26 +59,28 @@ export default function AdminCalls() {
 	const handleStatusUpdate = async (id, newStatus) => {
 		try {
 			const token = localStorage.getItem("adminToken");
+			const normalizedStatus = normalizeStatus(newStatus);
 			const response = await fetch(`${API_URL}/api/leads/${id}`, {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({ status: newStatus }),
+				body: JSON.stringify({ status: normalizedStatus }),
 			});
 
 			if (!response.ok) {
-				throw new Error("Failed to update status");
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || "Failed to update status");
 			}
 
 			setCalls((prev) => prev.map((call) => (
-				call._id === id ? { ...call, status: newStatus } : call
+				call._id === id ? { ...call, status: normalizedStatus } : call
 			)));
 			toast.success("Call status updated");
 		} catch (error) {
 			console.error("Error updating call status:", error);
-			toast.error("Unable to update status");
+			toast.error(error.message || "Unable to update status");
 		}
 	};
 
@@ -94,7 +102,11 @@ export default function AdminCalls() {
 			<div className="max-w-7xl mx-auto px-6">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 					<div>
+<<<<<<< HEAD
 						<h1 className="text-3xl font-bold text-[var(--text-color)] dark:bg-clip-text dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-blue-400">Calls</h1>
+=======
+						<h1 className="text-4xl md:text-5xl font-bold">Calls</h1>
+>>>>>>> origin/yoshitha
 						<p className="text-gray-400 mt-2">Talk-to-Expert responses from website visitors</p>
 					</div>
 					<input
@@ -138,21 +150,21 @@ export default function AdminCalls() {
 											<td className="px-4 py-3 text-gray-300 text-sm">{call.preferredContactMode || "-"}</td>
 											<td className="px-4 py-3 text-gray-300 text-sm">{call.preferredContactTime || "-"}</td>
 											<td className="px-4 py-3">
-												<span className={`px-3 py-1 rounded-full text-xs font-medium border ${call.status === "Contacted"
-													? "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
-													: "bg-blue-500/10 border-blue-500/20 text-blue-400"
+												<span className={`px-3 py-1 rounded-full text-xs font-medium border ${normalizeStatus(call.status) === "contacted"
+														? "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"
+														: "bg-blue-500/10 border-blue-500/20 text-blue-400"
 												}`}>
-													{call.status || "New"}
+														{formatStatus(call.status)}
 												</span>
 											</td>
 											<td className="px-4 py-3">
 												<select
 													className="bg-[var(--card-bg)] border border-white/10 rounded px-2 py-1 text-xs outline-none focus:border-blue-500"
-													value={call.status || "New"}
+													value={normalizeStatus(call.status) === "contacted" ? "contacted" : "new"}
 													onChange={(e) => handleStatusUpdate(call._id, e.target.value)}
 												>
-													<option value="New">New</option>
-													<option value="Contacted">Contacted</option>
+													<option value="new">New</option>
+													<option value="contacted">Contacted</option>
 												</select>
 											</td>
 										</tr>

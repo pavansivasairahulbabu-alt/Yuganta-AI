@@ -14,6 +14,7 @@ export default function AdminNavbar() {
     { label: "Instructor Management", path: "/admin/instructors" },
     { label: "Registrations", path: "/admin/registrations" },
     { label: "Assign Mentors", path: "/admin/assign-mentors" },
+    { label: "Courses", path: "/admin/courses" },
     { label: "Blog Management", path: "/admin/blogs" },
   ];
 

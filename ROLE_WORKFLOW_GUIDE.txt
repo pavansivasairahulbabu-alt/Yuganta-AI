@@ -1,0 +1,141 @@
+ROLE WORKFLOW GUIDE
+
+Project: MeroSphere (YuganthaAI)
+Purpose: Clear role-based business and platform workflow for operations and onboarding.
+
+==================================================
+1) USER (STUDENT/LEARNER) WORKFLOW
+==================================================
+
+A. Onboarding and Authentication
+1. User opens website and explores courses.
+2. User signs up with name, email, and password.
+3. System sends OTP to user email.
+4. User verifies OTP to activate account.
+5. User logs in (email/password or Google login).
+
+B. Learning Journey
+1. User browses course catalog.
+2. User opens course detail page.
+3. User enrolls in course.
+4. Enrollment is saved to user profile and enrolled course list.
+5. User continues learning through modules and videos.
+
+C. Mentorship Journey
+1. User books a mentorship session.
+2. System validates date/time rules and booking constraints.
+3. Session is created and visible in user bookings.
+4. User can:
+   - view status
+   - cancel booking
+   - request reschedule
+5. User joins session using meeting link when provided.
+
+D. Support and Sales Touchpoints
+1. User can submit contact form.
+2. User can submit lead form (brochure/counseling intent).
+3. Team follows up and converts lead to enrollment.
+
+==================================================
+2) INSTRUCTOR WORKFLOW
+==================================================
+
+A. Account and Access
+1. Admin creates/approves instructor account.
+2. Instructor sets password (setup/reset flow).
+3. Instructor logs in from instructor auth flow.
+
+B. Course Delivery Workflow
+1. Instructor creates a course.
+2. Instructor adds and edits:
+   - title, description, category, level
+   - thumbnail and brochure
+   - modules and videos
+3. Instructor updates or deletes own courses.
+4. Course content is published for users to enroll.
+
+C. Mentorship Coordination
+1. Instructor views instructor-side mentorship sessions.
+2. Instructor updates session status when needed.
+3. Instructor can add meeting links.
+4. Instructor can reject/reschedule with reason.
+
+==================================================
+3) MENTOR WORKFLOW
+==================================================
+
+A. Account and Access
+1. Admin creates or enables mentor account.
+2. Mentor sets password through forgot/reset flow.
+3. Mentor logs in via mentor auth.
+
+B. Session Execution
+1. Mentor receives assigned sessions.
+2. Mentor checks booked sessions and user context.
+3. Mentor adds meeting link if required.
+4. Mentor conducts session.
+5. Mentor marks session complete.
+6. If needed, mentor can reject/reschedule with reason.
+
+==================================================
+4) ADMIN WORKFLOW
+==================================================
+
+A. Platform Governance
+1. Admin logs in to admin dashboard.
+2. Admin monitors users, courses, mentors, instructors, and sessions.
+
+B. Instructor Management
+1. Create instructor records.
+2. Approve or deactivate instructors.
+3. Activate/reactivate instructors.
+4. Delete instructors if needed.
+5. Assign instructor to users.
+
+C. Mentor Management
+1. Create mentor records.
+2. Activate/deactivate mentors.
+3. Update mentor profile and expertise.
+4. Delete mentors if needed.
+5. Assign mentors to users or sessions.
+
+D. Mentorship Operations
+1. View all mentorship sessions.
+2. Assign mentor for pending requests.
+3. Track status and exceptions (cancel/reject/reschedule).
+
+E. Content and Growth Management
+1. Manage blogs (create, update, delete, feature).
+2. Upload media assets (images/photos).
+3. Track leads and update lead status.
+4. Coordinate follow-ups for conversion.
+
+==================================================
+5) END-TO-END BUSINESS FLOW
+==================================================
+
+1. Marketing brings visitor to website.
+2. Visitor becomes user via signup/login.
+3. User enrolls in course.
+4. Admin ensures user is mapped to right instructor/mentor.
+5. Instructor delivers structured course content.
+6. Mentor provides personalized session support.
+7. Admin and operations track outcomes:
+   - enrollment
+   - engagement
+   - mentorship completion
+   - lead conversion
+8. Continuous feedback improves curriculum and support quality.
+
+==================================================
+6) OPERATIONAL CHECKPOINTS (PRODUCTION)
+==================================================
+
+1. Auth and OTP reliability (email delivery, expiry handling).
+2. Correct environment configuration for frontend/backend URLs.
+3. Role-based access controls tested for all protected routes.
+4. Mentorship status transitions monitored for consistency.
+5. Lead and contact response SLAs tracked by operations.
+6. Security hygiene maintained (no secrets in docs/repo).
+
+

@@ -15,10 +15,29 @@ export default function CoursesPage() {
 
 	const fetchCourses = async () => {
 		try {
-			const response = await fetch(`${API_URL}/api/courses`);
+			// Add cache-busting parameter to force fresh data
+			const response = await fetch(`${API_URL}/api/courses?t=${Date.now()}`);
 			if (response.ok) {
 				const data = await response.json();
 				setCourses(data);
+				
+				// Log pioneer course data for debugging
+				const pioneer = data.find(
+					(course) =>
+						course.title &&
+						course.title.toLowerCase().includes("agentic") &&
+						course.title.toLowerCase().includes("pioneer")
+				);
+				if (pioneer) {
+					console.log("✅ Pioneer course found:", {
+						title: pioneer.title,
+						thumbnail: pioneer.thumbnail,
+						videoUrl: pioneer.videoUrl,
+						id: pioneer._id
+					});
+				} else {
+					console.warn("⚠️ Pioneer course not found in data");
+				}
 			}
 		} catch (error) {
 			console.error("Error fetching courses:", error);
@@ -467,7 +486,8 @@ export default function CoursesPage() {
 											className='bg-[var(--card-bg)] border border-[var(--border-color)]/80 rounded-2xl overflow-hidden hover:shadow-[0_12px_36px_rgba(139,92,246,0.22)] hover:border-[rgba(139,92,246,0.45)] transition-all duration-300 group backdrop-blur-sm'>
 											{/* Video/Thumbnail Section */}
 											<div className='relative h-44 overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900'>
-												{course.videoUrl ? (
+												{pioneer && console.log(`Pioneer course thumbnail: ${course.thumbnail}`)}
+												{course.videoUrl && !pioneer ? (
 													<video
 														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
 														muted
@@ -483,8 +503,12 @@ export default function CoursesPage() {
 												) : courseThumbnail ? (
 													<img
 														src={courseThumbnail}
-														alt={course.title}
+														alt={courseTitle}
 														className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
+														onError={(e) => {
+															console.warn(`Failed to load image: ${courseThumbnail}`);
+															e.target.style.display = 'none';
+														}}
 													/>
 												) : (
 													<div className='w-full h-full flex items-center justify-center text-6xl'>

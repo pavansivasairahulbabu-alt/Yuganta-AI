@@ -1,15 +1,110 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import API_URL from "../config/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function CourseDetailPage() {
 	const { id } = useParams();
+	const { token } = useAuth();
 	const [course, setCourse] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [selectedVideo, setSelectedVideo] = useState(null);
 	const [activeModule, setActiveModule] = useState(null);
 	const [completedVideos, setCompletedVideos] = useState(new Set());
 	const [moduleProgress, setModuleProgress] = useState({});
+	const [videoWatchPercent, setVideoWatchPercent] = useState({});
+	const [videoLoadError, setVideoLoadError] = useState("");
+	const [videoSourceIndex, setVideoSourceIndex] = useState(0);
+	const maxAllowedPlaybackTimeRef = useRef(0);
+	const selectedVideoElementRef = useRef(null);
+
+	const normalizeVideoUrl = (url) => {
+		if (!url || typeof url !== "string") return "";
+		let cleaned = url.trim();
+		cleaned = cleaned.replace(/\s+/g, "");
+		if (cleaned.startsWith("//")) cleaned = `https:${cleaned}`;
+		if (cleaned.startsWith("res.cloudinary.com/")) cleaned = `https://${cleaned}`;
+		if (cleaned.startsWith("http://")) cleaned = cleaned.replace("http://", "https://");
+		return cleaned;
+	};
+
+	const resolveVideoUrl = (video) => {
+		const directUrl = normalizeVideoUrl(video?.url || "");
+		if (directUrl) return directUrl;
+
+		const publicId = typeof video?.publicId === "string" ? video.publicId.trim() : "";
+		if (!publicId) return "";
+
+		const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "daudlyq2g";
+		return `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
+	};
+
+	const resolveVideoSources = (video) => {
+		const sources = [];
+		const directUrl = resolveVideoUrl(video);
+		const publicId = typeof video?.publicId === "string" ? video.publicId.trim() : "";
+		const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "daudlyq2g";
+
+		if (directUrl) {
+			sources.push(directUrl);
+			if (directUrl.includes("/video/upload/")) {
+				sources.push(
+					directUrl.replace(
+						"/video/upload/",
+						"/video/upload/f_mp4,vc_h264,ac_aac,fl_progressive/",
+					),
+				);
+			}
+		}
+
+		if (publicId) {
+			sources.push(
+				`https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,vc_h264,ac_aac,fl_progressive/${publicId}.mp4`,
+			);
+			sources.push(`https://res.cloudinary.com/${cloudName}/video/upload/f_auto/${publicId}`);
+			sources.push(`https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`);
+		}
+
+		return [...new Set(sources.filter(Boolean))];
+	};
+
+	const getVideoKey = (moduleIndex, videoIndex, video) => {
+		const urlPart = resolveVideoUrl(video);
+		const orderPart = Number(video?.order) || videoIndex + 1;
+		return `${moduleIndex}:${orderPart}:${urlPart || (video?.title || "untitled")}`;
+	};
+
+	const selectedVideoIndex = useMemo(() => {
+		if (activeModule === null || !course?.modules?.[activeModule]?.videos || !selectedVideo) {
+			return -1;
+		}
+
+		const selectedPublicId =
+			typeof selectedVideo?.publicId === "string" ? selectedVideo.publicId.trim() : "";
+		if (selectedPublicId) {
+			const byPublicId = course.modules[activeModule].videos.findIndex((video) => {
+				const moduleVideoPublicId =
+					typeof video?.publicId === "string" ? video.publicId.trim() : "";
+				return moduleVideoPublicId && moduleVideoPublicId === selectedPublicId;
+			});
+			if (byPublicId >= 0) return byPublicId;
+		}
+
+		return course.modules[activeModule].videos.findIndex(
+			(video) => resolveVideoUrl(video) === normalizeVideoUrl(selectedVideo?.url || "") && (video?.title || "") === (selectedVideo?.title || ""),
+		);
+	}, [course, activeModule, selectedVideo]);
+
+	const selectedVideoKey = useMemo(() => {
+		if (activeModule === null || selectedVideoIndex < 0 || !selectedVideo) return "";
+		return getVideoKey(activeModule, selectedVideoIndex, selectedVideo);
+	}, [activeModule, selectedVideoIndex, selectedVideo]);
+
+	const selectedVideoWatched = selectedVideoKey ? (videoWatchPercent[selectedVideoKey] || 0) : 0;
+	const selectedVideoCanComplete = selectedVideoWatched >= 75;
+	const selectedVideoSources = useMemo(() => resolveVideoSources(selectedVideo), [selectedVideo]);
+	const activeVideoSource = selectedVideoSources[videoSourceIndex] || "";
 
 	useEffect(() => {
 		fetchCourse();
@@ -28,7 +123,25 @@ export default function CourseDetailPage() {
 				const firstModule = data.modules[0];
 				setActiveModule(0);
 				if (firstModule.videos && firstModule.videos.length > 0) {
-					setSelectedVideo(firstModule.videos[0]);
+					setVideoLoadError("");
+					setVideoSourceIndex(0);
+					setSelectedVideo({
+						...firstModule.videos[0],
+						url: resolveVideoUrl(firstModule.videos[0]),
+					});
+				}
+			}
+
+			if (token) {
+				const progressResponse = await fetch(`${API_URL}/api/users/progress/${id}`, {
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				if (progressResponse.ok) {
+					const progressData = await progressResponse.json();
+					setCompletedVideos(new Set(progressData.completedVideos || []));
 				}
 			}
 		} catch (error) {
@@ -38,26 +151,80 @@ export default function CourseDetailPage() {
 	};
 
 	const handleVideoSelect = (video, moduleIndex) => {
-		setSelectedVideo(video);
+		setVideoLoadError("");
+		setVideoSourceIndex(0);
+		setSelectedVideo({
+			...video,
+			url: resolveVideoUrl(video),
+		});
 		setActiveModule(moduleIndex);
 	};
 
-	const markVideoCompleted = (videoUrl, moduleIndex) => {
-		const videoKey = `${moduleIndex}-${videoUrl}`;
-		if (!completedVideos.has(videoKey)) {
-			const newCompletedVideos = new Set(completedVideos);
-			newCompletedVideos.add(videoKey);
-			setCompletedVideos(newCompletedVideos);
-			
-			// Update module progress
-			if (course.modules[moduleIndex]) {
-				const totalVideos = course.modules[moduleIndex].videos?.length || 0;
-				const completedInModule = Array.from(newCompletedVideos)
-					.filter(key => key.startsWith(`${moduleIndex}-`)).length;
-				const progress = totalVideos > 0 ? (completedInModule / totalVideos) * 100 : 0;
-				setModuleProgress({ ...moduleProgress, [moduleIndex]: progress });
+	const markVideoCompleted = async () => {
+		if (!selectedVideoKey) return;
+		if (!selectedVideoCanComplete) {
+			toast.error("Watch at least 75% of this video to mark it complete");
+			return;
+		}
+
+		if (completedVideos.has(selectedVideoKey)) return;
+
+		const newCompletedVideos = new Set(completedVideos);
+		newCompletedVideos.add(selectedVideoKey);
+		setCompletedVideos(newCompletedVideos);
+
+		if (token) {
+			try {
+				await fetch(`${API_URL}/api/users/progress/${id}`, {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						videoKey: selectedVideoKey,
+						markComplete: true,
+					}),
+				});
+			} catch (error) {
+				console.error("Error saving video completion:", error);
 			}
 		}
+
+		toast.success("Video marked as complete");
+	};
+
+	const handleVideoTimeUpdate = (event) => {
+		if (!selectedVideoKey) return;
+		const duration = event.target.duration;
+		if (!duration || Number.isNaN(duration) || duration <= 0) return;
+		maxAllowedPlaybackTimeRef.current = Math.max(maxAllowedPlaybackTimeRef.current, event.target.currentTime);
+		const watched = (event.target.currentTime / duration) * 100;
+		setVideoWatchPercent((prev) => ({
+			...prev,
+			[selectedVideoKey]: Math.max(prev[selectedVideoKey] || 0, watched),
+		}));
+	};
+
+	const handleVideoSeeking = (event) => {
+		const player = event.target;
+		if (!player) return;
+		// Allow backward seeking, but block jumping ahead of watched position.
+		if (player.currentTime <= maxAllowedPlaybackTimeRef.current + 0.25) return;
+		player.currentTime = maxAllowedPlaybackTimeRef.current;
+	};
+
+	const handleVideoError = () => {
+		if (videoSourceIndex + 1 < selectedVideoSources.length) {
+			setVideoSourceIndex((prev) => prev + 1);
+			setVideoLoadError(
+				`Primary source failed. Trying fallback ${videoSourceIndex + 2}/${selectedVideoSources.length}...`,
+			);
+			return;
+		}
+
+		setVideoLoadError(activeVideoSource || selectedVideo?.url || "Video URL is empty");
+		toast.error("Video failed to load. Please re-upload this video.");
 	};
 
 	const getOverallProgress = () => {
@@ -65,6 +232,34 @@ export default function CourseDetailPage() {
 		const totalVideos = course.modules.reduce((sum, m) => sum + (m.videos?.length || 0), 0);
 		return totalVideos > 0 ? (completedVideos.size / totalVideos) * 100 : 0;
 	};
+
+	useEffect(() => {
+		if (!course?.modules) return;
+		const nextModuleProgress = {};
+		course.modules.forEach((module, moduleIndex) => {
+			const moduleVideos = module?.videos || [];
+			const totalVideos = moduleVideos.length;
+			if (totalVideos === 0) {
+				nextModuleProgress[moduleIndex] = 0;
+				return;
+			}
+
+			const completedCount = moduleVideos.reduce((count, video, videoIndex) => {
+				const key = getVideoKey(moduleIndex, videoIndex, video);
+				return completedVideos.has(key) ? count + 1 : count;
+			}, 0);
+
+			nextModuleProgress[moduleIndex] = (completedCount / totalVideos) * 100;
+		});
+
+		setModuleProgress(nextModuleProgress);
+	}, [course, completedVideos]);
+
+	useEffect(() => {
+		setVideoSourceIndex(0);
+		setVideoLoadError("");
+		maxAllowedPlaybackTimeRef.current = 0;
+	}, [selectedVideo?.publicId, selectedVideo?.url, selectedVideo?.title]);
 
 	if (loading) {
 		return (
@@ -189,27 +384,45 @@ export default function CourseDetailPage() {
 								<div>
 									<div className='relative bg-black aspect-video'>
 										<video
-											key={selectedVideo.url}
+											key={activeVideoSource || selectedVideo.url}
 											controls
+											playsInline
+											preload='metadata'
 											className='w-full h-full'
-											src={selectedVideo.url}
-											onEnded={() => markVideoCompleted(selectedVideo.url, activeModule)}>
+											src={activeVideoSource || selectedVideo.url}
+											ref={selectedVideoElementRef}
+											onError={handleVideoError}
+											onLoadedData={(event) => {
+												maxAllowedPlaybackTimeRef.current = event.target.currentTime || 0;
+												setVideoLoadError("");
+											}}
+											onSeeking={handleVideoSeeking}
+											onTimeUpdate={handleVideoTimeUpdate}>
 												Your browser does not support the video tag.
 											</video>
 										</div>
 										<div className='p-6'>
+										{videoLoadError && (
+											<div className='mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm'>
+												<div className='font-semibold mb-1'>Unable to play this video</div>
+												<div className='break-all text-xs'>{videoLoadError}</div>
+											</div>
+										)}
 										<div className='flex items-start justify-between mb-4'>
 											<h2 className='text-2xl font-bold text-[var(--text-color)] flex-1'>
 												{selectedVideo.title}
 											</h2>
 											<button
-												onClick={() => markVideoCompleted(selectedVideo.url, activeModule)}
+												onClick={markVideoCompleted}
+												disabled={!completedVideos.has(selectedVideoKey) && !selectedVideoCanComplete}
 												className={`ml-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
-													completedVideos.has(`${activeModule}-${selectedVideo.url}`)
+													completedVideos.has(selectedVideoKey)
 														? 'bg-green-500/20 text-green-400 border border-green-500/40'
-														: 'bg-[#00BCD4]/10 text-[#00BCD4] border border-[#00BCD4]/40 hover:bg-[#00BCD4]/20'
+														: selectedVideoCanComplete
+															? 'bg-[#00BCD4]/10 text-[#00BCD4] border border-[#00BCD4]/40 hover:bg-[#00BCD4]/20'
+															: 'bg-gray-500/10 text-gray-400 border border-gray-500/40 cursor-not-allowed'
 												}`}>
-												{completedVideos.has(`${activeModule}-${selectedVideo.url}`) ? (
+												{completedVideos.has(selectedVideoKey) ? (
 													<span className='flex items-center space-x-1'>
 														<svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20'>
 															<path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
@@ -217,10 +430,15 @@ export default function CourseDetailPage() {
 														<span>Completed</span>
 													</span>
 												) : (
-													'Mark Complete'
+													`Mark Complete (${Math.min(100, Math.round(selectedVideoWatched))}% watched)`
 												)}
 											</button>
 										</div>
+										{!completedVideos.has(selectedVideoKey) && !selectedVideoCanComplete && (
+											<p className='text-xs text-[var(--text-muted)] mb-4'>
+												Watch at least 75% of this video to enable completion.
+											</p>
+										)}
 										{selectedVideo.description && (
 											<p className='text-[var(--text-muted)] mb-4'>
 												{selectedVideo.description}
@@ -367,7 +585,8 @@ export default function CourseDetailPage() {
 																		a.order - b.order
 																)
 																.map((video, videoIndex) => {
-																	const isCompleted = completedVideos.has(`${moduleIndex}-${video.url}`);
+																	const videoKey = getVideoKey(moduleIndex, videoIndex, video);
+																	const isCompleted = completedVideos.has(videoKey);
 																	return (
 																	<button
 																		key={videoIndex}
@@ -378,7 +597,7 @@ export default function CourseDetailPage() {
 																			)
 																		}
 																		className={`w-full px-4 py-3 text-left hover:bg-[var(--card-bg-hover)] transition-colors duration-200 border-l-4 ${
-																			selectedVideo?.url === video.url
+																			normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video)
 																				? "border-[#00BCD4] bg-[var(--card-bg-hover)]"
 																				: "border-transparent"
 																			}`}>
