@@ -8,7 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function DsaMlProgramPage() {
   const { theme } = useTheme();
-  const { user, token, isAuthenticated, isCourseEnrolled, loading: authLoading } = useAuth();
+  const { user, token, isAuthenticated, isCourseEnrolled, refreshUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", phone: "", email: "" });
   const [agree, setAgree] = useState(true);
@@ -267,14 +267,17 @@ export default function DsaMlProgramPage() {
             const message = (enrollData?.message || "").toLowerCase();
             if (message.includes("already enrolled")) {
               setIsEnrolled(true);
+              if (refreshUser) refreshUser();
               toast.info("You are already enrolled in this program.");
             } else {
               console.warn("Enrollment sync failed:", enrollData?.message || enrollRes.statusText);
               setIsEnrolled(true);
+              if (refreshUser) refreshUser();
               toast.success("Enrollment submitted successfully!");
             }
           } else {
             setIsEnrolled(true);
+            if (refreshUser) refreshUser();
             toast.success("Successfully enrolled!");
             try {
               const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {

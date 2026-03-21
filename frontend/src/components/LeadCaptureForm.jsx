@@ -10,11 +10,11 @@ export default function LeadCaptureForm({
 	onDownload,
 	type = "Brochure",
 }) {
-	const { isCourseEnrolled } = useAuth();
+	const { isCourseEnrolled, user, token, refreshUser } = useAuth();
 	const [formData, setFormData] = useState({
-		name: "",
-		phone: "",
-		email: "",
+		name: user?.fullName || "",
+		phone: user?.phone || "",
+		email: user?.email || "",
 	});
 	const [loading, setLoading] = useState(false);
 	const [isAlreadyEnrolled, setIsAlreadyEnrolled] = useState(false);
@@ -38,6 +38,25 @@ export default function LeadCaptureForm({
 		setLoading(true);
 
 		try {
+			// If it's an enrollment and user is logged in, perform direct enrollment
+			if (type === "Enrollment" && user && token && courseId) {
+				const enrollResponse = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				});
+
+				if (enrollResponse.ok) {
+					toast.success("Successfully enrolled!");
+					if (refreshUser) refreshUser();
+					onClose();
+					return;
+				}
+				// If direct enrollment fails, fall back to lead capture
+			}
+
 			const response = await fetch(`${API_URL}/api/leads`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

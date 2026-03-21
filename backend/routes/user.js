@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { protect } from "../middleware/auth.js";
 import User from "../models/User.js";
+import Course from "../models/Course.js";
 import MentorshipSession from "../models/MentorshipSession.js";
 import Lead from "../models/Lead.js";
 import Mentor from "../models/Mentor.js";
@@ -48,6 +49,19 @@ const performUserCascadingDelete = async (userId) => {
 // Health check for user routes
 router.get("/health", (req, res) => {
 	res.json({ status: "User routes are working" });
+});
+
+// @route   GET /api/users/me
+// @desc    Get current user details (including enrollments)
+// @access  Private
+router.get("/me", protect, async (req, res) => {
+	try {
+		const user = await User.findById(req.user._id).populate("enrolledCourses.courseId");
+		if (!user) return res.status(404).json({ message: "User not found" });
+		res.json(user);
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
 });
 
 // @route   DELETE /api/users/delete
@@ -213,6 +227,11 @@ router.post("/enroll/:courseId", protect, async (req, res) => {
 			return res.status(400).json({ message: "Invalid course id" });
 		}
 
+		// Ensure Course model is registered
+		if (!mongoose.models.Course) {
+			await import("../models/Course.js");
+		}
+
 		const user = await User.findById(req.user._id).select("enrolledCourses");
 		if (!user) {
 			return res.status(404).json({ message: "User not found" });
@@ -273,10 +292,19 @@ router.post("/enroll/:courseId", protect, async (req, res) => {
 // @access  Private
 router.get("/enrolled", protect, async (req, res) => {
 	try {
+		// Ensure Course model is registered
+		if (!mongoose.models.Course) {
+			await import("../models/Course.js");
+		}
+
 		const user = await User.findById(req.user._id).populate(
 			"enrolledCourses.courseId"
 		);
 		
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+
 		// Filter out null courseIds (deleted courses)
 		const filteredEnrolledCourses = user.enrolledCourses.filter(
 			(enrollment) => enrollment.courseId !== null
@@ -355,6 +383,8 @@ router.put("/progress/:courseId", protect, async (req, res) => {
 
 		if (markComplete === true && !enrollment.completedVideos.includes(videoKey)) {
 			enrollment.completedVideos.push(videoKey);
+		} else if (markComplete === false) {
+			enrollment.completedVideos = enrollment.completedVideos.filter(k => k !== videoKey);
 		}
 
 		const Course = (await import("../models/Course.js")).default;
@@ -370,6 +400,7 @@ router.put("/progress/:courseId", protect, async (req, res) => {
 		enrollment.progress = progress;
 		enrollment.completed = totalVideos > 0 ? completedCount >= totalVideos : false;
 
+		user.markModified("enrolledCourses");
 		await user.save();
 
 		res.json({

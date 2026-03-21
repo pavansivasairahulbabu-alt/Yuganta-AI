@@ -52,80 +52,34 @@ export default function CoursesPage() {
 
 	const handleEnroll = async (courseId) => {
 		if (!isAuthenticated) {
-			toast.error("Please login to enroll in courses");
+			toast.error("Please log in to enroll");
 			navigate("/login");
 			return;
 		}
 
-		const token = localStorage.getItem("token");
-		if (!token) {
-			toast.error("Please login to enroll in courses");
-			navigate("/login");
-			return;
-		}
-
-		setEnrolling({ ...enrolling, [courseId]: true });
-
+		setEnrolling(prev => ({ ...prev, [courseId]: true }));
 		try {
-			const response = await fetch(
-				`${API_URL}/api/users/enroll/${courseId}`,
-				{
-					method: "POST",
-					headers: {
-						Authorization: `Bearer ${token}`,
-						"Content-Type": "application/json",
-					},
-				}
-			);
+			const response = await fetch(`${API_URL}/api/users/enroll/${courseId}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
 			const data = await response.json();
 
 			if (response.ok) {
-				toast.success("Successfully enrolled in course!");
-				// Update user state immediately to reflect new enrollment in UI
+				toast.success("Successfully enrolled!");
 				if (refreshUser) refreshUser();
-				try {
-					const mentorRes = await fetch(`${API_URL}/api/users/assigned-mentor`, {
-						headers: { Authorization: `Bearer ${token}` },
-					});
-					if (mentorRes.ok) {
-						const mentor = await mentorRes.json();
-						const d = new Date();
-						d.setDate(d.getDate() + 8);
-						const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-						const time = "7:00pm";
-						await fetch(`${API_URL}/api/mentorship-sessions`, {
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-								Authorization: `Bearer ${token}`,
-							},
-							body: JSON.stringify({
-								title: "First Mentorship",
-								mentorId: mentor?._id,
-								date: dateStr,
-								time,
-								notes: "Auto-created on enrollment",
-							}),
-						});
-					}
-				} catch {}
-				setTimeout(() => navigate("/my-learning"), 1000);
 			} else {
-				if (response.status === 401 || data.message === "Please login") {
-					toast.error("Session expired. Please login again");
-					localStorage.removeItem("token");
-					localStorage.removeItem("user");
-					setTimeout(() => navigate("/login"), 1500);
-				} else {
-					toast.error(data.message || "Enrollment failed");
-				}
+				toast.error(data.message || "Failed to enroll");
 			}
 		} catch (error) {
-			console.error("Error enrolling:", error);
-			toast.error("Error enrolling in course");
+			console.error("Enrollment error:", error);
+			toast.error("An error occurred during enrollment");
 		} finally {
-			setEnrolling({ ...enrolling, [courseId]: false });
+			setEnrolling(prev => ({ ...prev, [courseId]: false }));
 		}
 	};
 
@@ -549,14 +503,18 @@ export default function CoursesPage() {
 												<button
 													disabled={enrolling[course._id]}
 													onClick={() => {
-														if (pioneer) {
-															navigate("/courses/agentic-ai-pioneer-program");
-														} else if (crash) {
-															navigate("/courses/agentic-ai-crash-course-page");
-														} else if (dsa) {
-															navigate("/courses/dsa-machine-learning#pioneer-enroll-form");
-														} else {
+														if (isAuthenticated) {
 															handleEnroll(course._id);
+														} else {
+															if (pioneer) {
+																navigate("/courses/agentic-ai-pioneer-program");
+															} else if (crash) {
+																navigate("/courses/agentic-ai-crash-course-page");
+															} else if (dsa) {
+																navigate("/courses/dsa-machine-learning#pioneer-enroll-form");
+															} else {
+																handleEnroll(course._id);
+															}
 														}
 													}}
 													className="block w-full text-center py-3.5 rounded-xl font-semibold transition duration-300 border border-[var(--border-color)] text-[var(--text-color)] bg-transparent hover:border-blue-500 hover:text-blue-400"

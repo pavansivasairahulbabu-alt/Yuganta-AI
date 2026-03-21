@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AdminNavbar from "../components/AdminNavbar";
 import API_URL from "../config/api";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AdminCalls() {
+	const { theme } = useTheme();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 	const [calls, setCalls] = useState([]);
@@ -102,11 +104,13 @@ export default function AdminCalls() {
 			<div className="max-w-7xl mx-auto px-6">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 					<div>
-<<<<<<< HEAD
-						<h1 className="text-3xl font-bold text-[var(--text-color)] dark:bg-clip-text dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:to-blue-400">Calls</h1>
-=======
-						<h1 className="text-4xl md:text-5xl font-bold">Calls</h1>
->>>>>>> origin/yoshitha
+						<h1 className={`text-3xl font-bold ${
+							theme === "light-theme" 
+								? "text-black" 
+								: "bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400"
+						}`}>
+							Calls
+						</h1>
 						<p className="text-gray-400 mt-2">Talk-to-Expert responses from website visitors</p>
 					</div>
 					<input

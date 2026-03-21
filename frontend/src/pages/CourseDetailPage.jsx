@@ -12,6 +12,7 @@ export default function CourseDetailPage() {
 	const [selectedVideo, setSelectedVideo] = useState(null);
 	const [activeModule, setActiveModule] = useState(null);
 	const [completedVideos, setCompletedVideos] = useState(new Set());
+	const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 	const [moduleProgress, setModuleProgress] = useState({});
 	const [videoWatchPercent, setVideoWatchPercent] = useState({});
 	const [videoLoadError, setVideoLoadError] = useState("");
@@ -70,6 +71,11 @@ export default function CourseDetailPage() {
 	};
 
 	const getVideoKey = (moduleIndex, videoIndex, video) => {
+		if (!video) return "";
+		// Use video._id if available, it's the most stable key.
+		if (video._id) return `id:${video._id}`;
+		
+		// Fallback to legacy key format for backward compatibility
 		const urlPart = resolveVideoUrl(video);
 		const orderPart = Number(video?.order) || videoIndex + 1;
 		return `${moduleIndex}:${orderPart}:${urlPart || (video?.title || "untitled")}`;
@@ -80,20 +86,23 @@ export default function CourseDetailPage() {
 			return -1;
 		}
 
-		const selectedPublicId =
-			typeof selectedVideo?.publicId === "string" ? selectedVideo.publicId.trim() : "";
-		if (selectedPublicId) {
-			const byPublicId = course.modules[activeModule].videos.findIndex((video) => {
-				const moduleVideoPublicId =
-					typeof video?.publicId === "string" ? video.publicId.trim() : "";
-				return moduleVideoPublicId && moduleVideoPublicId === selectedPublicId;
-			});
-			if (byPublicId >= 0) return byPublicId;
+		// Try to find by _id first
+		if (selectedVideo._id) {
+			const index = course.modules[activeModule].videos.findIndex(
+				(v) => v._id === selectedVideo._id
+			);
+			if (index !== -1) return index;
 		}
 
-		return course.modules[activeModule].videos.findIndex(
-			(video) => resolveVideoUrl(video) === normalizeVideoUrl(selectedVideo?.url || "") && (video?.title || "") === (selectedVideo?.title || ""),
-		);
+		// Fallback to search by publicId or URL
+		const selectedPublicId =
+			typeof selectedVideo?.publicId === "string" ? selectedVideo.publicId.trim() : "";
+		
+		return course.modules[activeModule].videos.findIndex((video) => {
+			if (selectedPublicId && video.publicId === selectedPublicId) return true;
+			return resolveVideoUrl(video) === normalizeVideoUrl(selectedVideo?.url || "") && 
+				   (video?.title || "") === (selectedVideo?.title || "");
+		});
 	}, [course, activeModule, selectedVideo]);
 
 	const selectedVideoKey = useMemo(() => {
@@ -161,7 +170,7 @@ export default function CourseDetailPage() {
 	};
 
 	const markVideoCompleted = async () => {
-		if (!selectedVideoKey) return;
+		if (!selectedVideoKey || isMarkingComplete) return;
 		if (!selectedVideoCanComplete) {
 			toast.error("Watch at least 75% of this video to mark it complete");
 			return;
@@ -169,13 +178,10 @@ export default function CourseDetailPage() {
 
 		if (completedVideos.has(selectedVideoKey)) return;
 
-		const newCompletedVideos = new Set(completedVideos);
-		newCompletedVideos.add(selectedVideoKey);
-		setCompletedVideos(newCompletedVideos);
-
-		if (token) {
-			try {
-				await fetch(`${API_URL}/api/users/progress/${id}`, {
+		setIsMarkingComplete(true);
+		try {
+			if (token) {
+				const response = await fetch(`${API_URL}/api/users/progress/${id}`, {
 					method: "PUT",
 					headers: {
 						"Content-Type": "application/json",
@@ -186,12 +192,23 @@ export default function CourseDetailPage() {
 						markComplete: true,
 					}),
 				});
-			} catch (error) {
-				console.error("Error saving video completion:", error);
-			}
-		}
 
-		toast.success("Video marked as complete");
+				if (!response.ok) {
+					throw new Error("Failed to save progress");
+				}
+			}
+
+			// Update local state ONLY after successful API call or if no token (offline mode)
+			const newCompletedVideos = new Set(completedVideos);
+			newCompletedVideos.add(selectedVideoKey);
+			setCompletedVideos(newCompletedVideos);
+			toast.success("Video marked as complete");
+		} catch (error) {
+			console.error("Error saving video completion:", error);
+			toast.error("Failed to mark video as complete. Please try again.");
+		} finally {
+			setIsMarkingComplete(false);
+		}
 	};
 
 	const handleVideoTimeUpdate = (event) => {
@@ -414,15 +431,23 @@ export default function CourseDetailPage() {
 											</h2>
 											<button
 												onClick={markVideoCompleted}
-												disabled={!completedVideos.has(selectedVideoKey) && !selectedVideoCanComplete}
+												disabled={isMarkingComplete || completedVideos.has(selectedVideoKey) || !selectedVideoCanComplete}
 												className={`ml-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
 													completedVideos.has(selectedVideoKey)
-														? 'bg-green-500/20 text-green-400 border border-green-500/40'
+														? 'bg-green-500/20 text-green-400 border border-green-500/40 cursor-default'
 														: selectedVideoCanComplete
-															? 'bg-[#00BCD4]/10 text-[#00BCD4] border border-[#00BCD4]/40 hover:bg-[#00BCD4]/20'
-															: 'bg-gray-500/10 text-gray-400 border border-gray-500/40 cursor-not-allowed'
+															? 'bg-[#00BCD4]/10 text-[#00BCD4] border border-[#00BCD4]/40 hover:bg-[#00BCD4]/20 shadow-[0_0_10px_rgba(0,188,212,0.2)]'
+															: 'bg-gray-500/10 text-gray-400 border border-gray-500/40 cursor-not-allowed opacity-50'
 												}`}>
-												{completedVideos.has(selectedVideoKey) ? (
+												{isMarkingComplete ? (
+													<span className='flex items-center space-x-2'>
+														<svg className='animate-spin h-4 w-4 text-[#00BCD4]' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+															<circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
+															<path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+														</svg>
+														<span>Saving...</span>
+													</span>
+												) : completedVideos.has(selectedVideoKey) ? (
 													<span className='flex items-center space-x-1'>
 														<svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20'>
 															<path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />

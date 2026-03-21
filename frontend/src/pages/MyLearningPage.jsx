@@ -259,18 +259,26 @@ export default function MyLearningPage() {
 										? `We couldn't find any enrolled courses matching "${searchQuery}".` 
 										: "You haven't enrolled in any programs yet."}
 								</p>
-								{searchQuery ? (
+								<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+									{searchQuery ? (
+										<button 
+											onClick={() => setSearchQuery("")}
+											className='px-6 py-2 bg-purple-600 rounded-lg font-medium hover:bg-purple-700 transition'
+										>
+											Clear Search
+										</button>
+									) : (
+										<Link to='/courses' className='px-6 py-2 bg-purple-600 rounded-lg font-medium hover:bg-purple-700 transition'>
+											Browse Courses
+										</Link>
+									)}
 									<button 
-										onClick={() => setSearchQuery("")}
-										className='px-6 py-2 bg-purple-600 rounded-lg font-medium hover:bg-purple-700 transition'
+										onClick={fetchEnrolledCourses}
+										className='px-6 py-2 border border-[var(--border-color)] rounded-lg font-medium hover:bg-[var(--card-bg)] transition'
 									>
-										Clear Search
+										Refresh List
 									</button>
-								) : (
-									<Link to='/courses' className='px-6 py-2 bg-purple-600 rounded-lg font-medium hover:bg-purple-700 transition'>
-										Browse Courses
-									</Link>
-								)}
+								</div>
 							</div>
 						)}
 					</div>
