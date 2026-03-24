@@ -32,6 +32,7 @@ import MentorDashboard from "./pages/MentorDashboard";
 import MentorForgotPasswordPage from "./pages/MentorForgotPasswordPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminAddJobPage from "./pages/AdminAddJobPage";
 import AdminMentorManagement from "./pages/AdminMentorManagement";
 import AdminInstructorManagement from "./pages/AdminInstructorManagement";
 import AdminAssignMentors from "./pages/AdminAssignInstructors";
@@ -56,6 +57,7 @@ import CourtBookerPage from "./pages/projects/CourtBookerPage";
 import AIAgentAvatarPage from "./pages/projects/AIAgentAvatarPage";
 import HVACAgentPage from "./pages/projects/HVACAgentPage";
 import AILearningPlatformPage from "./pages/projects/AILearningPlatformPage";
+import JobsPage from "./pages/JobsPage";
 import InstructorsPage from "./pages/InstructorsPage";
 import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
@@ -178,21 +180,29 @@ export default function App() {
 										}
 									/>
 									<Route
-										path='/contact'
-										element={
-											<MainLayout>
-												<ContactPage />
-											</MainLayout>
-										}
-									/>
-									<Route
-										path='/talk-to-expert'
-										element={
-											<MainLayout>
-												<TalkToExpertPage />
-											</MainLayout>
-										}
-									/>
+												path='/contact'
+												element={
+													<MainLayout>
+														<ContactPage />
+													</MainLayout>
+												}
+											/>
+											<Route
+												path='/jobs'
+												element={
+													<MainLayout>
+														<JobsPage />
+													</MainLayout>
+												}
+											/>
+											<Route
+												path='/talk-to-expert'
+												element={
+													<MainLayout>
+														<TalkToExpertPage />
+													</MainLayout>
+												}
+											/>
 									<Route
 										path='/terms-and-conditions'
 										element={
@@ -389,6 +399,7 @@ export default function App() {
 									<Route path='/admin' element={<AdminLoginPage />} />
 									<Route path='/admin/login' element={<AdminLoginPage />} />
 									<Route path='/admin/dashboard' element={<AdminDashboard />} />
+									<Route path='/admin/add-job' element={<AdminAddJobPage />} />
 									<Route path='/admin/mentors' element={<AdminMentorManagement />} />
 									<Route path='/admin/instructors' element={<AdminInstructorManagement />} />
 									<Route path='/admin/blogs' element={<AdminBlogManagement />} />

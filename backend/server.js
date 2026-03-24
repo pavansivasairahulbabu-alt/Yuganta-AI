@@ -17,12 +17,13 @@ import blogRoutes from "./routes/blogs.js";
 import mentorshipSessionsRoutes from "./routes/mentorshipSessions.js";
 import leadRoutes from "./routes/leads.js";
 import contactRoutes from "./routes/contact.js";
+import jobRoutes from "./routes/jobs.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load env from backend/.env even if process cwd is project root
-dotenv.config();
+// Load env from backend/.env explicitly
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Validate required environment variables
 const requiredEnvVars = ["MONGODB_URI", "JWT_SECRET"];
@@ -134,6 +135,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/mentorship-sessions", mentorshipSessionsRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/jobs", jobRoutes);
 
 // Health check
 app.get("/", (req, res) => {

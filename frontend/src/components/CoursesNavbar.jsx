@@ -13,11 +13,11 @@ export default function CoursesNavbar() {
 
 	const navItems = [
 		{ label: "Courses", to: "/all-courses" },
+		{ label: "Jobs", to: "/jobs" },
 		{
 			label: "Program Dashboard",
 			to: isAuthenticated ? "/my-learning" : "/login",
 		},
-		// { label: "Instructors", to: "/instructors" },
 	];
 
 	const handleNavClick = () => {

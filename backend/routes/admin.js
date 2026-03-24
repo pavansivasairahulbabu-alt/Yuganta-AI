@@ -6,6 +6,7 @@ import User from "../models/User.js";
 import Instructor from "../models/Instructor.js";
 import Blog from "../models/Blog.js";
 import Course from "../models/Course.js";
+import Job from "../models/Job.js";
 import MentorshipSession from "../models/MentorshipSession.js";
 import sgMail from "../config/mailer.js";
 import upload from "../middleware/upload.js";
@@ -105,6 +106,7 @@ router.post("/login", async (req, res) => {
 // Middleware to verify admin token
 const verifyAdmin = (req, res, next) => {
 	const token = req.header("Authorization")?.replace("Bearer ", "");
+	console.log("🔑 JWT_SECRET length:", process.env.JWT_SECRET?.length || 0);
 
 	if (!token) {
 		console.warn("❌ No authorization token provided");
@@ -125,7 +127,10 @@ const verifyAdmin = (req, res, next) => {
 		next();
 	} catch (error) {
 		console.error("❌ Token verification error:", error.message);
-		res.status(401).json({ message: "Token is not valid" });
+		if (error.name === 'TokenExpiredError') {
+			return res.status(401).json({ message: "Token expired. Please login again." });
+		}
+		res.status(401).json({ message: `Token is not valid: ${error.message}` });
 	}
 };
 
@@ -172,6 +177,62 @@ router.post("/mentors", verifyAdmin, async (req, res) => {
 		res.status(201).json(mentor);
 	} catch (error) {
 		console.error("Add mentor error:", error);
+		res.status(500).json({ message: "Server error" });
+	}
+});
+
+// Get all jobs
+router.get("/jobs", verifyAdmin, async (req, res) => {
+	try {
+		const jobs = await Job.find({}).sort({ createdAt: -1 });
+		res.json(jobs);
+	} catch (error) {
+		console.error("Get jobs error:", error);
+		res.status(500).json({ message: "Server error" });
+	}
+});
+
+// Add new job
+router.post("/jobs", verifyAdmin, async (req, res) => {
+	console.log("📥 Received request to add job:", req.body);
+	try {
+		const { title, company, location, type, experience, salary, logo, jobLink, description } = req.body;
+		if (!title || !company || !location || !jobLink) {
+			return res.status(400).json({ message: "Title, company, location, and job link are required" });
+		}
+
+		const job = new Job({
+			title,
+			company,
+			location,
+			type,
+			experience,
+			salary,
+			logo,
+			jobLink,
+			description,
+			active: true,
+		});
+
+		await job.save();
+		res.status(201).json(job);
+	} catch (error) {
+		console.error("Add job error:", error);
+		res.status(500).json({ message: "Server error" });
+	}
+});
+
+// Delete job
+router.delete("/jobs/:id", verifyAdmin, async (req, res) => {
+	try {
+		const { id } = req.params;
+		const job = await Job.findByIdAndDelete(id);
+		if (!job) {
+			return res.status(404).json({ message: "Job not found" });
+		}
+		res.json({ message: "Job deleted successfully" });
+	} catch (error) {
+		console.error("Delete job error:", error);
 		res.status(500).json({ message: "Server error" });
 	}
 });
