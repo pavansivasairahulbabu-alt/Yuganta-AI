@@ -348,17 +348,7 @@ export default function JobsPage() {
 			</section>
 
 			{/* Floating Button */}
-			<button className='fixed bottom-8 right-8 bg-blue-600 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 hover:bg-blue-700 transition-colors z-50 group'>
-				<div className='bg-white/20 p-1.5 rounded-lg'>
-					<svg className='w-5 h-5' fill='currentColor' viewBox='0 0 24 24'>
-						<path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' />
-					</svg>
-				</div>
-				<div className='text-left'>
-					<div className='text-[10px] leading-tight opacity-80 uppercase font-bold tracking-wider'>Get Free</div>
-					<div className='text-sm leading-tight font-bold'>Resources</div>
-				</div>
-			</button>
+			
 		</div>
 	);
 }
