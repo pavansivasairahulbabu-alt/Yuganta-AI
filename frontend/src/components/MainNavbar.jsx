@@ -17,6 +17,7 @@ export default function MainNavbar() {
 		{ label: "Home", to: "/" },
 		{ label: "About", to: "/about" },
 		{ label: "Contact", to: "/contact" },
+		{ label: "Jobs", to: "/jobs" },
 		{ label: "Blogs", to: "/blogs" },
 		{ label: "Instructors", to: "/instructors" },
 	];

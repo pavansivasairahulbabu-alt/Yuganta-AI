@@ -13,17 +13,18 @@ export default function AdminAddJobPage() {
     title: "",
     company: "",
     location: "",
+    workMode: "Online",
     type: "Full-Time",
     experience: "Fresher",
-    salary: "0-3 LPA",
+    salary: "",
     logo: "",
     jobLink: "",
     description: "",
   });
 
   const experienceOptions = ["Fresher", "1 - 3 yr.", "3 - 6 yr.", "6+ yr."];
-  const salaryOptions = ["0-3 LPA", "3-6 LPA", "6-10 LPA", "10+ LPA"];
   const jobTypes = ["Full-Time", "Contract", "Internship"];
+  const workModeOptions = ["On-site", "Hybrid", "Online"];
 
   useEffect(() => {
     const authed = localStorage.getItem("adminAuthed") === "true";
@@ -90,9 +91,10 @@ export default function AdminAddJobPage() {
         title: "",
         company: "",
         location: "",
+        workMode: "Online",
         type: "Full-Time",
         experience: "Fresher",
-        salary: "0-3 LPA",
+        salary: "",
         logo: "",
         jobLink: "",
         description: "",
@@ -203,6 +205,21 @@ export default function AdminAddJobPage() {
                   </select>
                 </div>
 
+                {/* Work Mode */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-[#A855F7]">Work Mode*</label>
+                  <select
+                    name="workMode"
+                    value={formData.workMode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                  >
+                    {workModeOptions.map((mode) => (
+                      <option key={mode} value={mode}>{mode}</option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Experience */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-[#A855F7]">Experience Level*</label>
@@ -221,16 +238,15 @@ export default function AdminAddJobPage() {
                 {/* Salary */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-[#A855F7]">Salary Range*</label>
-                  <select
+                  <input
+                    type="text"
                     name="salary"
                     value={formData.salary}
                     onChange={handleChange}
+                    placeholder="e.g. 4-8 LPA / 20-30k per month"
                     className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
-                  >
-                    {salaryOptions.map((sal) => (
-                      <option key={sal} value={sal}>{sal}</option>
-                    ))}
-                  </select>
+                    required
+                  />
                 </div>
               </div>
 
@@ -311,10 +327,10 @@ export default function AdminAddJobPage() {
                     <div className="flex items-center gap-6 flex-1">
                       <div className="w-16 h-16 bg-white rounded-lg p-2 flex items-center justify-center flex-shrink-0">
                         <img 
-                          src={job.logo || '/yuganta-logo.png'} 
+                          src={job.logo?.trim() || '/job-default-logo.svg'} 
                           alt={job.company} 
                           className="max-w-full max-h-full object-contain"
-                          onError={(e) => { e.target.src = '/yuganta-logo.png'; }}
+                          onError={(e) => { e.target.src = '/job-default-logo.svg'; }}
                         />
                       </div>
                       <div>
@@ -322,6 +338,7 @@ export default function AdminAddJobPage() {
                         <p className="text-[#A855F7] font-medium">{job.company}</p>
                         <div className="flex flex-wrap gap-4 mt-2 text-sm text-[#9A93B5]">
                           <span className="flex items-center gap-1">📍 {job.location}</span>
+                          <span className="flex items-center gap-1">🏢 {job.workMode || "Online"}</span>
                           <span className="flex items-center gap-1">💼 {job.type}</span>
                           <span className="flex items-center gap-1">🎓 {job.experience}</span>
                           <span className="flex items-center gap-1">💰 {job.salary}</span>

@@ -8,7 +8,7 @@ export default function JobsPage() {
 	const [locationQuery, setLocationQuery] = useState("");
 	const [selectedExperience, setSelectedExperience] = useState([]);
 	const [selectedJobType, setSelectedJobType] = useState("All");
-	const [selectedSalary, setSelectedSalary] = useState([]);
+	const [salaryQuery, setSalaryQuery] = useState("");
 	const [loading, setLoading] = useState(true);
 	const { theme } = useTheme();
 
@@ -63,7 +63,7 @@ export default function JobsPage() {
 		const matchesLocation = job.location.toLowerCase().includes(locationQuery.toLowerCase());
 		const matchesExperience = selectedExperience.length === 0 || selectedExperience.includes(job.experience);
 		const matchesJobType = selectedJobType === "All" || job.type === selectedJobType;
-		const matchesSalary = selectedSalary.length === 0 || selectedSalary.includes(job.salary);
+		const matchesSalary = !salaryQuery || (job.salary || "").toLowerCase().includes(salaryQuery.toLowerCase());
 
 		return matchesSearch && matchesLocation && matchesExperience && matchesJobType && matchesSalary;
 	});
@@ -107,7 +107,7 @@ export default function JobsPage() {
 										setLocationQuery("");
 										setSelectedExperience([]);
 										setSelectedJobType("All");
-										setSelectedSalary([]);
+										setSalaryQuery("");
 									}}
 									className='text-sm text-blue-500 hover:text-blue-600 font-medium'
 								>
@@ -206,26 +206,20 @@ export default function JobsPage() {
 									</svg>
 								</button>
 								{filters.salary && (
-									<div className='px-6 pb-6 pt-2 space-y-3'>
-										{["0-3 LPA", "3-6 LPA", "6-10 LPA", "10+ LPA"].map((sal) => (
-											<label key={sal} className='flex items-center gap-3 cursor-pointer group'>
-												<div className='relative flex items-center'>
-													<input
-														type='checkbox'
-														checked={selectedSalary.includes(sal)}
-														onChange={() => handleCheckboxChange(setSelectedSalary, sal)}
-														className='w-4 h-4 rounded border-[var(--border-color)] text-blue-500 focus:ring-blue-500 bg-[var(--bg-color)] appearance-none border checked:bg-blue-500 checked:border-blue-500 transition-all'
-													/>
-													{selectedSalary.includes(sal) && (
-														<svg className='absolute w-3 h-3 text-white left-0.5 pointer-events-none' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-															<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={3} d='M5 13l4 4L19 7' />
-														</svg>
-													)}
-												</div>
-												<span className='text-sm group-hover:text-blue-500 transition-colors'>{sal}</span>
-											</label>
-										))}
-									</div>
+										<div className='px-6 pb-6 pt-2'>
+											<div className='relative'>
+												<input
+													type='text'
+													placeholder='e.g. 4-8 LPA'
+													value={salaryQuery}
+													onChange={(e) => setSalaryQuery(e.target.value)}
+													className='w-full bg-[var(--bg-color)] border border-[var(--border-color)] rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500'
+												/>
+												<svg className='absolute right-3 top-2.5 w-4 h-4 text-[var(--text-muted)]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+													<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+												</svg>
+											</div>
+										</div>
 								)}
 							</div>
 
@@ -279,17 +273,17 @@ export default function JobsPage() {
 							) : filteredJobs.length > 0 ? (
 								filteredJobs.map((job) => (
 									<div
-										key={job.id}
+										key={job._id || job.id}
 										className='bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6 hover:shadow-md transition-shadow duration-300'
 									>
 										{/* Company Logo */}
 										<div className='w-20 h-20 flex-shrink-0 bg-white rounded-lg border border-[var(--border-color)] flex items-center justify-center p-2'>
 											<img
-												src={job.logo}
+												src={job.logo?.trim() || "/job-default-logo.svg"}
 												alt={job.company}
 												className='max-w-full max-h-full object-contain'
 												onError={(e) => {
-													e.target.src = "/yuganta-logo.png";
+													e.target.src = "/job-default-logo.svg";
 												}}
 											/>
 										</div>
@@ -313,6 +307,12 @@ export default function JobsPage() {
 														<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
 													</svg>
 													{job.location}
+												</div>
+												<div className='flex items-center gap-2'>
+													<svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+														<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 7h18M6 7V5a2 2 0 012-2h8a2 2 0 012 2v2M8 11v6M12 11v6M16 11v6M5 21h14a2 2 0 002-2V7H3v12a2 2 0 002 2z' />
+													</svg>
+													{job.workMode || "Online"}
 												</div>
 												<div className='flex items-center gap-2'>
 													<svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>

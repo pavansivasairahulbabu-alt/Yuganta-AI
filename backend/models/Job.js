@@ -16,6 +16,12 @@ const jobSchema = new mongoose.Schema({
 		required: true,
 		trim: true,
 	},
+	workMode: {
+		type: String,
+		required: true,
+		enum: ["On-site", "Hybrid", "Online"],
+		default: "Online",
+	},
 	type: {
 		type: String,
 		required: true,
@@ -31,8 +37,7 @@ const jobSchema = new mongoose.Schema({
 	salary: {
 		type: String,
 		required: true,
-		enum: ["0-3 LPA", "3-6 LPA", "6-10 LPA", "10+ LPA"],
-		default: "0-3 LPA",
+		trim: true,
 	},
 	logo: {
 		type: String,

@@ -196,7 +196,7 @@ router.get("/jobs", verifyAdmin, async (req, res) => {
 router.post("/jobs", verifyAdmin, async (req, res) => {
 	console.log("📥 Received request to add job:", req.body);
 	try {
-		const { title, company, location, type, experience, salary, logo, jobLink, description } = req.body;
+		const { title, company, location, workMode, type, experience, salary, logo, jobLink, description } = req.body;
 		if (!title || !company || !location || !jobLink) {
 			return res.status(400).json({ message: "Title, company, location, and job link are required" });
 		}
@@ -205,6 +205,7 @@ router.post("/jobs", verifyAdmin, async (req, res) => {
 			title,
 			company,
 			location,
+			workMode,
 			type,
 			experience,
 			salary,
