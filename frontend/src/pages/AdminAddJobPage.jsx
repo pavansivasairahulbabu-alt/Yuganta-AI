@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import AdminNavbar from "../components/AdminNavbar";
 import API_URL from "../config/api";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AdminAddJobPage() {
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState([]);
@@ -28,7 +30,7 @@ export default function AdminAddJobPage() {
 
   const selectClassName =
     "w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors";
-  const optionClassName = "bg-[#171327] text-white";
+  const optionClassName = theme === "light-theme" ? "bg-white text-gray-900" : "bg-[#171327] text-white";
 
   useEffect(() => {
     const authed = localStorage.getItem("adminAuthed") === "true";
