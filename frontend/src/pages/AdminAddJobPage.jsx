@@ -26,6 +26,10 @@ export default function AdminAddJobPage() {
   const jobTypes = ["Full-Time", "Contract", "Internship"];
   const workModeOptions = ["On-site", "Hybrid", "Online"];
 
+  const selectClassName =
+    "w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors";
+  const optionClassName = "bg-[#171327] text-white";
+
   useEffect(() => {
     const authed = localStorage.getItem("adminAuthed") === "true";
     const token = localStorage.getItem("adminToken");
@@ -36,6 +40,13 @@ export default function AdminAddJobPage() {
     }
   }, [navigate]);
 
+  const handleUnauthorized = (message = "Session expired. Please login again.") => {
+    localStorage.removeItem("adminAuthed");
+    localStorage.removeItem("adminToken");
+    toast.error(message);
+    navigate("/admin/login", { replace: true });
+  };
+
   const fetchJobs = async () => {
     try {
       setFetchingJobs(true);
@@ -45,6 +56,12 @@ export default function AdminAddJobPage() {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
+
       if (!response.ok) throw new Error("Failed to fetch jobs");
       const data = await response.json();
       setJobs(data);
@@ -80,6 +97,11 @@ export default function AdminAddJobPage() {
         },
         body: JSON.stringify(formData),
       });
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -119,6 +141,11 @@ export default function AdminAddJobPage() {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (response.status === 401) {
+        handleUnauthorized();
+        return;
+      }
 
       if (!response.ok) throw new Error("Failed to delete job");
       
@@ -197,10 +224,10 @@ export default function AdminAddJobPage() {
                     name="type"
                     value={formData.type}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                    className={selectClassName}
                   >
                     {jobTypes.map((type) => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type} className={optionClassName}>{type}</option>
                     ))}
                   </select>
                 </div>
@@ -212,10 +239,10 @@ export default function AdminAddJobPage() {
                     name="workMode"
                     value={formData.workMode}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                    className={selectClassName}
                   >
                     {workModeOptions.map((mode) => (
-                      <option key={mode} value={mode}>{mode}</option>
+                      <option key={mode} value={mode} className={optionClassName}>{mode}</option>
                     ))}
                   </select>
                 </div>
@@ -227,10 +254,10 @@ export default function AdminAddJobPage() {
                     name="experience"
                     value={formData.experience}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                    className={selectClassName}
                   >
                     {experienceOptions.map((exp) => (
-                      <option key={exp} value={exp}>{exp}</option>
+                      <option key={exp} value={exp} className={optionClassName}>{exp}</option>
                     ))}
                   </select>
                 </div>
