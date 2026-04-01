@@ -232,58 +232,6 @@ export default function AdminMentorManagement() {
             <h2 className="text-2xl font-bold text-white mb-1">Add New Mentor</h2>
             <p className="text-[#C7C3D6] text-sm">Create a new mentor account for your platform</p>
           </div>
-          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <input
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Full Name"
-              required
-            />
-            <input
-              value={form.expertise}
-              onChange={(e) => setForm((f) => ({ ...f, expertise: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Expertise/Subject"
-              required
-            />
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Email Address"
-              required
-            />
-            <input
-              value={form.company}
-              onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Company"
-              required
-            />
-            <input
-              value={form.photo}
-              onChange={(e) => setForm((f) => ({ ...f, photo: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Photo URL"
-              required
-            />
-            <input
-              value={form.bio}
-              onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
-              className="bg-[var(--card-bg)] border border-[var(--border-primary)] rounded-lg px-4 py-3.5 text-[var(--text-color)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-[#8B5CF6] transition duration-300"
-              placeholder="Bio (optional)"
-            />
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] hover:from-[#A855F7] hover:to-[#D946EF] text-white rounded-lg font-bold px-6 py-3.5 transition-all duration-300 shadow-[0_4px_16px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.5)] hover:scale-105 active:scale-100 whitespace-nowrap group flex items-center justify-center gap-2">
-              <svg className='w-5 h-5 group-hover:rotate-90 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M12 4v16m8-8H4' />
-              </svg>
-              Add
-            </button>
-          </form>
 
 
           <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-5 gap-4">

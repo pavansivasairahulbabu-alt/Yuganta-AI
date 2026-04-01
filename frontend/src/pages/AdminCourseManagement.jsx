@@ -358,11 +358,11 @@ export default function AdminCourseManagement() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+              className="px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:border-[#A855F7] transition-colors"
             >
-              <option value="All">All Categories</option>
+              <option value="All" className="bg-[var(--bg-card)] text-[var(--text-color)]">All Categories</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
+                <option key={cat} value={cat} className="bg-[var(--bg-card)] text-[var(--text-color)]">
                   {cat}
                 </option>
               ))}
@@ -503,11 +503,11 @@ export default function AdminCourseManagement() {
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                      className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:border-[#A855F7] transition-colors"
                     >
-                      <option value="">Select category</option>
+                      <option value="" className="bg-[var(--bg-card)] text-[var(--text-color)]">Select category</option>
                       {categories.map((cat) => (
-                        <option key={cat} value={cat}>
+                        <option key={cat} value={cat} className="bg-[var(--bg-card)] text-[var(--text-color)]">
                           {cat}
                         </option>
                       ))}
@@ -519,11 +519,11 @@ export default function AdminCourseManagement() {
                     <select
                       value={formData.level}
                       onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                      className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                      className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:border-[#A855F7] transition-colors"
                     >
-                      <option value="Beginner">Beginner</option>
-                      <option value="Intermediate">Intermediate</option>
-                      <option value="Advanced">Advanced</option>
+                      <option value="Beginner" className="bg-[var(--bg-card)] text-[var(--text-color)]">Beginner</option>
+                      <option value="Intermediate" className="bg-[var(--bg-card)] text-[var(--text-color)]">Intermediate</option>
+                      <option value="Advanced" className="bg-[var(--bg-card)] text-[var(--text-color)]">Advanced</option>
                     </select>
                   </div>
 
@@ -539,11 +539,11 @@ export default function AdminCourseManagement() {
                           instructor: instructor?.name || "",
                         });
                       }}
-                      className="w-full px-4 py-3 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg text-white focus:outline-none focus:border-[#A855F7] transition-colors"
+                      className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:border-[#A855F7] transition-colors"
                     >
-                      <option value="">Select instructor</option>
+                      <option value="" className="bg-[var(--bg-card)] text-[var(--text-color)]">Select instructor</option>
                       {instructors.map((instructor) => (
-                        <option key={instructor._id} value={instructor._id}>
+                        <option key={instructor._id} value={instructor._id} className="bg-[var(--bg-card)] text-[var(--text-color)]">
                           {instructor.name}
                         </option>
                       ))}
