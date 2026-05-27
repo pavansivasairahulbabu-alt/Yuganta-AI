@@ -300,7 +300,6 @@ export default function SignupPage() {
 							<GoogleLogin
 								onSuccess={handleGoogleSuccess}
 								onError={handleGoogleError}
-								useOneTap
 							/>
 						</div>
 

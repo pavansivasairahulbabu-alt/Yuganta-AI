@@ -45,7 +45,7 @@ if (process.env.BREVO_API_KEY) {
 
 const app = express();
 app.set("trust proxy", 1);
-
+console.log("Starting yugantha-ai backend server");
 // Initialize server
 const initializeServer = async () => {
 	// Connect to MongoDB

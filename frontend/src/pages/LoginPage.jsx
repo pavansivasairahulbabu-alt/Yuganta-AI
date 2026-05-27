@@ -207,7 +207,6 @@ export default function LoginPage() {
 							<GoogleLogin
 								onSuccess={handleGoogleSuccess}
 								onError={handleGoogleError}
-								useOneTap
 							/>
 						</div>
 					</form>

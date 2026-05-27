@@ -86,13 +86,12 @@ userSchema.index({ createdAt: -1 });
 userSchema.index({ "enrolledCourses.courseId": 1 });
 
 // Hash password before saving (skip for Google users who have no password)
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
 	if (!this.isModified("password") || !this.password) {
-		return next();
+		return;
 	}
 	const salt = await bcrypt.genSalt(10);
 	this.password = await bcrypt.hash(this.password, salt);
-	return next();
 });
 
 // Compare password

@@ -128,7 +128,7 @@ router.post(
 			.isLength({ min: 6 })
 			.withMessage("Password must be at least 6 characters"),
 	],
-	async (req, res) => {
+	async (req, res, next) => {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) {
 			return res.status(400).json({ message: errors.array()[0].msg });
@@ -191,10 +191,7 @@ router.post(
 			}
 		} catch (error) {
 			console.error("[Signup] Unexpected error:", error.message);
-			res.status(500).json({
-				message: "Server error",
-				error: error.message,
-			});
+			next(error);
 		}
 	}
 );
@@ -208,16 +205,16 @@ router.post(
 		body("email").isEmail().withMessage("Please enter a valid email"),
 		body("otp").isLength({ min: 6, max: 6 }).withMessage("OTP must be 6 digits"),
 	],
-	async (req, res) => {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ message: errors.array()[0].msg });
-		}
-
-		const email = String(req.body.email).trim().toLowerCase();
-		const otp = String(req.body.otp).trim();
-
+	async (req, res, next) => {
 		try {
+			const errors = validationResult(req);
+			if (!errors.isEmpty()) {
+				return res.status(400).json({ message: errors.array()[0].msg });
+			}
+
+			const email = String(req.body.email).trim().toLowerCase();
+			const otp = String(req.body.otp).trim();
+
 			const user = await User.findOne({ email });
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
@@ -258,7 +255,8 @@ router.post(
 				token: generateToken(user._id),
 			});
 		} catch (error) {
-			return res.status(500).json({ message: "Server error", error: error.message });
+			console.error("[VerifyOTP] Unexpected error:", error.message);
+			next(error);
 		}
 	}
 );
@@ -269,15 +267,15 @@ router.post(
 router.post(
 	"/forgot-password",
 	[body("email").isEmail().withMessage("Please enter a valid email")],
-	async (req, res) => {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ message: errors.array()[0].msg });
-		}
-
-		const email = String(req.body.email).trim().toLowerCase();
-
+	async (req, res, next) => {
 		try {
+			const errors = validationResult(req);
+			if (!errors.isEmpty()) {
+				return res.status(400).json({ message: errors.array()[0].msg });
+			}
+
+			const email = String(req.body.email).trim().toLowerCase();
+
 			const user = await User.findOne({ email });
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
@@ -288,16 +286,16 @@ router.post(
 			user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 			await user.save();
 
-				try {
-					await sendOtpEmail(user.email, otp, user.fullName || "User", "reset");
-				} catch (emailErr) {
-					console.error("[ForgotPassword] Email send failed:", emailErr.message, emailErr.response || "");
-					return res.status(500).json({ message: "Failed to send OTP email. Please check email configuration.", error: emailErr.message });
-				}
-				return res.status(200).json({ message: "OTP sent to your email. Check your inbox." });
-			} catch (error) {
-				console.error("[ForgotPassword] Unexpected error:", error.message);
-			return res.status(500).json({ message: "Server error", error: error.message });
+			try {
+				await sendOtpEmail(user.email, otp, user.fullName || "User", "reset");
+			} catch (emailErr) {
+				console.error("[ForgotPassword] Email send failed:", emailErr.message, emailErr.response || "");
+				return res.status(500).json({ message: "Failed to send OTP email. Please check email configuration.", error: emailErr.message });
+			}
+			return res.status(200).json({ message: "OTP sent to your email. Check your inbox." });
+		} catch (error) {
+			console.error("[ForgotPassword] Unexpected error:", error.message);
+			next(error);
 		}
 	}
 );
@@ -314,17 +312,17 @@ router.post(
 			.isLength({ min: 6 })
 			.withMessage("Password must be at least 6 characters"),
 	],
-	async (req, res) => {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ message: errors.array()[0].msg });
-		}
-
-		const email = String(req.body.email).trim().toLowerCase();
-		const otp = String(req.body.otp).trim();
-		const { password } = req.body;
-
+	async (req, res, next) => {
 		try {
+			const errors = validationResult(req);
+			if (!errors.isEmpty()) {
+				return res.status(400).json({ message: errors.array()[0].msg });
+			}
+
+			const email = String(req.body.email).trim().toLowerCase();
+			const otp = String(req.body.otp).trim();
+			const { password } = req.body;
+
 			const user = await User.findOne({ email });
 			if (!user) {
 				return res.status(404).json({ message: "User not found" });
@@ -349,7 +347,8 @@ router.post(
 
 			return res.status(200).json({ message: "Password reset successful. Please login." });
 		} catch (error) {
-			return res.status(500).json({ message: "Server error", error: error.message });
+			console.error("[ResetPassword] Unexpected error:", error.message);
+			next(error);
 		}
 	}
 );
@@ -363,16 +362,16 @@ router.post(
 		body("email").isEmail().withMessage("Please enter a valid email"),
 		body("password").notEmpty().withMessage("Password is required"),
 	],
-	async (req, res) => {
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ message: errors.array()[0].msg });
-		}
-
-		const email = String(req.body.email).trim().toLowerCase();
-		const { password } = req.body;
-
+	async (req, res, next) => {
 		try {
+			const errors = validationResult(req);
+			if (!errors.isEmpty()) {
+				return res.status(400).json({ message: errors.array()[0].msg });
+			}
+
+			const email = String(req.body.email).trim().toLowerCase();
+			const { password } = req.body;
+
 			// Check if user exists
 			const user = await User.findOne({ email });
 			if (!user) {
@@ -400,35 +399,66 @@ router.post(
 				token: generateToken(user._id),
 			});
 		} catch (error) {
-			res.status(500).json({
-				message: "Server error",
-				error: error.message,
-			});
+			console.error("[Login] Unexpected error:", error.message);
+			next(error);
 		}
 	}
 );
 
 import { OAuth2Client } from "google-auth-library";
 
+// Check if Google Client ID is configured
+if (!process.env.GOOGLE_CLIENT_ID) {
+	console.warn("⚠️  GOOGLE_CLIENT_ID not configured - Google auth will not work");
+}
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @route   POST /api/auth/google
 // @desc    Authenticate user with Google
 // @access  Public
-router.post("/google", async (req, res) => {
-	const { credential } = req.body;
+router.post("/google", async (req, res, next) => {
 	try {
+		const { credential } = req.body;
+
+		// Validation checks
+		if (!credential) {
+			return res.status(400).json({
+				message: "Credential token is required",
+				error: "MISSING_CREDENTIAL",
+			});
+		}
+
+		if (!process.env.GOOGLE_CLIENT_ID) {
+			console.error("❌ GOOGLE_CLIENT_ID is not configured");
+			return res.status(500).json({
+				message: "Server configuration error",
+				error: "GOOGLE_CLIENT_ID_NOT_SET",
+			});
+		}
+
+		// Verify the ID token with Google
 		const ticket = await client.verifyIdToken({
 			idToken: credential,
 			audience: process.env.GOOGLE_CLIENT_ID,
 		});
+
 		const payload = ticket.getPayload();
 		const { name, email, picture } = payload;
+
+		// Validate required fields from Google payload
+		if (!email) {
+			return res.status(400).json({
+				message: "Email not provided by Google",
+				error: "MISSING_EMAIL",
+			});
+		}
 
 		let user = await User.findOne({ email });
 
 		if (user) {
 			// User exists, log them in
+			console.log(`✅ Existing Google user logged in: ${email}`);
 			res.json({
 				_id: user._id,
 				fullName: user.fullName,
@@ -440,12 +470,13 @@ router.post("/google", async (req, res) => {
 		} else {
 			// User does not exist, create a new user
 			const newUser = await User.create({
-				fullName: name,
+				fullName: name || email.split("@")[0],
 				email,
 				avatar: picture,
 				isVerified: true, // Google users are considered verified
 			});
 
+			console.log(`✅ New Google user created: ${email}`);
 			res.status(201).json({
 				_id: newUser._id,
 				fullName: newUser.fullName,
@@ -456,7 +487,29 @@ router.post("/google", async (req, res) => {
 			});
 		}
 	} catch (error) {
-		res.status(400).json({ message: "Google authentication failed", error });
+		console.error("❌ Google authentication error:", {
+			name: error.name,
+			message: error.message,
+			code: error.code,
+		});
+
+		// Handle specific Google verification errors
+		if (error.message && error.message.includes("Invalid token")) {
+			return res.status(401).json({
+				message: "Invalid Google token",
+				error: "INVALID_TOKEN",
+			});
+		}
+
+		if (error.message && error.message.includes("audience")) {
+			return res.status(401).json({
+				message: "Token audience mismatch - verify GOOGLE_CLIENT_ID is correct",
+				error: "AUDIENCE_MISMATCH",
+			});
+		}
+
+		console.error("[Google] Unhandled error:", error.message);
+		next(error);
 	}
 });
 
