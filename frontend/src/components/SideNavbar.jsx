@@ -22,7 +22,8 @@ import {
 	FiCalendar,
 	FiCpu,
 	FiBook,
-	FiWind
+	FiWind,
+	FiTrendingUp
 } from "react-icons/fi";
 
 export default function SideNavbar() {
@@ -40,6 +41,7 @@ export default function SideNavbar() {
 	const navItems = [
 		{ label: "Home", to: "/", icon: FiHome },
 		{ label: "About", to: "/about", icon: FiInfo },
+		{ label: "Bull Boom Community", to: "/bull-boom-community", icon: FiTrendingUp },
 		{ label: "Contact", to: "/contact", icon: FiMail },
 		{ label: "Jobs", to: "/jobs", icon: FiBriefcase },
 		{ label: "Blogs", to: "/blogs", icon: FiBookOpen },
