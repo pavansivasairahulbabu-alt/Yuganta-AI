@@ -6,8 +6,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { InstructorProvider } from "./context/InstructorContext";
 import { MentorProvider } from "./context/MentorContext";
 import { ScrollToTop } from "./components/ScrollToTop";
-import MainNavbar from "./components/MainNavbar";
-import CoursesNavbar from "./components/CoursesNavbar";
+import SideNavbar from "./components/SideNavbar";
 import Hero from "./components/Hero";
 import FreeCourses from "./components/FreeCourses";
 import LearningPaths from "./components/LearningPaths";
@@ -73,23 +72,45 @@ function CoursesHomePage() {
 	);
 }
 
+function HomeLayout({ children }) {
+	return (
+		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+			<SideNavbar />
+			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
+				<main className="flex-grow">
+					{children}
+				</main>
+				<Footer />
+			</div>
+		</div>
+	);
+}
+
 function MainLayout({ children }) {
 	return (
-		<>
-			<MainNavbar />
-			{children}
-			<Footer />
-		</>
+		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+			<SideNavbar />
+			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
+				<main className="flex-grow">
+					{children}
+				</main>
+				<Footer />
+			</div>
+		</div>
 	);
 }
 
 function CoursesLayout({ children }) {
 	return (
-		<>
-			<CoursesNavbar />
-			{children}
-			<Footer />
-		</>
+		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+			<SideNavbar />
+			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
+				<main className="flex-grow">
+					{children}
+				</main>
+				<Footer />
+			</div>
+		</div>
 	);
 }
 
@@ -154,9 +175,9 @@ export default function App() {
 									<Route
 										path='/'
 										element={
-											<MainLayout>
+											<HomeLayout>
 												<LandingPage />
-											</MainLayout>
+											</HomeLayout>
 										}
 									/>
 									<Route
