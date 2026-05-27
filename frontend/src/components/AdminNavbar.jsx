@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -28,6 +28,7 @@ export default function AdminNavbar() {
     return stored === "true";
   });
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const isFirstMount = useRef(true);
 
   const navLinks = [
     { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
@@ -48,19 +49,34 @@ export default function AdminNavbar() {
 
   useEffect(() => {
     const applyLayoutOffset = () => {
+      const needsTransition = !isFirstMount.current;
+      const transitionStyle = needsTransition ? "padding-left 300ms cubic-bezier(0.4, 0, 0.2, 1)" : "none";
+      
       if (window.innerWidth >= 1024) {
+        document.body.style.transition = transitionStyle;
         document.body.style.paddingLeft = isCollapsed ? "88px" : "280px";
       } else {
+        document.body.style.transition = transitionStyle;
         document.body.style.paddingLeft = "0px";
       }
     };
 
     applyLayoutOffset();
+    
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+    }
+
     window.addEventListener("resize", applyLayoutOffset);
 
     return () => {
       window.removeEventListener("resize", applyLayoutOffset);
-      document.body.style.paddingLeft = "0px";
+      const nextPath = window.location.pathname;
+      const nextIsAdminPage = nextPath.startsWith("/admin") && nextPath !== "/admin/login" && nextPath !== "/admin";
+      if (!nextIsAdminPage) {
+        document.body.style.paddingLeft = "0px";
+        document.body.style.transition = "";
+      }
     };
   }, [isCollapsed]);
 
@@ -171,8 +187,8 @@ export default function AdminNavbar() {
               <button
                 key={link.path}
                 onClick={() => navigate(link.path)}
-                className={`w-full h-11 rounded-xl transition-all duration-200 flex items-center ${
-                  isCollapsed ? "justify-center" : "justify-start px-3 gap-3"
+                className={`w-full h-11 rounded-xl transition-all duration-300 flex items-center ${
+                  isCollapsed ? "pl-[30px]" : "px-4"
                 } ${
                   isActive
                     ? "bg-gradient-to-r from-[rgba(139,92,246,0.25)] to-[rgba(236,72,153,0.15)] text-white border border-[rgba(139,92,246,0.45)]"
@@ -182,7 +198,13 @@ export default function AdminNavbar() {
                 aria-label={link.label}
               >
                 <Icon className="w-5 h-5 shrink-0" />
-                {!isCollapsed && <span className="text-sm font-semibold">{link.label}</span>}
+                <span
+                  className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${
+                    isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
+                  }`}
+                >
+                  {link.label}
+                </span>
               </button>
             );
           })}
