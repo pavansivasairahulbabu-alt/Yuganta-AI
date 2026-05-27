@@ -58,6 +58,7 @@ import HVACAgentPage from "./pages/projects/HVACAgentPage";
 import AILearningPlatformPage from "./pages/projects/AILearningPlatformPage";
 import JobsPage from "./pages/JobsPage";
 import InstructorsPage from "./pages/InstructorsPage";
+import BullBoomCommunity from "./pages/BullBoomCommunity";
 import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
 import DsaMlProgramPage from "./pages/courses/MasteringDataStructures&Algorithms";
@@ -197,6 +198,14 @@ export default function App() {
 										element={
 											<MainLayout>
 												<AboutPage />
+											</MainLayout>
+										}
+									/>
+									<Route
+										path='/bull-boom-community'
+										element={
+											<MainLayout>
+												<BullBoomCommunity />
 											</MainLayout>
 										}
 									/>
