@@ -15,11 +15,11 @@ async function verifyInstructorCourses() {
 		await mongoose.connect(process.env.MONGODB_URI);
 		console.log("✓ MongoDB connected\n");
 
-		// Find Pavan instructor
-		const pavanInstructor = await Instructor.findOne({ name: "Pavan" });
+		// Find YugantaAI instructor
+		const pavanInstructor = await Instructor.findOne({ name: "YugantaAI" });
 
 		if (!pavanInstructor) {
-			console.log("❌ Pavan instructor not found");
+			console.log("❌ YugantaAI instructor not found");
 			process.exit(1);
 		}
 

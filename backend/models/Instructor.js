@@ -75,12 +75,11 @@ const instructorSchema = new mongoose.Schema({
 });
 
 // Hash password before saving (only if password is provided/modified)
-instructorSchema.pre("save", async function (next) {
+instructorSchema.pre("save", async function () {
 	if (this.password && this.isModified("password")) {
 		const salt = await bcrypt.genSalt(10);
 		this.password = await bcrypt.hash(this.password, salt);
 	}
-	next();
 });
 
 // Method to compare passwords

@@ -988,7 +988,7 @@ export default function DsaMlProgramPage() {
             />
             <Plan
               name="Agentic AI Pioneer program"
-              price="₹12,000"
+              price="₹5,000"
               viewDetailsHref="/courses/agentic-ai-pioneer-program"
               bullets={[
                 "4 Months of Power Learning",

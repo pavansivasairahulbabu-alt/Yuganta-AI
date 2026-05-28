@@ -9,7 +9,7 @@ const courses = [
 	{
 		title: "Agentic AI Crash Course",
 		description: "A fast-paced introduction to building autonomous AI agents using modern frameworks. Learn the fundamentals of Agentic AI, RAG, and multi-agent systems in this intensive 4-week program.",
-		instructor: "Pavan",
+		instructor: "YugantaAI",
 		rating: 4.8,
 		students: 0,
 		lessons: 15,
@@ -17,8 +17,8 @@ const courses = [
 		level: "Beginner",
 		category: "AI & ML",
 		thumbnail: "https://onug.net/wp-content/uploads/2025/02/ONUG-Blog-Image-1024x512-1.jpg",
-		price: "Free",
-		isFree: true,
+		price: "3500",
+		isFree: false,
 		modules: [
 			{
 				title: "Introduction to AI Agents",
@@ -67,7 +67,7 @@ const courses = [
 	{
 		title: "Agentic AI Pioneer Program",
 		description: "The most comprehensive program for mastering Agentic AI. Build advanced autonomous systems, master LangGraph, and deploy professional-grade AI agents. Includes 150+ hours of content and expert mentorship.",
-		instructor: "Pavan",
+		instructor: "YugantaAI",
 		rating: 4.9,
 		students: 0,
 		lessons: 45,
@@ -75,8 +75,8 @@ const courses = [
 		level: "Advanced",
 		category: "AI & ML",
 		thumbnail: "/Agentic_AI_DSA.png",
-		price: "Free",
-		isFree: true,
+		price: "5000",
+		isFree: false,
 		modules: [
 			{
 				title: "Advanced Agent Architectures",
@@ -125,7 +125,7 @@ const courses = [
 	{
 		title: "Mastering Data Structures & Algorithms",
 		description: "Build a rock-solid foundation in problem-solving and computer science fundamentals. Master arrays, linked lists, trees, graphs, and dynamic programming to ace your technical interviews.",
-		instructor: "Pavan",
+		instructor: "YugantaAI",
 		rating: 4.7,
 		students: 0,
 		lessons: 36,
@@ -191,27 +191,31 @@ const seedCourses = async () => {
 		await Course.deleteMany({});
 		console.log("Existing courses cleared");
 
-		// Find or Create Instructor "Pavan"
-		let pavan = await Instructor.findOne({ name: "Pavan" });
-		if (!pavan) {
-			pavan = new Instructor({
-				name: "Pavan",
-				email: "pavan@merosphere.com",
+		// Delete Instructor "Pavan" if exists
+		await Instructor.deleteOne({ name: "Pavan" });
+		console.log("Instructor 'Pavan' deleted");
+
+		// Find or Create Instructor "YugantaAI"
+		let instructorObj = await Instructor.findOne({ name: "YugantaAI" });
+		if (!instructorObj) {
+			instructorObj = new Instructor({
+				name: "YugantaAI",
+				email: "instructor@yugantaai.com",
 				expertise: "AI & Full Stack",
 				bio: "Expert Instructor for AI and Programming courses.",
 				photo: "https://via.placeholder.com/150",
-				company: "YuganthaAI",
+				company: "YugantaAI",
 				active: true,
 				approved: true
 			});
-			await pavan.save();
-			console.log("Created instructor 'Pavan'.");
+			await instructorObj.save();
+			console.log("Created instructor 'YugantaAI'.");
 		}
 
 		// Insert new courses
 		const coursesWithInstructor = courses.map(course => ({
 			...course,
-			instructorId: pavan._id
+			instructorId: instructorObj._id
 		}));
 
 		await Course.insertMany(coursesWithInstructor);

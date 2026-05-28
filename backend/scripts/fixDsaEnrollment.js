@@ -17,15 +17,15 @@ const USER_EMAIL = "yoshithanunna@gmail.com";
 async function main() {
 	await mongoose.connect(process.env.MONGODB_URI);
 
-	let instructor = await Instructor.findOne({ name: "Pavan" });
+	let instructor = await Instructor.findOne({ name: "YugantaAI" });
 	if (!instructor) {
 		instructor = await Instructor.create({
-			name: "Pavan",
-			email: "pavan@merosphere.com",
+			name: "YugantaAI",
+			email: "instructor@yugantaai.com",
 			expertise: "Programming and AI",
 			bio: "Instructor for programming and AI courses",
 			photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
-			company: "MeroSphere",
+			company: "YugantaAI",
 			approved: true,
 			active: true,
 		});
@@ -36,7 +36,7 @@ async function main() {
 		course = await Course.create({
 			title: DSA_TITLE,
 			description: "Build a strong foundation in data structures, algorithms, and problem solving with guided practice, structured modules, and mentorship support.",
-			instructor: "Pavan",
+			instructor: "YugantaAI",
 			instructorId: instructor._id,
 			rating: 4.7,
 			students: 0,

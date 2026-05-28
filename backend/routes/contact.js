@@ -31,7 +31,7 @@ router.post("/", contactLimiter, async (req, res) => {
   try {
     await mailer.sendMail({
       from: { name: "YugantaAI Contact Form", email: process.env.BREVO_FROM_EMAIL || process.env.SMTP_USER },
-      to: "pavansivasairahulbabu@gmail.com",
+      to: "info@yugantaai.com",
       subject: `[Contact Form] ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
