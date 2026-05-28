@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import { useTheme } from "../context/ThemeContext";
-import { FaWhatsapp, FaTelegram } from "react-icons/fa";
+import { FaWhatsapp, FaTelegram, FaInstagram } from "react-icons/fa";
 import {
 	FiTrendingUp,
 	FiActivity,
@@ -200,6 +200,10 @@ export default function BullBoomCommunity() {
 									<a href="https://t.me/tradewithpavan7098" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold rounded-xl hover:shadow-[0_4px_20px_rgba(0,136,204,0.35)] hover:scale-[1.03] transition-all duration-300 flex items-center gap-2 text-sm md:text-base">
 										<FaTelegram size={20} />
 										<span>Join for Updates</span>
+									</a>
+									<a href="https://www.instagram.com/trade_wth_pavan?igsh=ZDh1b2o3cHQzbmF1" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F56040] text-white font-bold rounded-xl hover:shadow-[0_4px_20px_rgba(253,29,29,0.35)] hover:scale-[1.03] transition-all duration-300 flex items-center gap-2 text-sm md:text-base">
+										<FaInstagram size={20} />
+										<span>Instagram</span>
 									</a>
 									<a href="#graphs-section" className="px-6 py-3.5 border border-[var(--border-color)] text-[var(--text-color)] font-bold rounded-xl hover:bg-[rgba(59,130,246,0.05)] transition-all duration-300 flex items-center gap-2 text-sm md:text-base">
 										<FiActivity />
@@ -594,12 +598,15 @@ export default function BullBoomCommunity() {
 								<div className="w-16 h-16 bg-[#0088cc]/10 rounded-2xl flex items-center justify-center text-[#0088cc] shadow-[0_0_15px_rgba(0,136,204,0.15)]">
 									<FaTelegram className="w-8 h-8 animate-pulse" />
 								</div>
+								<div className="w-16 h-16 bg-[#E1306C]/10 rounded-2xl flex items-center justify-center text-[#E1306C] shadow-[0_0_15px_rgba(225,48,108,0.15)]">
+									<FaInstagram className="w-8 h-8 animate-pulse" />
+								</div>
 							</div>
 
 							<h3 className="text-3xl font-extrabold mb-4 text-[var(--text-color)]">Ready to Trade with Edge?</h3>
 							
 							<p className="text-[var(--text-muted)] text-base mb-8 max-w-xl mx-auto font-medium">
-								Outsiders and aspiring traders are welcome. Tap below to chat with our community coordinator on WhatsApp or join our Telegram channel for live updates.
+								Outsiders and aspiring traders are welcome. Tap below to chat with our community coordinator on WhatsApp, join our Telegram channel, or follow us on Instagram.
 							</p>
 
 							<div className="flex flex-wrap gap-4 justify-center">
@@ -620,6 +627,15 @@ export default function BullBoomCommunity() {
 								>
 									<FaTelegram size={22} />
 									<span>Join for Updates</span>
+								</a>
+								<a
+									href="https://www.instagram.com/trade_wth_pavan?igsh=ZDh1b2o3cHQzbmF1"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F56040] text-white font-bold rounded-2xl hover:shadow-[0_6px_25px_rgba(253,29,29,0.4)] hover:scale-[1.03] transition-all duration-300 text-base"
+								>
+									<FaInstagram size={22} />
+									<span>Follow on Instagram</span>
 								</a>
 							</div>
 						</div>
