@@ -24,15 +24,7 @@ export default function FreeCourses() {
 			topics: ["DSA", "ML & DL", "LangChain", "CrewAI", "LangGraph", "AI Agents", "RAG", "AutoGen"],
 			path: "/courses/agentic-ai-pioneer-program"
 		},
-		{
-			id: "mastering-dsa-algorithms",
-			title: "Mastering Data Structures & Algorithms",
-			duration: "40+ Hours",
-			weeks: "6 Weeks",
-			thumbnail: "https://miro.medium.com/1*u1dfDjx8WS86XlELNL252Q.jpeg",
-			topics: ["Arrays", "Linked Lists", "Stacks & Queues", "Searching & Sorting", "Trees & Graphs"],
-			path: "/courses/dsa-machine-learning"
-		}
+		
 	];
 
 	return (

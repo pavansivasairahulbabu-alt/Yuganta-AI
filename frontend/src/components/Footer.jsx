@@ -134,11 +134,7 @@ export default function Footer() {
 								</Link>
 							</li>
 
-							<li>
-								<Link to='/courses/dsa-machine-learning' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
-									Mastering Data Structure & Algorithms
-								</Link>
-							</li>
+							
 						</ul>
 					</div>
 				</div>

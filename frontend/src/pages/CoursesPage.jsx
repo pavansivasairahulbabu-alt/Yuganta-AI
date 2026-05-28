@@ -347,6 +347,10 @@ export default function CoursesPage() {
 								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7'>
 									{filteredCourses.map((course) => (
 										(() => {
+											// Skip DSA courses completely
+											if ((course?.title || "").toLowerCase().includes("data structures") || (course?.title || "").toLowerCase().includes("dsa")) {
+												return null;
+											}
 											const isAgentic = isAgenticCourse(course);
 											const pioneer = isPioneerCourse(course);
 											const crash = isCrashCourse(course);
