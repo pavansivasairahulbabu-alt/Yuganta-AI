@@ -61,7 +61,7 @@ import InstructorsPage from "./pages/InstructorsPage";
 import BullBoomCommunity from "./pages/BullBoomCommunity";
 import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
-
+import BackToTop from "./components/BackToTop";
 function CoursesHomePage() {
 	return (
 		<>
@@ -466,6 +466,7 @@ export default function App() {
 								</Routes>
 							</div>
 						</Router>
+						<BackToTop />
 					</MentorProvider>
 				</InstructorProvider>
 			</AuthProvider>
