@@ -20,7 +20,6 @@ export default function FreeCourses() {
 			duration: "150 Hours",
 			weeks: "4 Months",
 			thumbnail: "/Agentic_AI_DSA.png",
-			thumbnail: "./pioneerthumb.png",
 			topics: ["DSA", "ML & DL", "LangChain", "CrewAI", "LangGraph", "AI Agents", "RAG", "AutoGen"],
 			path: "/courses/agentic-ai-pioneer-program"
 		},
