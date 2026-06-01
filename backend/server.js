@@ -63,7 +63,7 @@ const envOrigins = (process.env.FRONTEND_URL || '')
 	.map(url => url.trim())
 	.filter(Boolean);
 const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-const prodDefaultOrigins = ['https://yugantha-ai.vercel.app', 'https://yugantaai.com'];
+const prodDefaultOrigins = ['https://yuganta-ai.vercel.app', 'https://yugantaai.com'];
 
 const allowedOrigins = [
 	...(process.env.NODE_ENV === "production" ? prodDefaultOrigins : defaultDevOrigins),
