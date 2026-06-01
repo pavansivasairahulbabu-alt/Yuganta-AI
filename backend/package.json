@@ -12,6 +12,9 @@
     "seed:instructors": "node seedInstructors.js"
   },
   "keywords": [],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
