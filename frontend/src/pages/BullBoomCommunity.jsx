@@ -197,7 +197,7 @@ export default function BullBoomCommunity() {
 										<FaWhatsapp size={20} />
 										<span>Chat on WhatsApp</span>
 									</a>
-									<a href="https://t.me/tradewithpavan7098" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold rounded-xl hover:shadow-[0_4px_20px_rgba(0,136,204,0.35)] hover:scale-[1.03] transition-all duration-300 flex items-center gap-2 text-sm md:text-base">
+									<a href="https://telegram.me/tradewithpavan7098" target="_blank" rel="noopener noreferrer" className="px-6 py-3.5 bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold rounded-xl hover:shadow-[0_4px_20px_rgba(0,136,204,0.35)] hover:scale-[1.03] transition-all duration-300 flex items-center gap-2 text-sm md:text-base">
 										<FaTelegram size={20} />
 										<span>Join for Updates</span>
 									</a>
@@ -620,7 +620,7 @@ export default function BullBoomCommunity() {
 									<span>Join via WhatsApp</span>
 								</a>
 								<a
-									href="https://t.me/tradewithpavan7098"
+									href="https://telegram.me/tradewithpavan7098"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="inline-flex items-center gap-3 px-8 py-4 bg-[#0088cc] hover:bg-[#0077b5] text-white font-bold rounded-2xl hover:shadow-[0_6px_25px_rgba(0,136,204,0.4)] hover:scale-[1.03] transition-all duration-300 text-base"
