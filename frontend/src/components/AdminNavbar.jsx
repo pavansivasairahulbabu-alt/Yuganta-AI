@@ -16,6 +16,10 @@ import {
   X,
   Sun,
   Moon,
+  Video,
+  Film,
+  UploadCloud,
+  Tags,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -32,6 +36,10 @@ export default function AdminNavbar() {
 
   const navLinks = [
     { label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Video Analytics", path: "/admin/video-dashboard", icon: Video },
+    { label: "Upload Video", path: "/admin/video-upload", icon: UploadCloud },
+    { label: "Manage Videos", path: "/admin/video-manage", icon: Film },
+    { label: "Video Categories", path: "/admin/video-categories", icon: Tags },
     { label: "Jobs", path: "/admin/add-job", icon: Briefcase },
     { label: "Calls", path: "/admin/calls", icon: Phone },
     { label: "Mentorship Bookings", path: "/admin/bookings", icon: CalendarCheck },

@@ -40,6 +40,10 @@ import AdminMentorAssignments from "./pages/AdminMentorAssignments";
 import AdminRegistrations from "./pages/AdminRegistrations";
 import AdminBlogManagement from "./pages/AdminBlogManagement";
 import AdminCourseManagement from "./pages/AdminCourseManagement";
+import AdminVideoDashboard from "./pages/AdminVideoDashboard";
+import AdminVideoUpload from "./pages/AdminVideoUpload";
+import AdminVideoManage from "./pages/AdminVideoManage";
+import AdminVideoCategories from "./pages/AdminVideoCategories";
 import AdminMentorshipBookings from "./pages/AdminMentorshipBookings";
 import AdminCalls from "./pages/AdminCalls";
 import InstructorForgotPasswordPage from "./pages/InstructorForgotPasswordPage";
@@ -429,6 +433,10 @@ export default function App() {
 									<Route path='/admin/mentorships' element={<AdminMentorAssignments />} />
 									<Route path='/admin/bookings' element={<AdminMentorshipBookings />} />
 									<Route path='/admin/calls' element={<AdminCalls />} />
+									<Route path='/admin/video-dashboard' element={<AdminVideoDashboard />} />
+									<Route path='/admin/video-upload' element={<AdminVideoUpload />} />
+									<Route path='/admin/video-manage' element={<AdminVideoManage />} />
+									<Route path='/admin/video-categories' element={<AdminVideoCategories />} />
 									<Route path='/admin/assign-instructors' element={<AdminAssignInstructors />} />
 									<Route path='/admin/registrations' element={<AdminRegistrations />} />
 
