@@ -169,7 +169,6 @@ export default function AdminVideoDashboard() {
             return (
               <div
                 key={c.name}
-                style={{ width: `${pct}%` }}
                 className="h-full transition-all hover:opacity-90 cursor-pointer"
                 title={`${c.name}: ${c.value} videos (${pct.toFixed(0)}%)`}
                 style={{ backgroundColor: color, width: `${pct}%` }}
