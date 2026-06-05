@@ -49,6 +49,21 @@ if (process.env.BREVO_API_KEY) {
 	console.warn("⚠️  BREVO_API_KEY not set — OTP emails will fail");
 }
 
+// Check Cloudflare R2 Configuration
+const hasR2Config = !!(
+	process.env.CLOUDFLARE_R2_ACCOUNT_ID &&
+	process.env.CLOUDFLARE_R2_ACCESS_KEY_ID &&
+	process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY &&
+	process.env.CLOUDFLARE_R2_BUCKET_NAME &&
+	process.env.CLOUDFLARE_R2_PUBLIC_URL
+);
+
+if (hasR2Config) {
+	console.log(`☁️  Cloudflare R2 cloud storage connected: ${process.env.CLOUDFLARE_R2_BUCKET_NAME}`);
+} else {
+	console.warn("⚠️  Cloudflare R2 not fully configured — Running in Simulation/Mock mode for file uploads");
+}
+
 const app = express();
 app.set("trust proxy", 1);
 console.log("Starting yugantha-ai backend server");
@@ -123,8 +138,8 @@ app.use(helmet({
 	crossOriginResourcePolicy: false,
 }));
 app.use(compression({ threshold: 1024 }));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '500mb' })); // Increased for large file uploads
+app.use(express.urlencoded({ extended: true, limit: '500mb' })); // Increased for large file uploads
 app.use("/api", apiLimiter);
 app.use("/api/auth", authLimiter);
 app.use("/api/instructor-auth", authLimiter);

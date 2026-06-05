@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { UploadCloud, Film, Image as ImageIcon, X, AlertTriangle, Loader2, Play, CheckCircle } from "lucide-react";
+import { UploadCloud, Film, Image as ImageIcon, X, AlertTriangle, Loader2, Play, CheckCircle, GripVertical } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import AdminNavbar from "../components/AdminNavbar";
@@ -17,14 +17,21 @@ export default function AdminVideoUpload() {
   const [category, setCategory] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState([]);
-  
+
+  // Drag menu states
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingMenu, setIsDraggingMenu] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const menuRef = useRef(null);
+
   // Media states
   const [videoFile, setVideoFile] = useState(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [videoSize, setVideoSize] = useState(0);
   const [videoUrl, setVideoUrl] = useState("");
   const [videoKey, setVideoKey] = useState("");
-  
+
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [thumbnailKey, setThumbnailKey] = useState("");
@@ -60,6 +67,39 @@ export default function AdminVideoUpload() {
     },
     enabled: !loading,
   });
+
+  // Handle Draggable Category Menu
+  const handleMenuMouseDown = (e) => {
+    if (e.target.closest("button")) return; // Don't drag if clicking buttons
+    setIsDraggingMenu(true);
+    setDragOffset({
+      x: e.clientX - menuPosition.x,
+      y: e.clientY - menuPosition.y,
+    });
+  };
+
+  useEffect(() => {
+    if (!isDraggingMenu) return;
+
+    const handleMouseMove = (e) => {
+      setMenuPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingMenu(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDraggingMenu, dragOffset]);
 
   // Handle Tags
   const handleAddTag = (e) => {
@@ -139,48 +179,62 @@ export default function AdminVideoUpload() {
   };
 
   // ==========================================
-  // CLOUDFLARE R2 UPLOAD WORKFLOW
+  // CLOUDFLARE R2 UPLOAD WORKFLOW (Backend Proxy)
   // ==========================================
   const uploadAsset = async (file, purpose, setProgress, setIsUploading) => {
     setIsUploading(true);
     setProgress(0);
 
     try {
-      // 1. Get presigned PUT URL from Backend
-      const presignResponse = await api.post("/videos/presign", {
-        fileName: file.name,
-        fileType: file.type,
-        purpose,
+      // Convert file to Base64 for transmission
+      const reader = new FileReader();
+
+      return new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            const base64Data = reader.result.split(',')[1]; // Remove data:image/png;base64, prefix
+
+            // Upload through backend API endpoint
+            const uploadResponse = await api.post("/videos/upload", {
+              fileName: file.name,
+              fileType: file.type,
+              purpose,
+              fileData: base64Data,
+            }, {
+              onUploadProgress: (progressEvent) => {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                setProgress(percent);
+              },
+            });
+
+            const { downloadUrl, key, isMock } = uploadResponse.data;
+
+            if (isMock) {
+              toast.success(`${purpose === "video" ? "Video" : "Thumbnail"} uploaded (Simulation Mode)`);
+            } else {
+              toast.success(`${purpose === "video" ? "Video" : "Thumbnail"} uploaded successfully to R2!`);
+            }
+
+            setIsUploading(false);
+            resolve({ downloadUrl, key });
+          } catch (error) {
+            console.error(`${purpose} upload error:`, error);
+            setIsUploading(false);
+            setProgress(0);
+            toast.error(`Failed to upload ${purpose}. Please try again.`);
+            reject(error);
+          }
+        };
+
+        reader.onerror = () => {
+          setIsUploading(false);
+          setProgress(0);
+          toast.error(`Failed to read ${purpose} file`);
+          reject(new Error(`Failed to read ${purpose} file`));
+        };
+
+        reader.readAsDataURL(file);
       });
-
-      const { uploadUrl, downloadUrl, key, isMock } = presignResponse.data;
-
-      if (isMock) {
-        // simulation mode: run a fake progress counter to show beautiful upload indicators
-        for (let p = 0; p <= 100; p += 10) {
-          setProgress(p);
-          await new Promise((r) => setTimeout(r, 150));
-        }
-        setIsUploading(false);
-        toast.success(`${purpose === "video" ? "Video" : "Thumbnail"} uploaded (Simulation Mode)`);
-        return { downloadUrl, key };
-      }
-
-      // 2. Upload file directly to Cloudflare R2 using presigned PUT URL
-      await axios.put(uploadUrl, file, {
-        headers: {
-          "Content-Type": file.type,
-        },
-        onUploadProgress: (progressEvent) => {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setProgress(percent);
-        },
-      });
-
-      setIsUploading(false);
-      toast.success(`${purpose === "video" ? "Video" : "Thumbnail"} uploaded successfully to R2!`);
-      return { downloadUrl, key };
-
     } catch (error) {
       console.error(`${purpose} upload error:`, error);
       setIsUploading(false);
@@ -283,7 +337,7 @@ export default function AdminVideoUpload() {
 
         {/* Form Container */}
         <form onSubmit={handleUploadAndSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Left Column: Form details */}
           <div className="lg:col-span-2 space-y-6 bg-[rgba(30,27,51,0.4)] border border-[rgba(139,92,246,0.15)] rounded-3xl p-6 md:p-8 shadow-xl">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 pb-3 border-b border-[rgba(139,92,246,0.1)]">
@@ -303,22 +357,23 @@ export default function AdminVideoUpload() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-sm font-semibold text-white">Category Selection</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-[rgba(26,21,44,0.7)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
-                  required
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-[rgba(26,21,44,0.7)] border border-[rgba(139,92,246,0.25)] hover:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm text-left flex justify-between items-center transition-all"
                 >
-                  <option value="" disabled>Select category...</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
+                  <span>{category || "Click to open category menu..."}</span>
+                  <span className="text-[#9A93B5]">📂</span>
+                </button>
+                {category && (
+                  <div className="text-xs text-[#A855F7] font-semibold flex items-center gap-2 pt-1">
+                    <CheckCircle className="w-4 h-4" />
+                    Selected: <span className="text-white">{category}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -369,7 +424,7 @@ export default function AdminVideoUpload() {
 
           {/* Right Column: Files Drag and Drop uploads */}
           <div className="space-y-6">
-            
+
             {/* Video File Area */}
             <div className="bg-[rgba(30,27,51,0.4)] border border-[rgba(139,92,246,0.15)] rounded-3xl p-6 shadow-xl space-y-4">
               <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-[rgba(139,92,246,0.1)]">
@@ -390,7 +445,7 @@ export default function AdminVideoUpload() {
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  
+
                   <div className="flex justify-between text-xs text-[#C7C3D6] font-semibold">
                     <span>Size: {formatBytes(videoSize)}</span>
                     <span>Duration: {formatDuration(videoDuration)}</span>
@@ -420,17 +475,16 @@ export default function AdminVideoUpload() {
                     setIsVideoDragActive(false);
                     if (e.dataTransfer.files?.[0]) handleVideoFileSelection(e.dataTransfer.files[0]);
                   }}
-                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
-                    isVideoDragActive 
-                      ? "border-[#A855F7] bg-[rgba(139,92,246,0.1)]" 
-                      : "border-[rgba(139,92,246,0.25)] hover:border-[#A855F7] hover:bg-[rgba(139,92,246,0.02)]"
-                  }`}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${isVideoDragActive
+                    ? "border-[#A855F7] bg-[rgba(139,92,246,0.1)]"
+                    : "border-[rgba(139,92,246,0.25)] hover:border-[#A855F7] hover:bg-[rgba(139,92,246,0.02)]"
+                    }`}
                   onClick={() => videoInputRef.current?.click()}
                 >
                   <UploadCloud className="w-10 h-10 mx-auto text-[#9A93B5] group-hover:scale-105 transition-transform" />
                   <p className="text-xs font-semibold text-white mt-3">Drag & drop video or click</p>
                   <p className="text-[10px] text-[#9A93B5] mt-1">MP4, MOV, AVI up to 200MB</p>
-                  
+
                   <input
                     type="file"
                     ref={videoInputRef}
@@ -464,7 +518,7 @@ export default function AdminVideoUpload() {
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  
+
                   {/* Local Thumbnail Preview */}
                   <div className="relative aspect-video bg-black rounded-lg overflow-hidden border border-[rgba(139,92,246,0.1)]">
                     <img
@@ -498,17 +552,16 @@ export default function AdminVideoUpload() {
                     setIsThumbDragActive(false);
                     if (e.dataTransfer.files?.[0]) handleThumbFileSelection(e.dataTransfer.files[0]);
                   }}
-                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${
-                    isThumbDragActive 
-                      ? "border-[#A855F7] bg-[rgba(139,92,246,0.1)]" 
-                      : "border-[rgba(139,92,246,0.25)] hover:border-[#A855F7] hover:bg-[rgba(139,92,246,0.02)]"
-                  }`}
+                  className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer ${isThumbDragActive
+                    ? "border-[#A855F7] bg-[rgba(139,92,246,0.1)]"
+                    : "border-[rgba(139,92,246,0.25)] hover:border-[#A855F7] hover:bg-[rgba(139,92,246,0.02)]"
+                    }`}
                   onClick={() => thumbInputRef.current?.click()}
                 >
                   <UploadCloud className="w-10 h-10 mx-auto text-[#9A93B5] group-hover:scale-105 transition-transform" />
                   <p className="text-xs font-semibold text-white mt-3">Drag & drop thumbnail or click</p>
                   <p className="text-[10px] text-[#9A93B5] mt-1">PNG, JPG, WEBP up to 5MB</p>
-                  
+
                   <input
                     type="file"
                     ref={thumbInputRef}
@@ -527,8 +580,8 @@ export default function AdminVideoUpload() {
               <button
                 type="submit"
                 disabled={
-                  isUploadingVideo || 
-                  isUploadingThumbnail || 
+                  isUploadingVideo ||
+                  isUploadingThumbnail ||
                   saveMutation.isPending
                 }
                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] text-white hover:opacity-95 font-bold shadow-lg transition-transform active:scale-[0.98] duration-150"
@@ -557,6 +610,82 @@ export default function AdminVideoUpload() {
 
           </div>
         </form>
+
+        {/* Draggable Category Menu */}
+        {isCategoryMenuOpen && (
+          <div
+            ref={menuRef}
+            className="fixed z-50 min-w-[400px] bg-[rgba(30,27,51,0.95)] border border-[rgba(139,92,246,0.3)] rounded-2xl shadow-2xl backdrop-blur-xl"
+            style={{
+              left: `${menuPosition.x}px`,
+              top: `${menuPosition.y}px`,
+              cursor: isDraggingMenu ? "grabbing" : "grab",
+            }}
+          >
+            {/* Draggable Header */}
+            <div
+              onMouseDown={handleMenuMouseDown}
+              className="flex items-center gap-2 px-4 py-3 border-b border-[rgba(139,92,246,0.2)] bg-gradient-to-r from-[rgba(139,92,246,0.1)] to-[rgba(236,72,153,0.05)] rounded-t-2xl cursor-grab active:cursor-grabbing transition-colors"
+            >
+              <GripVertical className="w-5 h-5 text-[#A855F7]" />
+              <h3 className="text-sm font-bold text-white flex-1">Select Video Category</h3>
+              <button
+                type="button"
+                onClick={() => setIsCategoryMenuOpen(false)}
+                className="p-1 hover:bg-[rgba(139,92,246,0.2)] rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4 text-[#C7C3D6]" />
+              </button>
+            </div>
+
+            {/* Categories Grid */}
+            <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+              {loadingCats ? (
+                <div className="text-center py-8 text-[#9A93B5]">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                  <p className="text-xs">Loading categories...</p>
+                </div>
+              ) : categories.length === 0 ? (
+                <div className="text-center py-8 text-[#9A93B5]">
+                  <p className="text-xs">No categories available</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat._id}
+                      type="button"
+                      onClick={() => {
+                        setCategory(cat.name);
+                        setIsCategoryMenuOpen(false);
+                        toast.success(`Category selected: ${cat.name}`);
+                      }}
+                      className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border-2 flex items-center justify-between group ${category === cat.name
+                        ? "bg-gradient-to-r from-[#A855F7] to-[#EC4899] border-[#A855F7] text-white shadow-lg"
+                        : "bg-[rgba(26,21,44,0.6)] border-[rgba(139,92,246,0.2)] text-[#C7C3D6] hover:border-[#A855F7] hover:bg-[rgba(139,92,246,0.2)]"
+                        }`}
+                    >
+                      <span>{cat.name}</span>
+                      {category === cat.name && <CheckCircle className="w-4 h-4" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer Info */}
+            <div className="px-4 py-3 border-t border-[rgba(139,92,246,0.2)] bg-[rgba(26,21,44,0.3)] rounded-b-2xl text-xs text-[#9A93B5]">
+              {category ? (
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-[#A855F7]" />
+                  <span>Selected: <span className="text-white font-semibold">{category}</span></span>
+                </div>
+              ) : (
+                <span>👆 Click a category to select it</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

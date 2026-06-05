@@ -48,7 +48,57 @@ const MOCK_THUMBNAILS = [
 ];
 
 // ==========================================
-// R2 UPLOAD PRESIGNED URL ROUTE
+// R2 DIRECT UPLOAD ENDPOINT (Backend proxy)
+// ==========================================
+router.post("/videos/upload", verifyAdmin, async (req, res) => {
+  try {
+    const { fileName, fileType, purpose } = req.body;
+    const fileBuffer = Buffer.from(req.body.fileData, 'base64');
+
+    if (!fileName || !fileType || !fileBuffer) {
+      return res.status(400).json({ message: "fileName, fileType, and fileData are required" });
+    }
+
+    const folder = purpose === "thumbnail" ? "thumbnails" : "videos";
+    const uniqueFileName = `${folder}/${Date.now()}_${fileName.replace(/\s+/g, "_")}`;
+
+    if (!hasR2Config) {
+      // In simulation mode, return a mocked upload destination
+      const fallbackUrl = purpose === "thumbnail" 
+        ? MOCK_THUMBNAILS[Math.floor(Math.random() * MOCK_THUMBNAILS.length)]
+        : MOCK_VIDEOS[Math.floor(Math.random() * MOCK_VIDEOS.length)];
+
+      return res.json({
+        isMock: true,
+        downloadUrl: fallbackUrl,
+        key: uniqueFileName,
+      });
+    }
+
+    // Upload directly to R2 from backend
+    const command = new PutObjectCommand({
+      Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+      Key: uniqueFileName,
+      Body: fileBuffer,
+      ContentType: fileType,
+    });
+
+    await s3Client.send(command);
+    const downloadUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL.replace(/\/$/, "")}/${uniqueFileName}`;
+
+    res.json({
+      isMock: false,
+      downloadUrl,
+      key: uniqueFileName,
+    });
+  } catch (error) {
+    console.error("Backend upload error:", error);
+    res.status(500).json({ message: "Failed to upload file", error: error.message });
+  }
+});
+
+// ==========================================
+// R2 UPLOAD PRESIGNED URL ROUTE (Legacy)
 // ==========================================
 router.post("/videos/presign", verifyAdmin, async (req, res) => {
   try {

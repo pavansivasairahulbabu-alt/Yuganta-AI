@@ -59,7 +59,7 @@ export default function AdminNavbar() {
     const applyLayoutOffset = () => {
       const needsTransition = !isFirstMount.current;
       const transitionStyle = needsTransition ? "padding-left 300ms cubic-bezier(0.4, 0, 0.2, 1)" : "none";
-      
+
       if (window.innerWidth >= 1024) {
         document.body.style.transition = transitionStyle;
         document.body.style.paddingLeft = isCollapsed ? "88px" : "280px";
@@ -70,7 +70,7 @@ export default function AdminNavbar() {
     };
 
     applyLayoutOffset();
-    
+
     if (isFirstMount.current) {
       isFirstMount.current = false;
     }
@@ -182,9 +182,8 @@ export default function AdminNavbar() {
       </header>
 
       <aside
-        className={`fixed top-16 left-0 bottom-0 z-50 ${shellClasses} border-r backdrop-blur-xl transition-all duration-300 ${
-          isCollapsed ? "w-[88px]" : "w-[280px]"
-        } ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        className={`fixed top-16 left-0 bottom-0 z-50 ${shellClasses} border-r backdrop-blur-xl transition-all duration-300 ${isCollapsed ? "w-[88px]" : "w-[280px]"
+          } ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         <nav className="p-3 space-y-1 overflow-y-auto h-full">
           {navLinks.map((link) => {
@@ -195,21 +194,18 @@ export default function AdminNavbar() {
               <button
                 key={link.path}
                 onClick={() => navigate(link.path)}
-                className={`w-full h-11 rounded-xl transition-all duration-300 flex items-center ${
-                  isCollapsed ? "pl-[30px]" : "px-4"
-                } ${
-                  isActive
+                className={`w-full h-11 rounded-xl transition-all duration-300 flex items-center ${isCollapsed ? "pl-[30px]" : "px-4"
+                  } ${isActive
                     ? "bg-gradient-to-r from-[rgba(139,92,246,0.25)] to-[rgba(236,72,153,0.15)] text-white border border-[rgba(139,92,246,0.45)]"
                     : `${textMuted} ${hoverTextClass} hover:bg-[rgba(139,92,246,0.14)] border border-transparent`
-                }`}
+                  }`}
                 title={isCollapsed ? link.label : undefined}
                 aria-label={link.label}
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 <span
-                  className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${
-                    isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
-                  }`}
+                  className={`text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
+                    }`}
                 >
                   {link.label}
                 </span>
