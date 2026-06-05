@@ -27,6 +27,9 @@ export default function AdminVideoManage() {
   // Selected videos for bulk operations
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // Preview Video modal state
+  const [previewVideo, setPreviewVideo] = useState(null);
+
   // Edit Video modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
@@ -449,12 +452,20 @@ export default function AdminVideoManage() {
                           </button>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="relative aspect-video w-32 bg-black rounded-lg overflow-hidden border border-[rgba(139,92,246,0.15)] group">
+                          <div 
+                            onClick={() => setPreviewVideo(video)}
+                            className="relative aspect-video w-32 bg-black rounded-lg overflow-hidden border border-[rgba(139,92,246,0.15)] group cursor-pointer"
+                          >
                             <img
                               src={video.thumbnailUrl || "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300"}
                               alt={video.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
+                              <div className="p-1.5 rounded-full bg-white/20 backdrop-blur-sm">
+                                <Play className="w-4 h-4 text-white fill-current" />
+                              </div>
+                            </div>
                             <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] text-white font-mono font-bold flex items-center gap-0.5">
                               <Clock className="w-2.5 h-2.5" />
                               {formatDuration(video.duration)}
@@ -488,6 +499,13 @@ export default function AdminVideoManage() {
                         </td>
                         <td className="py-4 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setPreviewVideo(video)}
+                              className="p-2 rounded-lg text-[#C7C3D6] hover:text-[#10B981] hover:bg-[rgba(16,185,129,0.1)] transition-colors"
+                              title="Preview Video"
+                            >
+                              <Play className="w-4 h-4" />
+                            </button>
                             <button
                               onClick={() => openEditModal(video)}
                               className="p-2 rounded-lg text-[#C7C3D6] hover:text-[#A855F7] hover:bg-[rgba(139,92,246,0.1)] transition-colors"
@@ -708,6 +726,63 @@ export default function AdminVideoManage() {
 
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Play Video Modal */}
+      {previewVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="relative w-full max-w-4xl bg-[#130E26] border border-[rgba(139,92,246,0.3)] rounded-3xl p-6 shadow-2xl space-y-4 my-8">
+            <button
+              onClick={() => setPreviewVideo(null)}
+              className="absolute top-4 right-4 p-2 text-[#C7C3D6] hover:text-white rounded-lg hover:bg-[rgba(139,92,246,0.1)] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1 pr-10">
+              <h2 className="text-xl font-bold text-white truncate">{previewVideo.title}</h2>
+              <p className="text-xs text-[#9A93B5] flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded bg-[rgba(139,92,246,0.1)] text-[#C084FC] font-semibold">{previewVideo.category}</span>
+                <span>•</span>
+                <span>Size: {formatSize(previewVideo.fileSize)}</span>
+                <span>•</span>
+                <span>Duration: {formatDuration(previewVideo.duration)}</span>
+              </p>
+            </div>
+
+            <div className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden border border-[rgba(139,92,246,0.2)] shadow-inner">
+              <video
+                src={previewVideo.videoUrl}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+                poster={previewVideo.thumbnailUrl}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+
+            <div className="bg-[rgba(26,21,44,0.4)] border border-[rgba(139,92,246,0.08)] rounded-xl p-4 text-sm">
+              <h4 className="font-semibold text-white mb-1">Description:</h4>
+              <p className="text-[#C7C3D6] text-xs leading-relaxed max-h-24 overflow-y-auto pr-2">
+                {previewVideo.description || "No description provided."}
+              </p>
+            </div>
+            
+            <div className="flex justify-between items-center pt-2 gap-4">
+              <p className="text-[10px] font-mono text-[#9A93B5] select-all truncate max-w-xl" title={previewVideo.videoUrl}>
+                URL: {previewVideo.videoUrl}
+              </p>
+              <button
+                type="button"
+                onClick={() => setPreviewVideo(null)}
+                className="px-5 py-2 rounded-xl border border-[rgba(139,92,246,0.3)] text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.1)] transition-colors text-sm font-semibold shrink-0"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         </div>
       )}
