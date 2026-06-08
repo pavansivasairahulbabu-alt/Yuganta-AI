@@ -97,7 +97,7 @@ export default function Footer() {
 									to='/instructor'
 									style={{ color: '#C7C3D6' }}
 									className='hover:text-[#A855F7] transition-colors duration-200'>
-									 Instructor
+									Instructor
 								</Link>
 							</li>
 							<li>
@@ -133,8 +133,13 @@ export default function Footer() {
 									Agentic AI Crash Course
 								</Link>
 							</li>
+							<li>
+								<Link to='/courses/indian-trade-market' style={{ color: '#C7C3D6' }} className='hover:text-[#A855F7] transition-colors duration-200'>
+									Trading Course
+								</Link>
+							</li>
 
-							
+
 						</ul>
 					</div>
 				</div>

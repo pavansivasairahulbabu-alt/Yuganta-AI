@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import StructuredData from "../components/StructuredData";
-import { useAuth } from "../context/AuthContext";
 
 export default function LandingPage() {
-	const { isCourseEnrolled } = useAuth();
 	return (
 		<div className="min-h-screen transition-colors duration-300">
 			<StructuredData />
@@ -164,7 +161,7 @@ export default function LandingPage() {
 							</div>
 
 							<h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-4 leading-tight">
-								Agentic AI Crash Course 
+								Agentic AI Crash Course
 							</h3>
 
 							<div className="flex flex-wrap gap-2 mb-6">
@@ -220,13 +217,48 @@ export default function LandingPage() {
 								Enroll Now
 							</Link>
 						</div>
+						<div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl">
+							<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
+								<img
+									src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1024&q=80"
+									alt="Indian Market Trade"
+									className="w-full h-full object-cover"
+								/>
+							</div>
 
-						
-						
+							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
+								<span>30+ Hours</span>
+								<span>•</span>
+								<span>4 Weeks</span>
+							</div>
+
+							<h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-4 leading-tight">
+								Trading Course
+							</h3>
+
+							<div className="flex flex-wrap gap-2 mb-6">
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">NSE & BSE</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Technical Analysis</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Fundamental Analysis</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Candlestick Patterns</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">Screener.in</span>
+								<span className="px-3.5 py-1.5 rounded-lg border border-blue-300/70 text-sm font-semibold text-[var(--text-color)]">TradingView</span>
+							</div>
+
+							<Link
+								to="/courses/indian-trade-market"
+								className="block w-full text-center py-3.5 rounded-2xl border text-base font-semibold transition-colors border-blue-300/70 text-[var(--text-color)] hover:border-blue-500 hover:text-blue-500"
+							>
+								Enroll Now
+							</Link>
+						</div>
+
+
+
 					</div>
 				</div>
 			</div>
-			
+
 			{/* Why yugantaAI Section */}
 			<div className="py-20 md:py-32 bg-[var(--bg-color)] transition-colors duration-300">
 				<div className="max-w-7xl mx-auto px-4 md:px-6">

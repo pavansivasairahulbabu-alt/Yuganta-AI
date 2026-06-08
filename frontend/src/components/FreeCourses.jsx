@@ -10,7 +10,7 @@ export default function FreeCourses() {
 			title: "Agentic AI Crash Course",
 			duration: "30+ Hours",
 			weeks: "4 Weeks",
-			thumbnail: "https://onug.net/wp-content/uploads/2025/02/ONUG-Blog-Image-1024x512-1.jpg", 
+			thumbnail: "https://onug.net/wp-content/uploads/2025/02/ONUG-Blog-Image-1024x512-1.jpg",
 			topics: ["AI Agents", "RAG", "LangChain", "AutoGen", "CrewAI"],
 			path: "/courses/agentic-ai-crash-course-page"
 		},
@@ -23,21 +23,30 @@ export default function FreeCourses() {
 			topics: ["DSA", "ML & DL", "LangChain", "CrewAI", "LangGraph", "AI Agents", "RAG", "AutoGen"],
 			path: "/courses/agentic-ai-pioneer-program"
 		},
-		
+		{
+			id: "indian-trade-market",
+			title: "Indian Market Trade",
+			duration: "30+ Hours",
+			weeks: "4 Weeks",
+			thumbnail: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=900&auto=format&fit=crop",
+			topics: ["Nifty 50", "Sensex", "Technical Analysis", "Options", "Risk Management"],
+			path: "/courses/indian-trade-market"
+		},
+
 	];
 
 	return (
 		<section
 			id='free-courses'
 			className='py-12 md:py-24 px-4 md:px-6 bg-[var(--bg-color)] text-[var(--text-color)] relative overflow-hidden transition-colors duration-300'>
-			
+
 			<div className='max-w-7xl mx-auto relative z-10'>
 				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8'>
 					{staticCourses.map((course) => (
 						<div
 							key={course.id}
 							className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group">
-							
+
 							{/* Thumbnail */}
 							<div className="w-full h-44 md:h-48 overflow-hidden rounded-2xl mb-5">
 								<img
@@ -62,7 +71,7 @@ export default function FreeCourses() {
 							{/* Topics */}
 							<div className="flex flex-wrap gap-2 mb-6 min-h-[80px]">
 								{course.topics.map((topic, index) => (
-									<span 
+									<span
 										key={index}
 										className="px-3 py-1 rounded-lg border border-[var(--border-color)] text-xs font-semibold text-[var(--text-muted)] group-hover:border-[#A855F7]/30 transition-colors"
 									>

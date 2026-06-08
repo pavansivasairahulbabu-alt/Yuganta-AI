@@ -14,7 +14,7 @@ import Footer from "./components/Footer";
 import LoadingSpinner from "./components/LoadingSpinner";
 import LandingPage from "./pages/LandingPage";
 import CoursesPage from "./pages/CoursesPage";
-import CourseDetailPage from "./pages/CourseDetailPage"; 
+import CourseDetailPage from "./pages/CourseDetailPage";
 import CourseDetailsPage from "./pages/CourseDetailsPage";
 import MyLearningPage from "./pages/MyLearningPage";
 import MentorshipPage from "./pages/MentorshipPage";
@@ -66,6 +66,7 @@ import BullBoomCommunity from "./pages/BullBoomCommunity";
 import AgenticAICrashCoursePage from "./pages/courses/AgenticAICrashCoursePage";
 import AgenticAIPioneerProgramPage from "./pages/courses/AgenticAIPioneerProgramPage";
 import BackToTop from "./components/BackToTop";
+import IndianMarketTradePage from "./pages/courses/Indianmarkettradepage";
 function CoursesHomePage() {
 	return (
 		<>
@@ -213,29 +214,29 @@ export default function App() {
 										}
 									/>
 									<Route
-												path='/contact'
-												element={
-													<MainLayout>
-														<ContactPage />
-													</MainLayout>
-												}
-											/>
-											<Route
-												path='/jobs'
-												element={
-													<MainLayout>
-														<JobsPage />
-													</MainLayout>
-												}
-											/>
-											<Route
-												path='/talk-to-expert'
-												element={
-													<MainLayout>
-														<TalkToExpertPage />
-													</MainLayout>
-												}
-											/>
+										path='/contact'
+										element={
+											<MainLayout>
+												<ContactPage />
+											</MainLayout>
+										}
+									/>
+									<Route
+										path='/jobs'
+										element={
+											<MainLayout>
+												<JobsPage />
+											</MainLayout>
+										}
+									/>
+									<Route
+										path='/talk-to-expert'
+										element={
+											<MainLayout>
+												<TalkToExpertPage />
+											</MainLayout>
+										}
+									/>
 									<Route
 										path='/terms-and-conditions'
 										element={
@@ -316,6 +317,14 @@ export default function App() {
 										element={
 											<CoursesLayout>
 												<AgenticAIPioneerProgramPage />
+											</CoursesLayout>
+										}
+									/>
+									<Route
+										path='/courses/indian-trade-market'
+										element={
+											<CoursesLayout>
+												<IndianMarketTradePage />
 											</CoursesLayout>
 										}
 									/>
