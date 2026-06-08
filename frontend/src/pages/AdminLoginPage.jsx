@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import API_URL from "../config/api";
 
 const ADMIN_EMAIL = "admin@yugantaai.com";
-const ADMIN_PASSWORD = "Admin123!";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();

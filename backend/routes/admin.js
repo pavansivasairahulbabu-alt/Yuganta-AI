@@ -70,8 +70,9 @@ const sendOTPEmail = async (email, otp, instructorName) => {
 };
 
 // Static admin credentials
-const ADMIN_EMAIL = "admin@yugantaai.com";
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync("Admin123!", 10);
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@yugantaai.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Admin123!";
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
 // Admin login
 router.post("/login", async (req, res) => {
