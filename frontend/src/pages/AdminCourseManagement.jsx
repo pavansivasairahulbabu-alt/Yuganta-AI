@@ -34,6 +34,20 @@ export default function AdminCourseManagement() {
   const [newVideoTitle, setNewVideoTitle] = useState("");
   const [newVideoDescription, setNewVideoDescription] = useState("");
   const [newVideoFile, setNewVideoFile] = useState(null);
+  const [videoLibrary, setVideoLibrary] = useState([]);
+  const [loadingVideoLibrary, setLoadingVideoLibrary] = useState(false);
+  const [addVideoMode, setAddVideoMode] = useState({}); // moduleIndex -> "upload" | "library" | "custom"
+  const [selectedLibraryVideoId, setSelectedLibraryVideoId] = useState({}); // moduleIndex -> video._id
+  const [newVideoUrl, setNewVideoUrl] = useState("");
+  const [newVideoDuration, setNewVideoDuration] = useState("");
+  const [editingModuleIndex, setEditingModuleIndex] = useState(null);
+  const [editingModuleTitle, setEditingModuleTitle] = useState("");
+  const [editingModuleDescription, setEditingModuleDescription] = useState("");
+  const [editingVideoKey, setEditingVideoKey] = useState(null); // { moduleIndex, videoIndex }
+  const [editingVideoTitle, setEditingVideoTitle] = useState("");
+  const [editingVideoDescription, setEditingVideoDescription] = useState("");
+  const [editingVideoUrl, setEditingVideoUrl] = useState("");
+  const [editingVideoDuration, setEditingVideoDuration] = useState("");
 
   const categories = [
     "DSA",
@@ -54,8 +68,28 @@ export default function AdminCourseManagement() {
     } else {
       fetchCourses();
       fetchInstructors();
+      fetchVideoLibrary();
     }
   }, [navigate]);
+
+  const fetchVideoLibrary = async () => {
+    try {
+      setLoadingVideoLibrary(true);
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch(`${API_URL}/api/admin/videos?limit=1000`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const list = Array.isArray(data) ? data : (data.videos || []);
+        setVideoLibrary(list);
+      }
+    } catch (error) {
+      console.error("Error fetching video library:", error);
+    } finally {
+      setLoadingVideoLibrary(false);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -169,58 +203,185 @@ export default function AdminCourseManagement() {
     toast.success("Module removed");
   };
 
-  const handleAddVideoToModule = async (moduleIndex) => {
-    if (!newVideoTitle.trim() || !newVideoFile) {
-      toast.error("Please enter video title and select a file");
+  const handleStartEditModule = (index, module) => {
+    setEditingModuleIndex(index);
+    setEditingModuleTitle(module.title);
+    setEditingModuleDescription(module.description || "");
+  };
+
+  const handleSaveModuleEdit = (index) => {
+    if (!editingModuleTitle.trim()) {
+      toast.error("Module title is required");
       return;
     }
+    const updated = [...formData.modules];
+    updated[index] = {
+      ...updated[index],
+      title: editingModuleTitle.trim(),
+      description: editingModuleDescription.trim(),
+    };
+    setFormData({ ...formData, modules: updated });
+    setEditingModuleIndex(null);
+    toast.success("Module renamed successfully");
+  };
 
-    try {
-      toast.loading("Uploading video...");
-      setUploadingVideo({ ...uploadingVideo, [moduleIndex]: true });
+  const handleStartEditVideo = (moduleIndex, videoIndex, video) => {
+    setEditingVideoKey({ moduleIndex, videoIndex });
+    setEditingVideoTitle(video.title);
+    setEditingVideoDescription(video.description || "");
+    setEditingVideoUrl(video.url || "");
+    setEditingVideoDuration(video.duration || "");
+  };
 
-      const formDataForUpload = new FormData();
-      formDataForUpload.append("video", newVideoFile);
+  const handleSaveVideoEdit = (moduleIndex, videoIndex) => {
+    if (!editingVideoTitle.trim()) {
+      toast.error("Video title is required");
+      return;
+    }
+    const updated = [...formData.modules];
+    const videos = [...(updated[moduleIndex].videos || [])];
+    videos[videoIndex] = {
+      ...videos[videoIndex],
+      title: editingVideoTitle.trim(),
+      description: editingVideoDescription.trim(),
+      url: editingVideoUrl.trim(),
+      duration: editingVideoDuration,
+    };
+    updated[moduleIndex].videos = videos;
+    setFormData({ ...formData, modules: updated });
+    setEditingVideoKey(null);
+    toast.success("Video metadata updated successfully");
+  };
 
-      const token = localStorage.getItem("adminToken");
-      const uploadRes = await fetch(`${API_URL}/api/admin/upload-video`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formDataForUpload,
-      });
+  const handleMoveVideoToModule = (sourceModuleIndex, videoIndex, targetModuleIndex) => {
+    if (sourceModuleIndex === targetModuleIndex) return;
+    const updated = [...formData.modules];
+    const videoToMove = updated[sourceModuleIndex].videos[videoIndex];
 
-      const uploadData = await uploadRes.json();
+    // Remove from source module
+    updated[sourceModuleIndex].videos = updated[sourceModuleIndex].videos.filter((_, idx) => idx !== videoIndex);
 
-      if (!uploadRes.ok) {
-        throw new Error(uploadData.message || "Video upload failed");
+    // Add to target module
+    updated[targetModuleIndex].videos = updated[targetModuleIndex].videos || [];
+    videoToMove.order = updated[targetModuleIndex].videos.length + 1;
+    updated[targetModuleIndex].videos.push(videoToMove);
+
+    // Re-order source module videos
+    updated[sourceModuleIndex].videos.forEach((v, i) => { v.order = i + 1; });
+    // Re-order target module videos
+    updated[targetModuleIndex].videos.forEach((v, i) => { v.order = i + 1; });
+
+    setFormData({ ...formData, modules: updated });
+    toast.success(`Moved video to "${updated[targetModuleIndex].title}"`);
+  };
+
+  const handleAddVideo = async (moduleIndex) => {
+    const mode = addVideoMode[moduleIndex] || "upload";
+
+    if (mode === "upload") {
+      if (!newVideoTitle.trim() || !newVideoFile) {
+        toast.error("Please enter video title and select a file");
+        return;
       }
 
-      // Add video to module
+      try {
+        toast.loading("Uploading video...");
+        setUploadingVideo({ ...uploadingVideo, [moduleIndex]: true });
+
+        const formDataForUpload = new FormData();
+        formDataForUpload.append("video", newVideoFile);
+
+        const token = localStorage.getItem("adminToken");
+        const uploadRes = await fetch(`${API_URL}/api/admin/upload-video`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formDataForUpload,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.message || "Video upload failed");
+        }
+
+        const updatedModules = [...formData.modules];
+        updatedModules[moduleIndex].videos = updatedModules[moduleIndex].videos || [];
+        updatedModules[moduleIndex].videos.push({
+          title: newVideoTitle,
+          url: uploadData.url,
+          publicId: uploadData.publicId,
+          duration: uploadData.duration || "",
+          description: newVideoDescription,
+          _id: Date.now().toString(),
+          order: updatedModules[moduleIndex].videos.length + 1,
+        });
+
+        setFormData({ ...formData, modules: updatedModules });
+        toast.dismiss();
+        toast.success("Video uploaded and added successfully");
+        setNewVideoTitle("");
+        setNewVideoDescription("");
+        setNewVideoFile(null);
+      } catch (error) {
+        toast.dismiss();
+        console.error("Video upload error:", error);
+        toast.error(error.message || "Failed to upload video");
+      } finally {
+        setUploadingVideo({ ...uploadingVideo, [moduleIndex]: false });
+      }
+    } else if (mode === "library") {
+      const selectedId = selectedLibraryVideoId[moduleIndex];
+      if (!selectedId) {
+        toast.error("Please select a video from library");
+        return;
+      }
+      const vidObj = videoLibrary.find(v => v._id === selectedId);
+      if (!vidObj) {
+        toast.error("Selected video not found in library");
+        return;
+      }
+
       const updatedModules = [...formData.modules];
       updatedModules[moduleIndex].videos = updatedModules[moduleIndex].videos || [];
       updatedModules[moduleIndex].videos.push({
-        title: newVideoTitle,
-        url: uploadData.url,
-        publicId: uploadData.publicId,
-        duration: uploadData.duration || "",
-        description: newVideoDescription,
+        title: newVideoTitle.trim() || vidObj.title,
+        url: vidObj.videoUrl,
+        publicId: vidObj.videoUrl,
+        duration: vidObj.duration ? String(vidObj.duration) : "",
+        description: newVideoDescription.trim() || vidObj.description || "",
         _id: Date.now().toString(),
+        order: updatedModules[moduleIndex].videos.length + 1,
       });
 
       setFormData({ ...formData, modules: updatedModules });
-
-      toast.dismiss();
-      toast.success("Video added successfully");
+      toast.success("Video added from library");
       setNewVideoTitle("");
       setNewVideoDescription("");
-      setNewVideoFile(null);
-      setExpandedModuleIndex(null);
-    } catch (error) {
-      toast.dismiss();
-      console.error("Video upload error:", error);
-      toast.error(error.message || "Failed to upload video");
-    } finally {
-      setUploadingVideo({ ...uploadingVideo, [moduleIndex]: false });
+      setSelectedLibraryVideoId({ ...selectedLibraryVideoId, [moduleIndex]: "" });
+    } else if (mode === "custom") {
+      if (!newVideoTitle.trim() || !newVideoUrl.trim()) {
+        toast.error("Please enter video title and URL");
+        return;
+      }
+
+      const updatedModules = [...formData.modules];
+      updatedModules[moduleIndex].videos = updatedModules[moduleIndex].videos || [];
+      updatedModules[moduleIndex].videos.push({
+        title: newVideoTitle.trim(),
+        url: newVideoUrl.trim(),
+        publicId: "",
+        duration: newVideoDuration ? String(newVideoDuration) : "",
+        description: newVideoDescription.trim(),
+        _id: Date.now().toString(),
+        order: updatedModules[moduleIndex].videos.length + 1,
+      });
+
+      setFormData({ ...formData, modules: updatedModules });
+      toast.success("Custom video added successfully");
+      setNewVideoTitle("");
+      setNewVideoDescription("");
+      setNewVideoUrl("");
+      setNewVideoDuration("");
     }
   };
 
@@ -231,6 +392,47 @@ export default function AdminCourseManagement() {
     );
     setFormData({ ...formData, modules: updatedModules });
     toast.success("Video removed");
+  };
+
+  const handleMoveModule = (index, direction) => {
+    const updatedModules = [...formData.modules];
+    if (direction === "up" && index > 0) {
+      const temp = updatedModules[index];
+      updatedModules[index] = updatedModules[index - 1];
+      updatedModules[index - 1] = temp;
+    } else if (direction === "down" && index < updatedModules.length - 1) {
+      const temp = updatedModules[index];
+      updatedModules[index] = updatedModules[index + 1];
+      updatedModules[index + 1] = temp;
+    }
+    updatedModules.forEach((m, i) => {
+      m.order = i + 1;
+    });
+    setFormData({ ...formData, modules: updatedModules });
+    toast.success("Module order updated");
+  };
+
+  const handleMoveVideo = (moduleIndex, videoIndex, direction) => {
+    const updatedModules = [...formData.modules];
+    const videos = [...(updatedModules[moduleIndex].videos || [])];
+    
+    if (direction === "up" && videoIndex > 0) {
+      const temp = videos[videoIndex];
+      videos[videoIndex] = videos[videoIndex - 1];
+      videos[videoIndex - 1] = temp;
+    } else if (direction === "down" && videoIndex < videos.length - 1) {
+      const temp = videos[videoIndex];
+      videos[videoIndex] = videos[videoIndex + 1];
+      videos[videoIndex + 1] = temp;
+    }
+    
+    videos.forEach((v, i) => {
+      v.order = i + 1;
+    });
+    
+    updatedModules[moduleIndex].videos = videos;
+    setFormData({ ...formData, modules: updatedModules });
+    toast.success("Video/Lesson order updated");
   };
 
   const handleSaveCourse = async () => {
@@ -658,19 +860,97 @@ export default function AdminCourseManagement() {
                   {formData.modules.map((module, index) => (
                     <div
                       key={index}
-                      className="bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg overflow-hidden"
+                      className="bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg overflow-hidden animate-fadeIn"
                     >
-                      <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-[rgba(139,92,246,0.15)] transition-colors" onClick={() => setExpandedModuleIndex(expandedModuleIndex === index ? null : index)}>
-                        <div className="flex-1">
-                          <p className="font-semibold text-white">{module.title}</p>
-                          {module.description && (
-                            <p className="text-sm text-[#9A93B5]">{module.description}</p>
+                      <div 
+                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-[rgba(139,92,246,0.15)] transition-colors" 
+                        onClick={() => setExpandedModuleIndex(expandedModuleIndex === index ? null : index)}
+                      >
+                        <div className="flex-1" onClick={(e) => e.stopPropagation()}>
+                          {editingModuleIndex === index ? (
+                            <div className="space-y-2 py-2">
+                              <input
+                                type="text"
+                                value={editingModuleTitle}
+                                onChange={(e) => setEditingModuleTitle(e.target.value)}
+                                className="w-full px-3 py-2 bg-[rgba(139,92,246,0.2)] border border-[#A855F7] rounded text-white text-sm focus:outline-none"
+                                placeholder="Module Title"
+                                required
+                              />
+                              <textarea
+                                value={editingModuleDescription}
+                                onChange={(e) => setEditingModuleDescription(e.target.value)}
+                                className="w-full px-3 py-2 bg-[rgba(139,92,246,0.2)] border border-[#A855F7] rounded text-white text-sm h-16 resize-none focus:outline-none"
+                                placeholder="Module Description"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveModuleEdit(index)}
+                                  className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-semibold transition-colors"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingModuleIndex(null)}
+                                  className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs font-semibold transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="cursor-pointer" onClick={() => setExpandedModuleIndex(expandedModuleIndex === index ? null : index)}>
+                              <p className="font-semibold text-white">Module {index + 1}: {module.title}</p>
+                              {module.description && (
+                                <p className="text-sm text-[#9A93B5]">{module.description}</p>
+                              )}
+                              <p className="text-xs text-[#A855F7] mt-1">
+                                {module.videos?.length || 0} videos/lessons
+                              </p>
+                            </div>
                           )}
-                          <p className="text-xs text-[#A855F7] mt-1">
-                            {module.videos?.length || 0} videos
-                          </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
+                          {editingModuleIndex !== index && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartEditModule(index, module);
+                              }}
+                              className="px-3 py-1 bg-[#A855F7]/20 hover:bg-[#A855F7]/40 text-[#D8B4FE] border border-[#A855F7]/40 rounded font-semibold transition-colors text-xs"
+                            >
+                              Rename
+                            </button>
+                          )}
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveModule(index, "up");
+                              }}
+                              disabled={index === 0}
+                              className="p-1 hover:bg-[rgba(139,92,246,0.2)] rounded text-white disabled:opacity-30 disabled:hover:bg-transparent transition text-xs"
+                              title="Move Module Up"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMoveModule(index, "down");
+                              }}
+                              disabled={index === formData.modules.length - 1}
+                              className="p-1 hover:bg-[rgba(139,92,246,0.2)] rounded text-white disabled:opacity-30 disabled:hover:bg-transparent transition text-xs"
+                              title="Move Module Down"
+                            >
+                              ▼
+                            </button>
+                          </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -692,20 +972,135 @@ export default function AdminCourseManagement() {
                           {/* Video List */}
                           {module.videos && module.videos.length > 0 && (
                             <div className="space-y-2">
-                              <p className="text-sm font-semibold text-[#A855F7]">Videos in this module:</p>
+                              <p className="text-sm font-semibold text-[#A855F7]">Videos / Lessons in this module:</p>
                               {module.videos.map((video, videoIndex) => (
-                                <div key={videoIndex} className="bg-[rgba(139,92,246,0.1)] p-3 rounded flex items-center justify-between">
-                                  <div className="flex-1 text-sm">
-                                    <p className="text-white font-medium">{video.title}</p>
-                                    {video.description && <p className="text-[#9A93B5]">{video.description}</p>}
-                                    {video.duration && <p className="text-xs text-[#9A93B5]">Duration: {video.duration}s</p>}
-                                  </div>
-                                  <button
-                                    onClick={() => handleRemoveVideo(index, videoIndex)}
-                                    className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold transition-colors"
-                                  >
-                                    Remove
-                                  </button>
+                                <div key={videoIndex} className="bg-[rgba(139,92,246,0.1)] p-3 rounded space-y-3">
+                                  {editingVideoKey && editingVideoKey.moduleIndex === index && editingVideoKey.videoIndex === videoIndex ? (
+                                    <div className="space-y-2 w-full text-sm">
+                                      <div>
+                                        <label className="block text-xs text-[#C7C3D6] mb-1 font-semibold">Video Title</label>
+                                        <input
+                                          type="text"
+                                          value={editingVideoTitle}
+                                          onChange={(e) => setEditingVideoTitle(e.target.value)}
+                                          className="w-full px-3 py-2 bg-[rgba(139,92,246,0.2)] border border-[#A855F7] rounded text-white focus:outline-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-[#C7C3D6] mb-1 font-semibold">Video Description</label>
+                                        <textarea
+                                          value={editingVideoDescription}
+                                          onChange={(e) => setEditingVideoDescription(e.target.value)}
+                                          className="w-full px-3 py-2 bg-[rgba(139,92,246,0.2)] border border-[#A855F7] rounded text-white h-12 resize-none focus:outline-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-[#C7C3D6] mb-1 font-semibold">Video URL</label>
+                                        <input
+                                          type="text"
+                                          value={editingVideoUrl}
+                                          onChange={(e) => setEditingVideoUrl(e.target.value)}
+                                          className="w-full px-3 py-2 bg-[rgba(139,92,246,0.2)] border border-[#A855F7] rounded text-white focus:outline-none font-mono text-xs"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs text-[#C7C3D6] mb-1 font-semibold">Duration (seconds or string, e.g. 180)</label>
+                                        <input
+                                          type="text"
+                                          value={editingVideoDuration}
+                                          onChange={(e) => setEditingVideoDuration(e.target.value)}
+                                          className="w-full px-3 py-2 bg-[rgba(139,92,246,0.2)] border border-[#A855F7] rounded text-white focus:outline-none font-mono text-xs"
+                                          placeholder="e.g. 120"
+                                        />
+                                      </div>
+                                      <div className="flex gap-2 pt-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleSaveVideoEdit(index, videoIndex)}
+                                          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-semibold transition-colors"
+                                        >
+                                          Save Changes
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setEditingVideoKey(null)}
+                                          className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs font-semibold transition-colors"
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-between w-full">
+                                      <div className="flex-1 text-sm pr-4">
+                                        <p className="text-white font-medium">{video.title}</p>
+                                        {video.description && <p className="text-[#9A93B5] text-xs mt-0.5">{video.description}</p>}
+                                        <p className="text-xs text-[#A855F7] mt-1">
+                                          {video.duration ? `Duration: ${video.duration}s` : "No duration"} | URL: <span className="font-mono text-gray-400 break-all select-all text-[10px]">{video.url}</span>
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center gap-2 flex-shrink-0">
+                                        {/* Dropdown to Move Video */}
+                                        <select
+                                          onChange={(e) => {
+                                            if (e.target.value !== "") {
+                                              handleMoveVideoToModule(index, videoIndex, parseInt(e.target.value));
+                                            }
+                                          }}
+                                          value=""
+                                          className="px-2 py-1 bg-[rgba(139,92,246,0.2)] border border-[rgba(139,92,246,0.3)] rounded text-xs text-[#D8B4FE] focus:outline-none cursor-pointer"
+                                        >
+                                          <option value="" disabled>Move to...</option>
+                                          {formData.modules.map((m, mIdx) => (
+                                            mIdx !== index && (
+                                              <option key={mIdx} value={mIdx}>
+                                                Module {mIdx + 1}: {m.title}
+                                              </option>
+                                            )
+                                          ))}
+                                        </select>
+
+                                        {/* Edit Button */}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStartEditVideo(index, videoIndex, video)}
+                                          className="px-2 py-1 bg-[#A855F7]/20 hover:bg-[#A855F7]/40 text-[#D8B4FE] border border-[#A855F7]/40 rounded text-xs font-semibold transition-colors"
+                                        >
+                                          Edit
+                                        </button>
+
+                                        {/* Ordering Arrows */}
+                                        <div className="flex flex-col gap-0.5">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleMoveVideo(index, videoIndex, "up")}
+                                            disabled={videoIndex === 0}
+                                            className="p-1 hover:bg-[rgba(139,92,246,0.2)] rounded text-white disabled:opacity-30 disabled:hover:bg-transparent transition text-xs"
+                                            title="Move Video Up"
+                                          >
+                                            ▲
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleMoveVideo(index, videoIndex, "down")}
+                                            disabled={videoIndex === (module.videos.length - 1)}
+                                            className="p-1 hover:bg-[rgba(139,92,246,0.2)] rounded text-white disabled:opacity-30 disabled:hover:bg-transparent transition text-xs"
+                                            title="Move Video Down"
+                                          >
+                                            ▼
+                                          </button>
+                                        </div>
+                                        {/* Remove Button */}
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveVideo(index, videoIndex)}
+                                          className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-semibold transition-colors"
+                                        >
+                                          Remove
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -714,11 +1109,50 @@ export default function AdminCourseManagement() {
                           {/* Add Video Form */}
                           <div className="border-t border-[rgba(139,92,246,0.3)] pt-4 space-y-3">
                             <p className="text-sm font-semibold text-[#A855F7]">Add Video to Module</p>
+
+                            {/* Tab Pills selector */}
+                            <div className="flex gap-2 p-1 bg-[rgba(139,92,246,0.1)] rounded-lg w-fit">
+                              <button
+                                type="button"
+                                onClick={() => setAddVideoMode({ ...addVideoMode, [index]: "upload" })}
+                                className={`px-3 py-1 text-xs font-semibold rounded transition ${
+                                  (addVideoMode[index] || "upload") === "upload"
+                                    ? "bg-[#A855F7] text-white"
+                                    : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
+                                }`}
+                              >
+                                Upload Video
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setAddVideoMode({ ...addVideoMode, [index]: "library" })}
+                                className={`px-3 py-1 text-xs font-semibold rounded transition ${
+                                  addVideoMode[index] === "library"
+                                    ? "bg-[#A855F7] text-white"
+                                    : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
+                                }`}
+                              >
+                                Select from Library
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setAddVideoMode({ ...addVideoMode, [index]: "custom" })}
+                                className={`px-3 py-1 text-xs font-semibold rounded transition ${
+                                  addVideoMode[index] === "custom"
+                                    ? "bg-[#A855F7] text-white"
+                                    : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
+                                }`}
+                              >
+                                Video URL / External
+                              </button>
+                            </div>
+
+                            {/* Shared Title and Description Inputs */}
                             <input
                               type="text"
                               value={expandedModuleIndex === index ? newVideoTitle : ""}
                               onChange={(e) => setNewVideoTitle(e.target.value)}
-                              placeholder="Video title"
+                              placeholder="Video Title"
                               className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded text-white placeholder-[#9A93B5] focus:outline-none focus:border-[#A855F7] text-sm"
                             />
                             <textarea
@@ -727,21 +1161,89 @@ export default function AdminCourseManagement() {
                               placeholder="Video description (optional)"
                               className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded text-white placeholder-[#9A93B5] focus:outline-none focus:border-[#A855F7] text-sm resize-none h-16"
                             />
-                            <input
-                              type="file"
-                              accept="video/*"
-                              onChange={(e) => setNewVideoFile(e.target.files?.[0] || null)}
-                              className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-dashed border-[rgba(139,92,246,0.3)] rounded text-white text-sm cursor-pointer"
-                            />
-                            {newVideoFile && (
-                              <p className="text-xs text-[#A855F7]">Selected: {newVideoFile.name}</p>
+
+                            {/* Dynamic inputs based on Mode */}
+                            {(addVideoMode[index] || "upload") === "upload" && (
+                              <div className="space-y-2">
+                                <input
+                                  type="file"
+                                  accept="video/*"
+                                  onChange={(e) => setNewVideoFile(e.target.files?.[0] || null)}
+                                  className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-dashed border-[rgba(139,92,246,0.3)] rounded text-white text-sm cursor-pointer"
+                                />
+                                {newVideoFile && (
+                                  <p className="text-xs text-[#A855F7]">Selected: {newVideoFile.name}</p>
+                                )}
+                              </div>
                             )}
+
+                            {addVideoMode[index] === "library" && (
+                              <div className="space-y-2">
+                                <label className="block text-xs font-semibold text-[#C7C3D6]">Select Video from Library</label>
+                                {loadingVideoLibrary ? (
+                                  <p className="text-xs text-gray-400">Loading library videos...</p>
+                                ) : videoLibrary.length === 0 ? (
+                                  <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 p-2 rounded">
+                                    No videos found in library. Upload videos in Video Dashboard first, or upload directly above.
+                                  </div>
+                                ) : (
+                                  <select
+                                    value={selectedLibraryVideoId[index] || ""}
+                                    onChange={(e) => setSelectedLibraryVideoId({ ...selectedLibraryVideoId, [index]: e.target.value })}
+                                    className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded text-white text-sm focus:outline-none focus:border-[#A855F7]"
+                                  >
+                                    <option value="">-- Choose a video --</option>
+                                    {videoLibrary.map((vid) => (
+                                      <option key={vid._id} value={vid._id}>
+                                        {vid.title} ({vid.category})
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+                            )}
+
+                            {addVideoMode[index] === "custom" && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-xs text-[#C7C3D6] mb-1">Video URL (direct mp4 or stream URL)</label>
+                                  <input
+                                    type="text"
+                                    value={newVideoUrl}
+                                    onChange={(e) => setNewVideoUrl(e.target.value)}
+                                    placeholder="https://example.com/video.mp4"
+                                    className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded text-white text-sm focus:outline-none focus:border-[#A855F7]"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-[#C7C3D6] mb-1">Duration (seconds or string)</label>
+                                  <input
+                                    type="text"
+                                    value={newVideoDuration}
+                                    onChange={(e) => setNewVideoDuration(e.target.value)}
+                                    placeholder="e.g. 180"
+                                    className="w-full px-3 py-2 bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded text-white text-sm focus:outline-none focus:border-[#A855F7]"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
                             <button
-                              onClick={() => handleAddVideoToModule(index)}
+                              onClick={() => handleAddVideo(index)}
                               disabled={uploadingVideo[index]}
-                              className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors text-sm"
+                              className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white rounded font-semibold transition-colors text-sm flex items-center justify-center gap-2"
                             >
-                              {uploadingVideo[index] ? "Uploading..." : "Add Video"}
+                              {uploadingVideo[index] ? (
+                                <>
+                                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Uploading...
+                                </>
+                              ) : (
+                                "Add Video"
+                              )}
                             </button>
                           </div>
                         </div>

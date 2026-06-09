@@ -30,6 +30,16 @@ export const protect = async (req, res, next) => {
 			// Verify token
 			const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+			if (decoded.role === "admin") {
+				req.user = { _id: "admin", role: "admin", fullName: "Admin" };
+				return next();
+			}
+
+			if (decoded.role === "instructor") {
+				req.user = { _id: decoded.id || "instructor", role: "instructor", fullName: "Instructor" };
+				return next();
+			}
+
 			// Get user from token
 			req.user = await User.findById(decoded.id).select("-password");
 			

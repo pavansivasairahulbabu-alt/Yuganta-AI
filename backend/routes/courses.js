@@ -1,5 +1,6 @@
 import express from "express";
 import Course from "../models/Course.js";
+import User from "../models/User.js";
 import Instructor from "../models/Instructor.js";
 import { protect } from "../middleware/auth.js";
 import { protectInstructor } from "../middleware/instructorAuth.js";
@@ -97,6 +98,70 @@ router.get("/:id", async (req, res) => {
 
 		if (!course) {
 			return res.status(404).json({ message: "Course not found" });
+		}
+
+		// Strip secret video fields for general public view
+		if (course.modules && Array.isArray(course.modules)) {
+			course.modules = course.modules.map((module) => {
+				const videos = Array.isArray(module.videos)
+					? module.videos.map((video) => {
+							const { url, publicId, ...strippedVideo } = video;
+							return strippedVideo;
+						})
+					: [];
+				return { ...module, videos };
+			});
+		}
+
+		res.json(course);
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+});
+
+// @route   GET /api/courses/:id/content
+// @desc    Get complete course details including video URLs (only for enrolled students, instructors, or admins)
+// @access  Private
+router.get("/:id/content", protect, async (req, res) => {
+	try {
+		const course = await Course.findById(req.params.id).lean();
+
+		if (!course) {
+			return res.status(404).json({ message: "Course not found" });
+		}
+
+		let isAuthorized = false;
+
+		// 1. Check if requester is Admin
+		if (req.user && req.user.role === "admin") {
+			isAuthorized = true;
+		}
+
+		// 2. Check if requester is Instructor (either owns the course or has instructor role bypass)
+		if (req.user && req.user.role === "instructor") {
+			isAuthorized = true;
+		} else if (req.user && course.instructorId && course.instructorId.toString() === req.user._id.toString()) {
+			isAuthorized = true;
+		}
+
+		// 3. Check if requester is an Enrolled Student
+		if (!isAuthorized && req.user) {
+			const student = await User.findById(req.user._id).select("enrolledCourses");
+			if (student && student.enrolledCourses) {
+				const isEnrolled = student.enrolledCourses.some(
+					(enrollment) => enrollment.courseId && enrollment.courseId.toString() === req.params.id
+				);
+				if (isEnrolled) {
+					isAuthorized = true;
+				}
+			}
+		}
+
+		if (!isAuthorized) {
+			return res.status(403).json({
+				message: "Access denied. Please enroll in this course to view its content.",
+				isEnrolled: false
+			});
 		}
 
 		res.json(course);

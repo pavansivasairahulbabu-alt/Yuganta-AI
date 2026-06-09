@@ -344,6 +344,9 @@ router.get("/progress/:courseId", protect, async (req, res) => {
 			progress: enrollment.progress || 0,
 			completed: Boolean(enrollment.completed),
 			completedVideos: enrollment.completedVideos || [],
+			lastWatchedVideoId: enrollment.lastWatchedVideoId || "",
+			lastWatchedTimestamp: enrollment.lastWatchedTimestamp || 0,
+			lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle || "",
 		});
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
@@ -351,19 +354,19 @@ router.get("/progress/:courseId", protect, async (req, res) => {
 });
 
 // @route   PUT /api/users/progress/:courseId
-// @desc    Update video-level progress for an enrolled course
+// @desc    Update video-level progress and last watched state for an enrolled course
 // @access  Private
 router.put("/progress/:courseId", protect, async (req, res) => {
 	try {
 		const { courseId } = req.params;
-		const { videoKey, markComplete } = req.body || {};
+		const { videoKey, markComplete, lastWatchedVideoId, lastWatchedTimestamp, lastWatchedVideoTitle } = req.body || {};
 
 		if (!mongoose.Types.ObjectId.isValid(courseId)) {
 			return res.status(400).json({ message: "Invalid course id" });
 		}
 
-		if (!videoKey || typeof videoKey !== "string") {
-			return res.status(400).json({ message: "videoKey is required" });
+		if ((!videoKey || typeof videoKey !== "string") && (!lastWatchedVideoId || typeof lastWatchedVideoId !== "string")) {
+			return res.status(400).json({ message: "videoKey or lastWatchedVideoId is required" });
 		}
 
 		const user = await User.findById(req.user._id).select("enrolledCourses");
@@ -379,12 +382,26 @@ router.put("/progress/:courseId", protect, async (req, res) => {
 			return res.status(404).json({ message: "Enrollment not found" });
 		}
 
-		enrollment.completedVideos = enrollment.completedVideos || [];
+		// Handle completed videos list
+		if (videoKey && typeof videoKey === "string") {
+			enrollment.completedVideos = enrollment.completedVideos || [];
 
-		if (markComplete === true && !enrollment.completedVideos.includes(videoKey)) {
-			enrollment.completedVideos.push(videoKey);
-		} else if (markComplete === false) {
-			enrollment.completedVideos = enrollment.completedVideos.filter(k => k !== videoKey);
+			if (markComplete === true && !enrollment.completedVideos.includes(videoKey)) {
+				enrollment.completedVideos.push(videoKey);
+			} else if (markComplete === false) {
+				enrollment.completedVideos = enrollment.completedVideos.filter(k => k !== videoKey);
+			}
+		}
+
+		// Handle last watched state
+		if (lastWatchedVideoId && typeof lastWatchedVideoId === "string") {
+			enrollment.lastWatchedVideoId = lastWatchedVideoId;
+			if (typeof lastWatchedTimestamp === "number") {
+				enrollment.lastWatchedTimestamp = lastWatchedTimestamp;
+			}
+			if (typeof lastWatchedVideoTitle === "string") {
+				enrollment.lastWatchedVideoTitle = lastWatchedVideoTitle;
+			}
 		}
 
 		const Course = (await import("../models/Course.js")).default;
@@ -394,7 +411,7 @@ router.put("/progress/:courseId", protect, async (req, res) => {
 			0,
 		);
 
-		const completedCount = new Set(enrollment.completedVideos).size;
+		const completedCount = new Set(enrollment.completedVideos || []).size;
 		const progress = totalVideos > 0 ? Math.min(100, Math.round((completedCount / totalVideos) * 100)) : 0;
 
 		enrollment.progress = progress;
@@ -409,6 +426,9 @@ router.put("/progress/:courseId", protect, async (req, res) => {
 			progress: enrollment.progress,
 			completed: enrollment.completed,
 			completedVideos: enrollment.completedVideos,
+			lastWatchedVideoId: enrollment.lastWatchedVideoId || "",
+			lastWatchedTimestamp: enrollment.lastWatchedTimestamp || 0,
+			lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle || "",
 			totalVideos,
 		});
 	} catch (error) {

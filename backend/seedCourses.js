@@ -7,6 +7,7 @@ dotenv.config();
 
 const courses = [
 	{
+		_id: new mongoose.Types.ObjectId("6a1806d6b5e868b97b735fc2"),
 		title: "Agentic AI Crash Course",
 		description: "A fast-paced introduction to building autonomous AI agents using modern frameworks. Learn the fundamentals of Agentic AI, RAG, and multi-agent systems in this intensive 4-week program.",
 		instructor: "YugantaAI",
@@ -65,6 +66,7 @@ const courses = [
 		]
 	},
 	{
+		_id: new mongoose.Types.ObjectId("6a1806d6b5e868b97b735fc9"),
 		title: "Agentic AI Pioneer Program",
 		description: "The most comprehensive program for mastering Agentic AI. Build advanced autonomous systems, master LangGraph, and deploy professional-grade AI agents. Includes 150+ hours of content and expert mentorship.",
 		instructor: "YugantaAI",
@@ -123,6 +125,7 @@ const courses = [
 		]
 	},
 	{
+		_id: new mongoose.Types.ObjectId("6a1806d6b5e868b97b735fd0"),
 		title: "Mastering Data Structures & Algorithms",
 		description: "Build a rock-solid foundation in problem-solving and computer science fundamentals. Master arrays, linked lists, trees, graphs, and dynamic programming to ace your technical interviews.",
 		instructor: "YugantaAI",

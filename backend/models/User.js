@@ -56,10 +56,22 @@ const userSchema = new mongoose.Schema({
 				type: Boolean,
 				default: false,
 			},
-				completedVideos: {
-					type: [String],
-					default: [],
-				},
+			completedVideos: {
+				type: [String],
+				default: [],
+			},
+			lastWatchedVideoId: {
+				type: String,
+				default: "",
+			},
+			lastWatchedTimestamp: {
+				type: Number,
+				default: 0,
+			},
+			lastWatchedVideoTitle: {
+				type: String,
+				default: "",
+			},
 		},
 	],
 	assignedInstructor: {

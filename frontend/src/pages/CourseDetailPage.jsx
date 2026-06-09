@@ -19,6 +19,8 @@ export default function CourseDetailPage() {
 	const [videoSourceIndex, setVideoSourceIndex] = useState(0);
 	const maxAllowedPlaybackTimeRef = useRef(0);
 	const selectedVideoElementRef = useRef(null);
+	const lastSavedTimeRef = useRef(0);
+	const resumeTimeRef = useRef(0);
 
 	const normalizeVideoUrl = (url) => {
 		if (!url || typeof url !== "string") return "";
@@ -122,25 +124,33 @@ export default function CourseDetailPage() {
 
 	const fetchCourse = async () => {
 		try {
-			const response = await fetch(`${API_URL}/api/courses/${id}`);
+			const queryParams = new URLSearchParams(window.location.search);
+			const shouldResume = queryParams.get("resume") === "true";
+
+			const response = await fetch(`${API_URL}/api/courses/${id}/content`, {
+				headers: {
+					Authorization: token ? `Bearer ${token}` : "",
+				},
+			});
+
+			if (!response.ok) {
+				if (response.status === 403 || response.status === 401) {
+					toast.error("Please enroll in this course to access the content.");
+					window.location.href = `/course-details/${id}`;
+					return;
+				}
+				throw new Error("Failed to fetch course details");
+			}
+
 			const data = await response.json();
 			setCourse(data);
 			setLoading(false);
 
-			// Set first video as default if modules exist
-			if (data.modules && data.modules.length > 0) {
-				const firstModule = data.modules[0];
-				setActiveModule(0);
-				if (firstModule.videos && firstModule.videos.length > 0) {
-					setVideoLoadError("");
-					setVideoSourceIndex(0);
-					setSelectedVideo({
-						...firstModule.videos[0],
-						url: resolveVideoUrl(firstModule.videos[0]),
-					});
-				}
-			}
+			let defaultVideo = null;
+			let defaultModuleIndex = 0;
 
+			// Fetch progress
+			let progressData = null;
 			if (token) {
 				const progressResponse = await fetch(`${API_URL}/api/users/progress/${id}`, {
 					headers: {
@@ -149,8 +159,50 @@ export default function CourseDetailPage() {
 				});
 
 				if (progressResponse.ok) {
-					const progressData = await progressResponse.json();
+					progressData = await progressResponse.json();
 					setCompletedVideos(new Set(progressData.completedVideos || []));
+				}
+			}
+
+			// Decide which video to play first (either resume or first video of first module)
+			if (data.modules && data.modules.length > 0) {
+				if (shouldResume && progressData && progressData.lastWatchedVideoId) {
+					for (let mIdx = 0; mIdx < data.modules.length; mIdx++) {
+						const module = data.modules[mIdx];
+						if (module.videos) {
+							for (let vIdx = 0; vIdx < module.videos.length; vIdx++) {
+								const video = module.videos[vIdx];
+								const vKey = getVideoKey(mIdx, vIdx, video);
+								if (vKey === progressData.lastWatchedVideoId || (video._id && video._id.toString() === progressData.lastWatchedVideoId)) {
+									defaultVideo = video;
+									defaultModuleIndex = mIdx;
+									resumeTimeRef.current = progressData.lastWatchedTimestamp || 0;
+									lastSavedTimeRef.current = progressData.lastWatchedTimestamp || 0;
+									break;
+								}
+							}
+						}
+						if (defaultVideo) break;
+					}
+				}
+
+				// Fallback to first video
+				if (!defaultVideo) {
+					const firstModule = data.modules[0];
+					defaultModuleIndex = 0;
+					if (firstModule.videos && firstModule.videos.length > 0) {
+						defaultVideo = firstModule.videos[0];
+					}
+				}
+
+				if (defaultVideo) {
+					setVideoLoadError("");
+					setVideoSourceIndex(0);
+					setSelectedVideo({
+						...defaultVideo,
+						url: resolveVideoUrl(defaultVideo),
+					});
+					setActiveModule(defaultModuleIndex);
 				}
 			}
 		} catch (error) {
@@ -159,9 +211,31 @@ export default function CourseDetailPage() {
 		}
 	};
 
+	const saveResumeState = async (videoKey, timestamp, videoTitle) => {
+		if (!token || !videoKey) return;
+		try {
+			await fetch(`${API_URL}/api/users/progress/${id}`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					lastWatchedVideoId: videoKey,
+					lastWatchedTimestamp: timestamp,
+					lastWatchedVideoTitle: videoTitle
+				}),
+			});
+		} catch (error) {
+			console.error("Error saving resume state:", error);
+		}
+	};
+
 	const handleVideoSelect = (video, moduleIndex) => {
 		setVideoLoadError("");
 		setVideoSourceIndex(0);
+		resumeTimeRef.current = 0;
+		lastSavedTimeRef.current = 0;
 		setSelectedVideo({
 			...video,
 			url: resolveVideoUrl(video),
@@ -215,12 +289,57 @@ export default function CourseDetailPage() {
 		if (!selectedVideoKey) return;
 		const duration = event.target.duration;
 		if (!duration || Number.isNaN(duration) || duration <= 0) return;
-		maxAllowedPlaybackTimeRef.current = Math.max(maxAllowedPlaybackTimeRef.current, event.target.currentTime);
-		const watched = (event.target.currentTime / duration) * 100;
+		
+		const currentTime = event.target.currentTime;
+		maxAllowedPlaybackTimeRef.current = Math.max(maxAllowedPlaybackTimeRef.current, currentTime);
+		
+		const watched = (currentTime / duration) * 100;
 		setVideoWatchPercent((prev) => ({
 			...prev,
 			[selectedVideoKey]: Math.max(prev[selectedVideoKey] || 0, watched),
 		}));
+
+		// Periodically save state (every 10 seconds of playback progression)
+		if (Math.abs(currentTime - lastSavedTimeRef.current) >= 10) {
+			lastSavedTimeRef.current = currentTime;
+			saveResumeState(selectedVideoKey, currentTime, selectedVideo.title);
+		}
+	};
+
+	const handleVideoPause = (event) => {
+		if (!selectedVideoKey) return;
+		const currentTime = event.target.currentTime;
+		lastSavedTimeRef.current = currentTime;
+		saveResumeState(selectedVideoKey, currentTime, selectedVideo.title);
+	};
+
+	const handleVideoEnded = () => {
+		if (selectedVideoCanComplete && !completedVideos.has(selectedVideoKey)) {
+			markVideoCompleted();
+		}
+
+		if (activeModule === null || selectedVideoIndex < 0) return;
+		
+		const currentModule = course.modules[activeModule];
+		const nextVideoIndex = selectedVideoIndex + 1;
+		
+		if (currentModule.videos && nextVideoIndex < currentModule.videos.length) {
+			const nextVideo = currentModule.videos[nextVideoIndex];
+			handleVideoSelect(nextVideo, activeModule);
+			toast.success("Playing next lesson...");
+		} else {
+			const nextModuleIndex = activeModule + 1;
+			if (course.modules && nextModuleIndex < course.modules.length) {
+				const nextModule = course.modules[nextModuleIndex];
+				if (nextModule.videos && nextModule.videos.length > 0) {
+					const nextVideo = nextModule.videos[0];
+					handleVideoSelect(nextVideo, nextModuleIndex);
+					toast.success(`Playing Next Module: ${nextModule.title}`);
+				}
+			} else {
+				toast.success("Congratulations! You've finished all lessons in this course.");
+			}
+		}
 	};
 
 	const handleVideoSeeking = (event) => {
@@ -410,9 +529,16 @@ export default function CourseDetailPage() {
 											ref={selectedVideoElementRef}
 											onError={handleVideoError}
 											onLoadedData={(event) => {
+												if (resumeTimeRef.current > 0) {
+													event.target.currentTime = resumeTimeRef.current;
+													toast.success(`Resumed from ${Math.round(resumeTimeRef.current)}s`, { id: "resume-toast" });
+													resumeTimeRef.current = 0;
+												}
 												maxAllowedPlaybackTimeRef.current = event.target.currentTime || 0;
 												setVideoLoadError("");
 											}}
+											onPause={handleVideoPause}
+											onEnded={handleVideoEnded}
 											onSeeking={handleVideoSeeking}
 											onTimeUpdate={handleVideoTimeUpdate}>
 												Your browser does not support the video tag.

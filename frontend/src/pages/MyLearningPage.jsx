@@ -46,6 +46,9 @@ export default function MyLearningPage() {
 					progress: enrollment.progress,
 					completed: enrollment.completed,
 					enrolledAt: enrollment.enrolledAt,
+					lastWatchedVideoId: enrollment.lastWatchedVideoId,
+					lastWatchedTimestamp: enrollment.lastWatchedTimestamp,
+					lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle,
 				}))
 				.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
 
@@ -77,10 +80,6 @@ export default function MyLearningPage() {
 
 	// Helper to get the correct course thumbnail
 	const getCourseThumbnail = (course) => {
-		const title = (course?.title || "").toLowerCase();
-		if (title.includes("agentic") && title.includes("pioneer")) {
-			return "/Agentic_AI_DSA.png";
-		}
 		return course?.thumbnail;
 	};
 
@@ -175,17 +174,23 @@ export default function MyLearningPage() {
 									</div>
 								</div>
 								<div className='lg:w-1/2 p-8 md:p-10 flex flex-col justify-center'>
-									<h3 className='text-3xl md:text-4xl font-bold mb-4'>
+									<h3 className='text-3xl md:text-4xl font-bold mb-2'>
 										{featuredCourse.title}
 									</h3>
+									{featuredCourse.lastWatchedVideoTitle && (
+										<p className='text-[var(--text-color)]/80 text-sm mb-4 font-medium flex items-center gap-1.5'>
+											<span className='w-2 h-2 rounded-full bg-purple-500 animate-pulse'></span>
+											Last watched: <span className='text-purple-400'>{featuredCourse.lastWatchedVideoTitle}</span>
+										</p>
+									)}
 									<p className='text-gray-400 mb-8'>
-										Mentorship sessions completed · {calculateCourseStats(featuredCourse).totalVideos}
+										Mentorship sessions completed · {calculateCourseStats(featuredCourse).totalVideos} videos
 									</p>
 									<div className='flex flex-col sm:flex-row gap-3 sm:space-x-4'>
 										<Link
-											to={`/courses/${featuredCourse._id}`}
+											to={`/courses/${featuredCourse._id}${featuredCourse.lastWatchedVideoId ? "?resume=true" : ""}`}
 											className='px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-gray-200 transition text-center'>
-											Resume Learning
+											{featuredCourse.lastWatchedVideoId ? "Continue Learning" : "Resume Learning"}
 										</Link>
 										<Link
 											to='/mentorships'
@@ -211,7 +216,7 @@ export default function MyLearningPage() {
 								return (
 									<Link
 										key={course._id}
-										to={`/courses/${course._id}`}
+										to={`/courses/${course._id}${course.lastWatchedVideoId ? "?resume=true" : ""}`}
 										className='bg-[var(--card-bg)] rounded-xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 border border-[var(--border-color)] hover:border-purple-500 flex flex-col'>
 										<div className='relative h-48 bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900'>
 											{getCourseThumbnail(course) ? (
@@ -231,19 +236,24 @@ export default function MyLearningPage() {
 															strokeLinecap='round'
 															strokeLinejoin='round'
 															strokeWidth={1}
-															d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+															d='M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
 														/>
 													</svg>
 												</div>
 											)}
 										</div>
 										<div className='p-6 flex-1 flex flex-col'>
-											<div className='text-sm text-gray-400 mb-3'>
+											<div className='text-sm text-gray-400 mb-2'>
 												{stats.totalHours} • {course.modules?.length || 0} Modules
 											</div>
 											<h3 className='text-xl font-bold mb-2 line-clamp-2'>
 												{course.title}
 											</h3>
+											{course.lastWatchedVideoTitle && (
+												<p className='text-purple-400 text-xs font-medium mt-auto pt-2 truncate'>
+													Last watched: {course.lastWatchedVideoTitle}
+												</p>
+											)}
 										</div>
 									</Link>
 								);
@@ -314,9 +324,14 @@ export default function MyLearningPage() {
 									<div
 										key={course._id}
 										className='bg-[var(--bg-color)] border-t border-[var(--border-color)] pt-8 mb-8 transition-colors duration-300'>
-										<h3 className='text-2xl md:text-3xl font-semibold mb-4'>
+										<h3 className='text-2xl md:text-3xl font-semibold mb-2'>
 											{course.title}
 										</h3>
+										{course.lastWatchedVideoTitle && (
+											<p className='text-purple-400 text-sm mb-4 font-medium'>
+												Last watched: {course.lastWatchedVideoTitle}
+											</p>
+										)}
 										<div className='mb-6'>
 											<div className='flex items-center justify-between mb-2'>
 												<span className='text-sm text-gray-400'>
@@ -330,9 +345,9 @@ export default function MyLearningPage() {
 											</div>
 										</div>
 										<Link
-											to={`/courses/${course._id}`}
+											to={`/courses/${course._id}${course.lastWatchedVideoId ? "?resume=true" : ""}`}
 											className='inline-block px-8 py-3 bg-[var(--card-bg)] border border-[var(--border-color)] text-[var(--text-color)] rounded-lg font-semibold hover:bg-gray-800 transition'>
-											Continue
+											{course.lastWatchedVideoId ? "Continue Learning" : "Start Learning"}
 										</Link>
 									</div>
 								);
@@ -418,9 +433,14 @@ export default function MyLearningPage() {
 													</div>
 												</div>
 												<div className='p-6 flex-1 flex flex-col'>
-													<h3 className='text-xl font-bold mb-2 line-clamp-2'>
+													<h3 className='text-xl font-bold mb-1 line-clamp-2'>
 														{course.title}
 													</h3>
+													{course.lastWatchedVideoTitle && (
+														<p className='text-purple-400 text-xs font-medium mb-3 truncate'>
+															Last watched: {course.lastWatchedVideoTitle}
+														</p>
+													)}
 													<p className='text-sm text-gray-400 mb-4'>
 														by {course.instructor}
 													</p>
@@ -477,7 +497,7 @@ export default function MyLearningPage() {
 													</div>
 													<div className="mt-auto space-y-3">
 														<Link
-															to={`/courses/${course._id}`}
+															to={`/courses/${course._id}${course.lastWatchedVideoId ? "?resume=true" : ""}`}
 															className={`block w-full px-4 py-3 rounded-lg text-center font-semibold transition ${
 																progress === 0
 																	? "border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white"
@@ -486,18 +506,10 @@ export default function MyLearningPage() {
 														>
 															{progress === 0
 																? "Start Course"
-																: progress === 100
-																	? "Review"
+																: course.lastWatchedVideoId
+																	? "Continue Learning"
 																	: "Continue"}
 														</Link>
-														{["agenticai crash course page", "agentic ai pioneer program"].includes((course.title || "").toLowerCase()) && (
-															<Link
-																to={(course.title || "").toLowerCase() === "agentic ai pioneer program" ? "/courses/agentic-ai-pioneer-program" : "/courses/agentic-ai-crash-course-page"}
-																className="block w-full px-4 py-3 rounded-lg text-center font-semibold transition border border-[#8B5CF6] text-[#A855F7] bg-transparent hover:bg-[rgba(139,92,246,0.1)]"
-															>
-																Roadmap
-															</Link>
-														)}
 													</div>
 												</div>
 											</div>
