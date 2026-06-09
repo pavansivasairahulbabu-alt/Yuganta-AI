@@ -435,7 +435,7 @@ router.post("/videos", verifyAdmin, async (req, res) => {
 router.put("/videos/:id", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize } = req.body;
+    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize, courseId, moduleName, videoOrder } = req.body;
 
     const video = await Video.findById(id);
     if (!video) {
@@ -460,6 +460,65 @@ router.put("/videos/:id", verifyAdmin, async (req, res) => {
     if (fileSize !== undefined) video.fileSize = fileSize;
 
     await video.save();
+
+    if (courseId) {
+      if (!moduleName || !moduleName.trim()) {
+        return res.status(400).json({ message: "Module name is required when associating with a course" });
+      }
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Selected course not found" });
+      }
+
+      // Find or create module
+      let moduleObj = course.modules.find(
+        (m) => m.title.trim().toLowerCase() === moduleName.trim().toLowerCase()
+      );
+
+      if (!moduleObj) {
+        // Calculate module order
+        const maxModuleOrder = course.modules.reduce((max, m) => Math.max(max, m.order || 0), 0);
+        moduleObj = {
+          title: moduleName.trim(),
+          description: "",
+          order: maxModuleOrder + 1,
+          videos: [],
+        };
+        course.modules.push(moduleObj);
+        moduleObj = course.modules[course.modules.length - 1];
+      }
+
+      // Check if video is already in the module
+      const existingVideoIndex = moduleObj.videos.findIndex(v => v.url === video.videoUrl || v.title === video.title);
+      
+      const newVideoOrder = Number(videoOrder) || (moduleObj.videos.length + 1);
+
+      const videoDataForCourse = {
+        title: video.title.trim(),
+        url: video.videoUrl,
+        publicId: "",
+        duration: video.duration ? String(video.duration) : "",
+        description: video.description || "",
+        order: newVideoOrder,
+      };
+
+      if (existingVideoIndex >= 0) {
+        // Update existing video
+        moduleObj.videos[existingVideoIndex] = { ...moduleObj.videos[existingVideoIndex], ...videoDataForCourse };
+      } else {
+        // Add new video
+        moduleObj.videos.push(videoDataForCourse);
+      }
+
+      // Sort videos within this module by order
+      moduleObj.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      // Sort modules by order
+      course.modules.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      await course.save();
+    }
+
     res.json(video);
   } catch (error) {
     console.error("Update video error:", error);

@@ -39,6 +39,11 @@ export default function AdminVideoManage() {
   const [editTags, setEditTags] = useState([]);
   const [editTagInput, setEditTagInput] = useState("");
   
+  // Course Association states
+  const [courseId, setCourseId] = useState("");
+  const [moduleName, setModuleName] = useState("");
+  const [videoOrder, setVideoOrder] = useState("");
+  
   // Edit replacements
   const [newThumbFile, setNewThumbFile] = useState(null);
   const [editThumbUrl, setEditThumbUrl] = useState("");
@@ -60,6 +65,16 @@ export default function AdminVideoManage() {
     queryKey: ["video-categories"],
     queryFn: async () => {
       const res = await api.get("/categories");
+      return res.data;
+    },
+    enabled: !loading,
+  });
+
+  // Fetch courses for assignment
+  const { data: courses = [], isLoading: loadingCourses } = useQuery({
+    queryKey: ["admin-courses-list"],
+    queryFn: async () => {
+      const res = await api.get("/courses");
       return res.data;
     },
     enabled: !loading,
