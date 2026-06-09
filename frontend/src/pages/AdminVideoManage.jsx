@@ -193,6 +193,33 @@ export default function AdminVideoManage() {
     setEditThumbUrl(video.thumbnailUrl || "");
     setNewThumbFile(null);
     setThumbProgress(0);
+
+    let foundCourseId = "";
+    let foundModuleName = "";
+    let foundOrder = "";
+    
+    if (courses && courses.length > 0) {
+      for (const course of courses) {
+        if (course.modules) {
+          for (const module of course.modules) {
+            if (module.videos) {
+              const v = module.videos.find(vid => vid.url === video.videoUrl || vid.title === video.title);
+              if (v) {
+                foundCourseId = course._id;
+                foundModuleName = module.title;
+                foundOrder = v.order || "";
+                break;
+              }
+            }
+          }
+        }
+        if (foundCourseId) break;
+      }
+    }
+
+    setCourseId(foundCourseId);
+    setModuleName(foundModuleName);
+    setVideoOrder(foundOrder);
     setIsEditModalOpen(true);
   };
 
