@@ -490,6 +490,8 @@ export default function CourseDetailPage() {
 										<video
 											key={activeVideoSource || selectedVideo.url}
 											controls
+											controlsList='nodownload'
+											onContextMenu={(e) => e.preventDefault()}
 											playsInline
 											preload='metadata'
 											className='w-full h-full'
