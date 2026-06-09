@@ -136,6 +136,7 @@ app.use(cors(corsOptions));
 app.use(helmet({
 	contentSecurityPolicy: false,
 	crossOriginResourcePolicy: false,
+	crossOriginOpenerPolicy: false,
 }));
 app.use(compression({ threshold: 1024 }));
 app.use(express.json({ limit: '500mb' })); // Increased for large file uploads
