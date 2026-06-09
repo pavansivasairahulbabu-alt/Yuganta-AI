@@ -4,6 +4,17 @@ import toast from "react-hot-toast";
 import AdminNavbar from "../components/AdminNavbar";
 import API_URL from "../config/api";
 
+const validateVideoUrl = (url) => {
+  if (!url) return false;
+  const cleanUrl = url.trim();
+  // Allow CloudFront and authorized R2 public URL
+  const cleanR2Url = "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev";
+  if (cleanUrl.startsWith(cleanR2Url) || cleanUrl.includes("cloudfront.net")) {
+    return true;
+  }
+  return false;
+};
+
 export default function AdminCourseManagement() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
@@ -11,6 +22,7 @@ export default function AdminCourseManagement() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
+  const [isCreateMode, setIsCreateMode] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -157,6 +169,7 @@ export default function AdminCourseManagement() {
 
   const handleEditClick = (course) => {
     setEditingCourse(course);
+    setIsCreateMode(false);
     setFormData({
       title: course.title,
       description: course.description,
@@ -170,6 +183,25 @@ export default function AdminCourseManagement() {
       modules: course.modules || [],
     });
     setThumbnailPreview(course.thumbnail);
+    setShowEditModal(true);
+  };
+
+  const handleCreateClick = () => {
+    setEditingCourse(null);
+    setIsCreateMode(true);
+    setFormData({
+      title: "",
+      description: "",
+      category: "",
+      level: "Beginner",
+      thumbnail: "",
+      price: "Free",
+      isFree: true,
+      instructor: "YugantaAI",
+      instructorId: "",
+      modules: [],
+    });
+    setThumbnailPreview("");
     setShowEditModal(true);
   };
 
@@ -236,6 +268,10 @@ export default function AdminCourseManagement() {
   const handleSaveVideoEdit = (moduleIndex, videoIndex) => {
     if (!editingVideoTitle.trim()) {
       toast.error("Video title is required");
+      return;
+    }
+    if (!validateVideoUrl(editingVideoUrl)) {
+      toast.error("Validation Error: Video URL must be a valid CloudFront/R2 URL matching the authorized domain (e.g. pub-f58d270cf3294402934fa2667e0b053d.r2.dev or cloudfront.net).");
       return;
     }
     const updated = [...formData.modules];
@@ -363,6 +399,10 @@ export default function AdminCourseManagement() {
         toast.error("Please enter video title and URL");
         return;
       }
+      if (!validateVideoUrl(newVideoUrl)) {
+        toast.error("Validation Error: Video URL must be a valid CloudFront/R2 URL matching the authorized domain (e.g. pub-f58d270cf3294402934fa2667e0b053d.r2.dev or cloudfront.net).");
+        return;
+      }
 
       const updatedModules = [...formData.modules];
       updatedModules[moduleIndex].videos = updatedModules[moduleIndex].videos || [];
@@ -442,7 +482,7 @@ export default function AdminCourseManagement() {
     }
 
     try {
-      toast.loading("Saving course...");
+      toast.loading(isCreateMode ? "Creating course..." : "Saving course...");
       const token = localStorage.getItem("adminToken");
       const payload = {
         title: formData.title,
@@ -453,14 +493,19 @@ export default function AdminCourseManagement() {
         price: formData.price,
         isFree: formData.isFree,
         instructor: formData.instructor,
-        instructorId: formData.instructorId,
+        instructorId: formData.instructorId || null,
         modules: formData.modules,
       };
 
-      console.log("📝 Sending update payload:", payload);
+      console.log("📝 Sending course payload:", payload);
 
-      const response = await fetch(`${API_URL}/api/admin/courses/${editingCourse._id}`, {
-        method: "PUT",
+      const url = isCreateMode
+        ? `${API_URL}/api/admin/courses`
+        : `${API_URL}/api/admin/courses/${editingCourse._id}`;
+      const method = isCreateMode ? "POST" : "PUT";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -471,12 +516,12 @@ export default function AdminCourseManagement() {
       const responseData = await response.json();
 
       if (!response.ok) {
-        console.error("❌ Update error:", responseData);
-        throw new Error(responseData.message || "Failed to update course");
+        console.error("❌ Save course error:", responseData);
+        throw new Error(responseData.message || "Failed to save course");
       }
 
       toast.dismiss();
-      toast.success("Course updated successfully");
+      toast.success(isCreateMode ? "Course created successfully" : "Course updated successfully");
       setShowEditModal(false);
       fetchCourses();
     } catch (error) {
@@ -539,12 +584,20 @@ export default function AdminCourseManagement() {
       <AdminNavbar />
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
         {/* Header */}
-        <div className="space-y-2">
-          <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider">Management</p>
-          <h1 className="text-5xl md:text-6xl font-bold">Course Management</h1>
-          <p className="text-[#C7C3D6] mt-3 text-lg">
-            Manage all courses: edit details, modules, content, thumbnail, and instructors
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[rgba(139,92,246,0.2)] pb-6">
+          <div className="space-y-2">
+            <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider">Management</p>
+            <h1 className="text-5xl md:text-6xl font-bold">Course Management</h1>
+            <p className="text-[#C7C3D6] mt-3 text-lg">
+              Manage all courses: create, edit details, modules, content, thumbnail, and instructors
+            </p>
+          </div>
+          <button
+            onClick={handleCreateClick}
+            className="self-start sm:self-center px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#EC4899] text-white rounded-xl font-bold shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_25px_rgba(168,85,247,0.6)]"
+          >
+            + Create Course
+          </button>
         </div>
 
         {/* Search and Filter */}
@@ -658,12 +711,12 @@ export default function AdminCourseManagement() {
       </div>
 
       {/* Edit Course Modal */}
-      {showEditModal && editingCourse && (
+      {showEditModal && (isCreateMode || editingCourse) && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[var(--card-bg)] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[rgba(139,92,246,0.3)] shadow-[0_20px_60px_rgba(139,92,246,0.3)]">
             {/* Modal Header */}
             <div className="sticky top-0 bg-[var(--card-bg)] border-b border-[rgba(139,92,246,0.3)] px-8 py-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white">Edit Course</h2>
+              <h2 className="text-2xl font-bold text-white">{isCreateMode ? "Create Course" : "Edit Course"}</h2>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="text-[#9A93B5] hover:text-white transition-colors text-2xl"
@@ -1259,7 +1312,7 @@ export default function AdminCourseManagement() {
                   onClick={handleSaveCourse}
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#EC4899] text-white rounded-lg font-semibold hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300"
                 >
-                  Save Course
+                  {isCreateMode ? "Create Course" : "Save Changes"}
                 </button>
                 <button
                   onClick={() => setShowEditModal(false)}

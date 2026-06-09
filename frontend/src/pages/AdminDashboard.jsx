@@ -49,7 +49,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Management Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Mentors Management Card */}
           <Link
             to="/admin/mentors"
@@ -57,8 +57,8 @@ export default function AdminDashboard() {
             <div className="flex items-start justify-between mb-6">
               <div>
                 <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider mb-2">Management</p>
-                <h2 className="text-3xl font-bold text-white mb-2">Mentor Management</h2>
-                <p className="text-[#C7C3D6]">Create, manage, and assign mentors to users. Control mentor activation status and handle mentor-user assignments.</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Mentor Management</h2>
+                <p className="text-[#C7C3D6] text-sm">Create, manage, and assign mentors to users. Control mentor activation status and handle assignments.</p>
               </div>
               <div className="p-4 bg-gradient-to-br from-[rgba(139,92,246,0.2)] to-[rgba(168,85,247,0.1)] rounded-xl group-hover:scale-110 transition-transform duration-300">
                 <svg className='w-8 h-8 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
@@ -73,23 +73,23 @@ export default function AdminDashboard() {
                 <svg className='w-5 h-5 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Add and create mentor accounts</span>
+                <span className="text-xs text-[#C7C3D6]">Create mentor accounts</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className='w-5 h-5 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Activate or deactivate mentors</span>
+                <span className="text-xs text-[#C7C3D6]">Activate / deactivate status</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className='w-5 h-5 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Remove mentors from platform</span>
+                <span className="text-xs text-[#C7C3D6]">Remove mentors</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[#A855F7] font-semibold group-hover:gap-3 transition-all duration-300">
+            <div className="flex items-center gap-2 text-[#A855F7] font-semibold group-hover:gap-3 transition-all duration-300 mt-auto">
               <span>Go to Mentors</span>
               <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
@@ -104,12 +104,12 @@ export default function AdminDashboard() {
             <div className="flex items-start justify-between mb-6">
               <div>
                 <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider mb-2">Management</p>
-                <h2 className="text-3xl font-bold text-white mb-2">Instructor Management</h2>
-                <p className="text-[#C7C3D6]">Create, manage, and organize instructors for courses. Handle instructor accounts, activation, and course assignments.</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Instructor Management</h2>
+                <p className="text-[#C7C3D6] text-sm">Create, manage, and organize instructors for courses. Control accounts and course assignments.</p>
               </div>
               <div className="p-4 bg-gradient-to-br from-[rgba(236,72,153,0.2)] to-[rgba(236,72,153,0.1)] rounded-xl group-hover:scale-110 transition-transform duration-300">
-                <svg className='w-8 h-8 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
-                  <path d='M10.5 1.5H5.75C4.232 1.5 3 2.732 3 4.25v11.5C3 17.268 4.232 18.5 5.75 18.5h8.5c1.518 0 2.75-1.232 2.75-2.75V6.75m-8-5v5h5m-5-5l5 5' />
+                <svg className='w-8 h-8 text-[#EC4899]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' />
                 </svg>
               </div>
             </div>
@@ -120,24 +120,71 @@ export default function AdminDashboard() {
                 <svg className='w-5 h-5 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Create instructor accounts</span>
+                <span className="text-xs text-[#C7C3D6]">Create instructor accounts</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className='w-5 h-5 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Manage instructor courses</span>
+                <span className="text-xs text-[#C7C3D6]">Manage course assignments</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className='w-5 h-5 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Control instructor status</span>
+                <span className="text-xs text-[#C7C3D6]">Control instructor status</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[#EC4899] font-semibold group-hover:gap-3 transition-all duration-300">
+            <div className="flex items-center gap-2 text-[#EC4899] font-semibold group-hover:gap-3 transition-all duration-300 mt-auto">
               <span>Go to Instructors</span>
+              <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
+              </svg>
+            </div>
+          </Link>
+
+          {/* Courses & Curriculum Management Card */}
+          <Link
+            to="/admin/courses"
+            className="group bg-[var(--card-bg)] border border-[rgba(139,92,246,0.3)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(139,92,246,0.1)] hover:shadow-[0_12px_48px_rgba(139,92,246,0.25)] hover:border-[rgba(139,92,246,0.6)] transition-all duration-300 hover:-translate-y-2">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider mb-2">Curriculum</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Course Management</h2>
+                <p className="text-[#C7C3D6] text-sm">Create courses, build modules, and add video/lesson content hosted securely on R2/CloudFront.</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-[rgba(139,92,246,0.2)] to-[rgba(168,85,247,0.1)] rounded-xl group-hover:scale-110 transition-transform duration-300">
+                <svg className='w-8 h-8 text-[#A855F7]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' />
+                </svg>
+              </div>
+            </div>
+
+            {/* Features */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-3">
+                <svg className='w-5 h-5 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                </svg>
+                <span className="text-xs text-[#C7C3D6]">Create and delete courses</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className='w-5 h-5 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                </svg>
+                <span className="text-xs text-[#C7C3D6]">Interactive Curriculum Builder</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <svg className='w-5 h-5 text-[#A855F7]' fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                </svg>
+                <span className="text-xs text-[#C7C3D6]">R2/CloudFront video delivery</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-[#A855F7] font-semibold group-hover:gap-3 transition-all duration-300 mt-auto">
+              <span>Go to Courses</span>
               <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
               </svg>
@@ -151,8 +198,8 @@ export default function AdminDashboard() {
             <div className="flex items-start justify-between mb-6">
               <div>
                 <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider mb-2">Assignment</p>
-                <h2 className="text-3xl font-bold text-white mb-2">Assign Mentors</h2>
-                <p className="text-[#C7C3D6]">Assign mentors to users for personalized 1:1 mentoring sessions. Manage mentor-user pairings and track mentorship relationships.</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Assign Mentors</h2>
+                <p className="text-[#C7C3D6] text-sm">Assign mentors to users for personalized 1:1 sessions. Manage mentor-user pairings.</p>
               </div>
               <div className="p-4 bg-gradient-to-br from-[rgba(236,72,153,0.2)] to-[rgba(236,72,153,0.1)] rounded-xl group-hover:scale-110 transition-transform duration-300">
                 <svg className='w-8 h-8 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
@@ -167,23 +214,23 @@ export default function AdminDashboard() {
                 <svg className='w-5 h-5 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Assign available mentors</span>
+                <span className="text-xs text-[#C7C3D6]">Assign available mentors</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className='w-5 h-5 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Track mentorship pairings</span>
+                <span className="text-xs text-[#C7C3D6]">Track pairings in real-time</span>
               </div>
               <div className="flex items-center gap-3">
                 <svg className='w-5 h-5 text-[#EC4899]' fill='currentColor' viewBox='0 0 20 20'>
                   <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
                 </svg>
-                <span className="text-sm text-[#C7C3D6]">Manage user-mentor relationships</span>
+                <span className="text-xs text-[#C7C3D6]">Manage pairings</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[#EC4899] font-semibold group-hover:gap-3 transition-all duration-300">
+            <div className="flex items-center gap-2 text-[#EC4899] font-semibold group-hover:gap-3 transition-all duration-300 mt-auto">
               <span>Assign Mentors</span>
               <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />

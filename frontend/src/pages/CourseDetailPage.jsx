@@ -27,49 +27,17 @@ export default function CourseDetailPage() {
 		let cleaned = url.trim();
 		cleaned = cleaned.replace(/\s+/g, "");
 		if (cleaned.startsWith("//")) cleaned = `https:${cleaned}`;
-		if (cleaned.startsWith("res.cloudinary.com/")) cleaned = `https://${cleaned}`;
 		if (cleaned.startsWith("http://")) cleaned = cleaned.replace("http://", "https://");
 		return cleaned;
 	};
 
 	const resolveVideoUrl = (video) => {
-		const directUrl = normalizeVideoUrl(video?.url || "");
-		if (directUrl) return directUrl;
-
-		const publicId = typeof video?.publicId === "string" ? video.publicId.trim() : "";
-		if (!publicId) return "";
-
-		const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "daudlyq2g";
-		return `https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`;
+		return normalizeVideoUrl(video?.url || "");
 	};
 
 	const resolveVideoSources = (video) => {
-		const sources = [];
 		const directUrl = resolveVideoUrl(video);
-		const publicId = typeof video?.publicId === "string" ? video.publicId.trim() : "";
-		const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "daudlyq2g";
-
-		if (directUrl) {
-			sources.push(directUrl);
-			if (directUrl.includes("/video/upload/")) {
-				sources.push(
-					directUrl.replace(
-						"/video/upload/",
-						"/video/upload/f_mp4,vc_h264,ac_aac,fl_progressive/",
-					),
-				);
-			}
-		}
-
-		if (publicId) {
-			sources.push(
-				`https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,vc_h264,ac_aac,fl_progressive/${publicId}.mp4`,
-			);
-			sources.push(`https://res.cloudinary.com/${cloudName}/video/upload/f_auto/${publicId}`);
-			sources.push(`https://res.cloudinary.com/${cloudName}/video/upload/${publicId}.mp4`);
-		}
-
-		return [...new Set(sources.filter(Boolean))];
+		return directUrl ? [directUrl] : [];
 	};
 
 	const getVideoKey = (moduleIndex, videoIndex, video) => {

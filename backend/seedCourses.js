@@ -28,15 +28,13 @@ const courses = [
 				videos: [
 					{ 
 						title: "What are AI Agents?", 
-						url: "https://res.cloudinary.com/demo/video/upload/dog.mp4", 
-						publicId: "demo/dog",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/what_are_ai_agents.mp4", 
 						duration: "15:00", 
 						order: 1 
 					},
 					{ 
 						title: "The Agentic Workflow", 
-						url: "https://res.cloudinary.com/demo/video/upload/elephants.mp4", 
-						publicId: "demo/elephants",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/agentic_workflow.mp4", 
 						duration: "20:00", 
 						order: 2 
 					}
@@ -49,15 +47,13 @@ const courses = [
 				videos: [
 					{ 
 						title: "LangChain Agents", 
-						url: "https://res.cloudinary.com/demo/video/upload/sea_turtle.mp4", 
-						publicId: "demo/sea_turtle",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/langchain_agents.mp4", 
 						duration: "25:00", 
 						order: 1 
 					},
 					{ 
 						title: "Multi-Agent Systems with CrewAI", 
-						url: "https://res.cloudinary.com/demo/video/upload/finish_line.mp4", 
-						publicId: "demo/finish_line",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/multi_agent_systems.mp4", 
 						duration: "30:00", 
 						order: 2 
 					}
@@ -87,15 +83,13 @@ const courses = [
 				videos: [
 					{ 
 						title: "Planning & Reasoning", 
-						url: "https://res.cloudinary.com/demo/video/upload/dog.mp4", 
-						publicId: "demo/dog",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/planning_reasoning.mp4", 
 						duration: "35:00", 
 						order: 1 
 					},
 					{ 
 						title: "Memory & State Management", 
-						url: "https://res.cloudinary.com/demo/video/upload/elephants.mp4", 
-						publicId: "demo/elephants",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/memory_state.mp4", 
 						duration: "40:00", 
 						order: 2 
 					}
@@ -108,15 +102,13 @@ const courses = [
 				videos: [
 					{ 
 						title: "Stateful Graphs", 
-						url: "https://res.cloudinary.com/demo/video/upload/sea_turtle.mp4", 
-						publicId: "demo/sea_turtle",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/stateful_graphs.mp4", 
 						duration: "45:00", 
 						order: 1 
 					},
 					{ 
 						title: "Human-in-the-loop Systems", 
-						url: "https://res.cloudinary.com/demo/video/upload/finish_line.mp4", 
-						publicId: "demo/finish_line",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/human_in_loop.mp4", 
 						duration: "50:00", 
 						order: 2 
 					}
@@ -146,15 +138,13 @@ const courses = [
 				videos: [
 					{ 
 						title: "Arrays & Strings Mastery", 
-						url: "https://res.cloudinary.com/demo/video/upload/dog.mp4", 
-						publicId: "demo/dog",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/arrays_strings.mp4", 
 						duration: "30:00", 
 						order: 1 
 					},
 					{ 
 						title: "Linked Lists Deep Dive", 
-						url: "https://res.cloudinary.com/demo/video/upload/elephants.mp4", 
-						publicId: "demo/elephants",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/linked_lists.mp4", 
 						duration: "35:00", 
 						order: 2 
 					}
@@ -167,15 +157,13 @@ const courses = [
 				videos: [
 					{ 
 						title: "Binary Trees & BST", 
-						url: "https://res.cloudinary.com/demo/video/upload/sea_turtle.mp4", 
-						publicId: "demo/sea_turtle",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/binary_trees.mp4", 
 						duration: "40:00", 
 						order: 1 
 					},
 					{ 
 						title: "Graph Traversals (BFS/DFS)", 
-						url: "https://res.cloudinary.com/demo/video/upload/finish_line.mp4", 
-						publicId: "demo/finish_line",
+						url: "https://pub-f58d270cf3294402934fa2667e0b053d.r2.dev/videos/graph_traversals.mp4", 
 						duration: "45:00", 
 						order: 2 
 					}

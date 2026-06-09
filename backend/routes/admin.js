@@ -10,6 +10,7 @@ import Job from "../models/Job.js";
 import MentorshipSession from "../models/MentorshipSession.js";
 import sgMail from "../config/mailer.js";
 import upload from "../middleware/upload.js";
+import { uploadVideoToR2 } from "../middleware/r2Upload.js";
 import multer from "multer";
 
 // In-memory multer for instructor photo (no Cloudinary required)
@@ -816,6 +817,75 @@ router.get("/courses", verifyAdmin, async (req, res) => {
 	}
 });
 
+const validateVideoUrl = (url) => {
+	if (!url) return false;
+	const cleanUrl = url.trim();
+	const r2PublicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL;
+	if (r2PublicUrl) {
+		const cleanR2Url = r2PublicUrl.trim().replace(/\/$/, "");
+		if (cleanUrl.startsWith(cleanR2Url)) {
+			return true;
+		}
+	}
+	if (cleanUrl.includes("cloudfront.net")) {
+		return true;
+	}
+	return false;
+};
+
+// Create course (admin can create a new course with modules and videos)
+router.post("/courses", verifyAdmin, async (req, res) => {
+	try {
+		const { title, description, category, level, thumbnail, image, price, isFree, modules, instructor, instructorId } = req.body;
+
+		console.log("📝 Creating course:", title);
+
+		// Validate all video URLs in the modules array if present
+		if (modules && Array.isArray(modules)) {
+			for (let mIdx = 0; mIdx < modules.length; mIdx++) {
+				const module = modules[mIdx];
+				const moduleTitle = module.title || `Module ${mIdx + 1}`;
+				if (module.videos && Array.isArray(module.videos)) {
+					for (let vIdx = 0; vIdx < module.videos.length; vIdx++) {
+						const video = module.videos[vIdx];
+						const videoTitle = video.title || `Video ${vIdx + 1}`;
+						if (!validateVideoUrl(video.url)) {
+							return res.status(400).json({
+								message: `Validation Error: The video URL for "${videoTitle}" in module "${moduleTitle}" is not a valid CloudFront/R2 URL. All course videos must be hosted on the authorized delivery endpoint: ${process.env.CLOUDFLARE_R2_PUBLIC_URL || "CloudFront/R2"}`
+							});
+						}
+					}
+				}
+			}
+		}
+
+		const newCourse = new Course({
+			title,
+			description,
+			category,
+			level: level || "Beginner",
+			thumbnail,
+			image,
+			price: price || "Free",
+			isFree: isFree !== undefined ? isFree : true,
+			modules: modules || [],
+			instructor: instructor || "YugantaAI",
+			instructorId: instructorId || null,
+			students: 0,
+			rating: 0
+		});
+
+		await newCourse.save();
+
+		const populatedCourse = await Course.findById(newCourse._id).populate("instructorId", "name email expertise");
+
+		res.status(201).json({ message: "Course created successfully", course: populatedCourse });
+	} catch (error) {
+		console.error("❌ Create course error:", error);
+		res.status(500).json({ message: "Server error", details: error.message });
+	}
+});
+
 // Update course (admin can edit course details, modules, content, thumbnail)
 router.put("/courses/:id", verifyAdmin, async (req, res) => {
 	try {
@@ -828,6 +898,27 @@ router.put("/courses/:id", verifyAdmin, async (req, res) => {
 		const course = await Course.findById(id);
 		if (!course) {
 			return res.status(404).json({ message: "Course not found" });
+		}
+
+		// Update modules if provided
+		if (modules !== undefined && Array.isArray(modules)) {
+			// Validate all video URLs in the modules array
+			for (let mIdx = 0; mIdx < modules.length; mIdx++) {
+				const module = modules[mIdx];
+				const moduleTitle = module.title || `Module ${mIdx + 1}`;
+				if (module.videos && Array.isArray(module.videos)) {
+					for (let vIdx = 0; vIdx < module.videos.length; vIdx++) {
+						const video = module.videos[vIdx];
+						const videoTitle = video.title || `Video ${vIdx + 1}`;
+						if (!validateVideoUrl(video.url)) {
+							return res.status(400).json({
+								message: `Validation Error: The video URL for "${videoTitle}" in module "${moduleTitle}" is not a valid CloudFront/R2 URL. All course videos must be hosted on the authorized delivery endpoint: ${process.env.CLOUDFLARE_R2_PUBLIC_URL || "CloudFront/R2"}`
+							});
+						}
+					}
+				}
+			}
+			course.modules = modules;
 		}
 
 		// Update basic fields
@@ -850,11 +941,6 @@ router.put("/courses/:id", verifyAdmin, async (req, res) => {
 			} else if (instructorId) {
 				course.instructorId = instructorId;
 			}
-		}
-
-		// Update modules if provided
-		if (modules !== undefined && Array.isArray(modules)) {
-			course.modules = modules;
 		}
 
 		await course.save();
@@ -920,17 +1006,17 @@ router.post("/upload-image", verifyAdmin, upload.single("image"), async (req, re
 });
 
 // Upload video for module
-router.post("/upload-video", verifyAdmin, upload.single("video"), async (req, res) => {
+router.post("/upload-video", verifyAdmin, uploadVideoToR2, async (req, res) => {
 	try {
 		if (!req.file) {
 			return res.status(400).json({ message: "No video file provided" });
 		}
 
-		// Extract duration if available (Cloudinary provides this for videos)
+		// Extract duration if available
 		const duration = req.file.duration ? Math.round(req.file.duration) : 0;
 
 		res.json({
-			message: "Video uploaded successfully",
+			message: "Video uploaded successfully to Cloudflare R2",
 			url: req.file.path,
 			publicId: req.file.filename,
 			duration: duration,
@@ -947,6 +1033,13 @@ router.post("/courses/:courseId/modules/:moduleId/videos", verifyAdmin, async (r
 	try {
 		const { courseId, moduleId } = req.params;
 		const { title, url, publicId, duration, description } = req.body;
+
+		// Validate Video URL
+		if (!validateVideoUrl(url)) {
+			return res.status(400).json({
+				message: `Validation Error: The video URL is not a valid CloudFront/R2 URL. All course videos must be hosted on the authorized delivery endpoint: ${process.env.CLOUDFLARE_R2_PUBLIC_URL || "CloudFront/R2"}`
+			});
+		}
 
 		const course = await Course.findById(courseId);
 

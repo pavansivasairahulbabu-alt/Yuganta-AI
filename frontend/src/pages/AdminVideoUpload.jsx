@@ -17,6 +17,9 @@ export default function AdminVideoUpload() {
   const [category, setCategory] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState([]);
+  const [courseId, setCourseId] = useState("");
+  const [moduleName, setModuleName] = useState("");
+  const [videoOrder, setVideoOrder] = useState("");
 
   // Drag menu states
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
@@ -63,6 +66,16 @@ export default function AdminVideoUpload() {
     queryKey: ["video-categories"],
     queryFn: async () => {
       const res = await api.get("/categories");
+      return res.data;
+    },
+    enabled: !loading,
+  });
+
+  // Fetch courses for dropdown
+  const { data: courses = [], isLoading: loadingCourses } = useQuery({
+    queryKey: ["admin-courses"],
+    queryFn: async () => {
+      const res = await api.get("/courses");
       return res.data;
     },
     enabled: !loading,
@@ -264,6 +277,9 @@ export default function AdminVideoUpload() {
 
     if (!title.trim()) return toast.error("Video title is required");
     if (!category) return toast.error("Category selection is required");
+    if (!courseId) return toast.error("Please select a course to attach the video to");
+    if (!moduleName.trim()) return toast.error("Please specify a module name");
+    if (!videoOrder) return toast.error("Please specify a video order number");
     if (!videoFile && !videoUrl) return toast.error("Please upload or provide a video file");
     if (!thumbnailFile && !thumbnailUrl) return toast.error("Please upload or provide a thumbnail image");
 
@@ -301,6 +317,9 @@ export default function AdminVideoUpload() {
         videoUrl: finalVideoUrl,
         duration: Math.round(videoDuration),
         fileSize: videoSize,
+        courseId,
+        moduleName: moduleName.trim(),
+        videoOrder: Number(videoOrder),
       };
 
       saveMutation.mutate(payload);
@@ -310,7 +329,7 @@ export default function AdminVideoUpload() {
     }
   };
 
-  if (loading || loadingCats) {
+  if (loading || loadingCats || loadingCourses) {
     return (
       <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] flex items-center justify-center">
         <div className="text-center">
@@ -355,6 +374,92 @@ export default function AdminVideoUpload() {
                 className="w-full px-4 py-2.5 rounded-xl bg-[rgba(26,21,44,0.7)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
                 required
               />
+            </div>
+
+            {/* Course & Module Association */}
+            <div className="p-5 rounded-2xl border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.03)] space-y-4">
+              <h3 className="text-sm font-bold text-[#C084FC] uppercase tracking-wide">Course Association</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Course Selection */}
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-semibold text-white">Select Course</label>
+                  <select
+                    value={courseId}
+                    onChange={(e) => {
+                      setCourseId(e.target.value);
+                      setModuleName(""); // reset module name on course change
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl bg-[rgba(26,21,44,0.7)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
+                    required
+                  >
+                    <option value="">-- Select Course --</option>
+                    {courses.map((c) => (
+                      <option key={c._id} value={c._id} className="bg-[#1a152c]">
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Video Order / Position */}
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-semibold text-white">Video Order / Position</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 1"
+                    value={videoOrder}
+                    onChange={(e) => setVideoOrder(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-[rgba(26,21,44,0.7)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
+                    required={!!courseId}
+                  />
+                </div>
+              </div>
+
+              {/* Module Name Selection / Entry */}
+              {courseId && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-white">Module Name</label>
+                  <input
+                    type="text"
+                    placeholder="Enter new module name or select one below..."
+                    value={moduleName}
+                    onChange={(e) => setModuleName(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl bg-[rgba(26,21,44,0.7)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
+                    required={!!courseId}
+                  />
+                  {/* List of existing modules as quick buttons */}
+                  {(() => {
+                    const selectedCourse = courses.find((c) => c._id === courseId);
+                    const existingModules = selectedCourse?.modules || [];
+                    if (existingModules.length > 0) {
+                      return (
+                        <div className="space-y-1.5 pt-1">
+                          <span className="text-[11px] text-[#9A93B5] block font-medium">Quick-select existing module:</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {existingModules.map((m) => (
+                              <button
+                                key={m._id || m.title}
+                                type="button"
+                                onClick={() => setModuleName(m.title)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                                  moduleName === m.title
+                                    ? "bg-[#A855F7] border-[#A855F7] text-white"
+                                    : "bg-[rgba(26,21,44,0.5)] border-[rgba(139,92,246,0.15)] text-[#C7C3D6] hover:border-[#A855F7]"
+                                }`}
+                              >
+                                {m.title}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">

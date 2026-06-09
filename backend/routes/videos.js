@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import Video from "../models/Video.js";
 import Category from "../models/Category.js";
+import Course from "../models/Course.js";
 import { verifyAdmin } from "../middleware/adminAuth.js";
 
 const router = express.Router();
@@ -27,25 +28,12 @@ if (hasR2Config) {
     region: "auto",
   });
 } else {
-  console.warn("⚠️ Cloudflare R2 not configured in backend .env. Operating in Simulation / Mock mode for file uploads.");
+  console.error("❌ Cloudflare R2 is NOT configured in backend .env! Video uploads will fail.");
 }
 
-// Predefined mock resources for simulation mode
-const MOCK_VIDEOS = [
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
-];
-
-const MOCK_THUMBNAILS = [
-  "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1542204172-e7052809a8a7?w=600&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=600&auto=format&fit=crop&q=80"
-];
+// Predefined mock resources for simulation mode (deprecated, kept empty to avoid accidental use)
+const MOCK_VIDEOS = [];
+const MOCK_THUMBNAILS = [];
 
 // ==========================================
 // R2 DIRECT UPLOAD ENDPOINT (Backend proxy)
@@ -63,16 +51,7 @@ router.post("/videos/upload", verifyAdmin, async (req, res) => {
     const uniqueFileName = `${folder}/${Date.now()}_${fileName.replace(/\s+/g, "_")}`;
 
     if (!hasR2Config) {
-      // In simulation mode, return a mocked upload destination
-      const fallbackUrl = purpose === "thumbnail" 
-        ? MOCK_THUMBNAILS[Math.floor(Math.random() * MOCK_THUMBNAILS.length)]
-        : MOCK_VIDEOS[Math.floor(Math.random() * MOCK_VIDEOS.length)];
-
-      return res.json({
-        isMock: true,
-        downloadUrl: fallbackUrl,
-        key: uniqueFileName,
-      });
+      return res.status(500).json({ message: "Cloudflare R2 is not configured. Direct upload failed." });
     }
 
     // Upload directly to R2 from backend
@@ -112,17 +91,7 @@ router.post("/videos/presign", verifyAdmin, async (req, res) => {
     const uniqueFileName = `${folder}/${Date.now()}_${fileName.replace(/\s+/g, "_")}`;
 
     if (!hasR2Config) {
-      // In simulation mode, return a mocked upload destination
-      const fallbackUrl = purpose === "thumbnail" 
-        ? MOCK_THUMBNAILS[Math.floor(Math.random() * MOCK_THUMBNAILS.length)]
-        : MOCK_VIDEOS[Math.floor(Math.random() * MOCK_VIDEOS.length)];
-
-      return res.json({
-        isMock: true,
-        uploadUrl: null, // Frontend will skip HTTP PUT
-        downloadUrl: fallbackUrl,
-        key: uniqueFileName,
-      });
+      return res.status(500).json({ message: "Cloudflare R2 is not configured. Presign generation failed." });
     }
 
     const command = new PutObjectCommand({
@@ -383,10 +352,21 @@ router.get("/videos/:id", verifyAdmin, async (req, res) => {
 // Create video metadata
 router.post("/videos", verifyAdmin, async (req, res) => {
   try {
-    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize } = req.body;
+    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize, courseId, moduleName, videoOrder } = req.body;
 
     if (!title || !category || !videoUrl) {
       return res.status(400).json({ message: "Title, category, and video URL are required" });
+    }
+
+    let course = null;
+    if (courseId) {
+      if (!moduleName || !moduleName.trim()) {
+        return res.status(400).json({ message: "Module name is required when associating with a course" });
+      }
+      course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Selected course not found" });
+      }
     }
 
     const video = new Video({
@@ -402,6 +382,48 @@ router.post("/videos", verifyAdmin, async (req, res) => {
     });
 
     await video.save();
+
+    if (course) {
+      // Find or create module
+      let moduleObj = course.modules.find(
+        (m) => m.title.trim().toLowerCase() === moduleName.trim().toLowerCase()
+      );
+
+      if (!moduleObj) {
+        // Calculate module order
+        const maxModuleOrder = course.modules.reduce((max, m) => Math.max(max, m.order || 0), 0);
+        moduleObj = {
+          title: moduleName.trim(),
+          description: "",
+          order: maxModuleOrder + 1,
+          videos: [],
+        };
+        course.modules.push(moduleObj);
+        // Reference the newly created module
+        moduleObj = course.modules[course.modules.length - 1];
+      }
+
+      // Add video to module
+      const newVideoOrder = Number(videoOrder) || (moduleObj.videos.length + 1);
+      
+      moduleObj.videos.push({
+        title: title.trim(),
+        url: videoUrl,
+        publicId: "",
+        duration: duration ? String(duration) : "",
+        description: description || "",
+        order: newVideoOrder,
+      });
+
+      // Sort videos within this module by order
+      moduleObj.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      // Sort modules by order
+      course.modules.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      await course.save();
+    }
+
     res.status(201).json(video);
   } catch (error) {
     console.error("Create video error:", error);
