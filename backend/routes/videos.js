@@ -461,10 +461,38 @@ router.put("/videos/:id", verifyAdmin, async (req, res) => {
 
     await video.save();
 
+    // First, scrub the video from ALL courses so it doesn't duplicate
+    const allCourses = await Course.find({});
+    for (let c of allCourses) {
+      let modified = false;
+      if (c.modules) {
+        for (let i = c.modules.length - 1; i >= 0; i--) {
+          let m = c.modules[i];
+          if (m.videos) {
+            const initialLen = m.videos.length;
+            m.videos = m.videos.filter(v => v.url !== video.videoUrl && v.title !== video.title);
+            if (m.videos.length !== initialLen) {
+              modified = true;
+            }
+          }
+          // Remove module if it became empty
+          if (m.videos.length === 0) {
+            c.modules.splice(i, 1);
+            modified = true;
+          }
+        }
+      }
+      if (modified) {
+        await c.save();
+      }
+    }
+
+    // Now, if a new course is selected, attach it there
     if (courseId) {
       if (!moduleName || !moduleName.trim()) {
         return res.status(400).json({ message: "Module name is required when associating with a course" });
       }
+      // Re-fetch the target course just in case it was modified in the scrub
       const course = await Course.findById(courseId);
       if (!course) {
         return res.status(404).json({ message: "Selected course not found" });
@@ -487,9 +515,6 @@ router.put("/videos/:id", verifyAdmin, async (req, res) => {
         course.modules.push(moduleObj);
         moduleObj = course.modules[course.modules.length - 1];
       }
-
-      // Check if video is already in the module
-      const existingVideoIndex = moduleObj.videos.findIndex(v => v.url === video.videoUrl || v.title === video.title);
       
       const newVideoOrder = Number(videoOrder) || (moduleObj.videos.length + 1);
 
@@ -502,13 +527,8 @@ router.put("/videos/:id", verifyAdmin, async (req, res) => {
         order: newVideoOrder,
       };
 
-      if (existingVideoIndex >= 0) {
-        // Update existing video
-        moduleObj.videos[existingVideoIndex] = { ...moduleObj.videos[existingVideoIndex], ...videoDataForCourse };
-      } else {
-        // Add new video
-        moduleObj.videos.push(videoDataForCourse);
-      }
+      // Add new video (we already scrubbed duplicates)
+      moduleObj.videos.push(videoDataForCourse);
 
       // Sort videos within this module by order
       moduleObj.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
