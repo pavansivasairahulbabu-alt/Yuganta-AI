@@ -672,47 +672,47 @@ export default function AdminVideoManage() {
                     </select>
                   </div>
 
-                  {courseId && (
-                    <div className="space-y-3 animate-fade-in pt-2 border-t border-[rgba(139,92,246,0.1)]">
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold text-[#C7C3D6]">Module Name</label>
-                        <input
-                          type="text"
-                          value={moduleName}
-                          onChange={(e) => setModuleName(e.target.value)}
-                          placeholder="e.g. Introduction to React"
-                          className="w-full px-4 py-2 rounded-xl bg-[rgba(26,21,44,0.9)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
-                          required={!!courseId}
-                        />
-                        {courses.find(c => c._id === courseId)?.modules?.length > 0 && (
-                          <div className="pt-2 flex flex-wrap gap-2">
-                            {courses.find(c => c._id === courseId).modules.map((mod, idx) => (
-                              <button
-                                key={idx}
-                                type="button"
-                                onClick={() => setModuleName(mod.title)}
-                                className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${moduleName === mod.title ? 'bg-[rgba(139,92,246,0.2)] border-[#A855F7] text-white' : 'border-[rgba(139,92,246,0.2)] text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.1)]'}`}
-                              >
-                                {mod.title}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold text-[#C7C3D6]">Video Order / Position</label>
-                        <input
-                          type="number"
-                          value={videoOrder}
-                          onChange={(e) => setVideoOrder(e.target.value)}
-                          placeholder="Leave empty to auto-append"
-                          className="w-full px-4 py-2 rounded-xl bg-[rgba(26,21,44,0.9)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
-                          min="1"
-                        />
-                      </div>
+                  <div className={`space-y-3 pt-2 border-t border-[rgba(139,92,246,0.1)] transition-opacity duration-300 ${!courseId ? 'opacity-40 grayscale pointer-events-none' : ''}`}>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-[#C7C3D6]">Module Name {!courseId && "(Select a course first)"}</label>
+                      <input
+                        type="text"
+                        value={moduleName}
+                        onChange={(e) => setModuleName(e.target.value)}
+                        placeholder="e.g. Introduction to React"
+                        className="w-full px-4 py-2 rounded-xl bg-[rgba(26,21,44,0.9)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
+                        required={!!courseId}
+                        disabled={!courseId}
+                      />
+                      {courseId && courses.find(c => c._id === courseId)?.modules?.length > 0 && (
+                        <div className="pt-2 flex flex-wrap gap-2">
+                          {courses.find(c => c._id === courseId).modules.map((mod, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setModuleName(mod.title)}
+                              className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${moduleName === mod.title ? 'bg-[rgba(139,92,246,0.2)] border-[#A855F7] text-white' : 'border-[rgba(139,92,246,0.2)] text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.1)]'}`}
+                            >
+                              {mod.title}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-semibold text-[#C7C3D6]">Video Order / Position</label>
+                      <input
+                        type="number"
+                        value={videoOrder}
+                        onChange={(e) => setVideoOrder(e.target.value)}
+                        placeholder="Leave empty to auto-append"
+                        className="w-full px-4 py-2 rounded-xl bg-[rgba(26,21,44,0.9)] border border-[rgba(139,92,246,0.25)] focus:border-[#A855F7] text-white focus:outline-none focus:ring-1 focus:ring-[#A855F7] text-sm"
+                        min="1"
+                        disabled={!courseId}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-1.5">
