@@ -305,6 +305,18 @@ export default function AdminVideoManage() {
         thumbnailUrl: finalThumbUrl,
       };
 
+      if (courseId) {
+        if (!moduleName.trim()) {
+          toast.error("Module name is required to associate video to the course");
+          return;
+        }
+        payload.courseId = courseId;
+        payload.moduleName = moduleName.trim();
+        payload.videoOrder = Number(videoOrder) || "";
+      } else {
+        payload.courseId = ""; // Send empty string to clear previous association if removed
+      }
+
       updateMutation.mutate({ id: editingVideo._id, payload });
     } catch (err) {
       console.error(err);
