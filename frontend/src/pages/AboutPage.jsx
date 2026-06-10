@@ -184,22 +184,31 @@ export default function AboutPage() {
 
 				{/* Final CTA */}
 				<div className="max-w-7xl mx-auto px-4 md:px-6 pb-24">
-					<div className="bg-gradient-to-r from-[#2563EB] to-[#38BDF8] rounded-[2rem] p-12 text-center relative overflow-hidden group">
-						<div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
-						<div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-10 rounded-full -ml-20 -mb-20 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+					<div className="relative rounded-[2rem] overflow-hidden p-[1px] group">
+						{/* Animated Gradient Border */}
+						<div className="absolute inset-0 bg-gradient-to-r from-[#2563EB] via-[#8B5CF6] to-[#38BDF8] opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
 						
-						<div className="relative z-10">
-							<h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Start Your AI Journey?</h2>
-							<p className="text-white/80 text-xl mb-10 max-w-2xl mx-auto">
-								Join hundreds of students and professionals who are already building the future with Yuganta AI.
-							</p>
-							<div className="flex flex-col sm:flex-row gap-4 justify-center">
-								<Link to="/signup" className="px-10 py-4 bg-white text-[#2563EB] font-bold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-									Join Now
-								</Link>
-								<Link to="/talk-to-expert" className="px-10 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all duration-300">
-									Talk to an Expert
-								</Link>
+						{/* Card Content */}
+						<div className="relative bg-[var(--bg-card)] rounded-[2rem] p-12 text-center h-full w-full">
+							{/* Background Glow */}
+							<div className="absolute top-0 right-0 w-64 h-64 bg-[#8B5CF6] opacity-10 rounded-full -mr-20 -mt-20 blur-[80px] group-hover:scale-150 transition-transform duration-700"></div>
+							<div className="absolute bottom-0 left-0 w-64 h-64 bg-[#38BDF8] opacity-10 rounded-full -ml-20 -mb-20 blur-[80px] group-hover:scale-150 transition-transform duration-700"></div>
+							
+							<div className="relative z-10">
+								<h2 className="text-4xl md:text-5xl font-bold mb-6 text-[var(--text-color)]">
+									Ready to Start Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#38BDF8]">AI Journey?</span>
+								</h2>
+								<p className="text-[var(--text-muted)] text-xl mb-10 max-w-2xl mx-auto font-medium">
+									Join hundreds of students and professionals who are already building the future with Yuganta AI.
+								</p>
+								<div className="flex flex-col sm:flex-row gap-4 justify-center">
+									<Link to="/signup" className="px-10 py-4 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-bold rounded-xl hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:scale-105 transition-all duration-300">
+										Join Now
+									</Link>
+									<Link to="/talk-to-expert" className="px-10 py-4 border border-[var(--border-color)] text-[var(--text-color)] font-bold rounded-xl hover:bg-[var(--bg-secondary)] hover:scale-105 transition-all duration-300">
+										Talk to an Expert
+									</Link>
+								</div>
 							</div>
 						</div>
 					</div>
