@@ -67,7 +67,7 @@ export default function AboutPage() {
 								<nav className="flex items-center gap-2 text-sm font-semibold text-[var(--text-color)] ml-1">
 									<Link to="/" className="hover:text-[#8B5CF6] transition-colors opacity-70 hover:opacity-100">Home</Link>
 									<ChevronRight className="w-3 h-3 opacity-50" />
-									<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#38BDF8]">About Us</span>
+									<span className={`text-transparent bg-clip-text bg-gradient-to-r ${isLight ? 'from-[#6D28D9] to-[#0284C7]' : 'from-[#8B5CF6] to-[#38BDF8]'}`}>About Us</span>
 								</nav>
 							</div>
 						</div>
