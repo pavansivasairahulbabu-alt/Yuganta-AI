@@ -75,7 +75,7 @@ export default function AboutPage() {
 						<div className="max-w-5xl mx-auto">
 							<h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1] tracking-tight text-[var(--text-color)]">
 								Architecting the <br className="hidden md:block" />
-								<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#2563EB] to-[#38BDF8] drop-shadow-sm">
+								<span className={`text-transparent bg-clip-text bg-gradient-to-r ${isLight ? 'from-[#6D28D9] via-[#1D4ED8] to-[#0284C7]' : 'from-[#8B5CF6] via-[#2563EB] to-[#38BDF8]'} drop-shadow-sm`}>
 									AI-First Future
 								</span>
 							</h1>
@@ -188,7 +188,7 @@ export default function AboutPage() {
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 							{/* Stat 1 */}
 							<div className="relative group">
-								<div className={`absolute inset-0 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] rounded-3xl blur transition duration-500 ${isLight ? 'opacity-10 group-hover:opacity-20' : 'opacity-20 group-hover:opacity-40'}`}></div>
 								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
 									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#2563EB]/10 text-[#2563EB]' : 'bg-[#2563EB]/20 text-[#38BDF8]'}`}>
 										<Users className="w-8 h-8" />
@@ -204,7 +204,7 @@ export default function AboutPage() {
 
 							{/* Stat 2 */}
 							<div className="relative group">
-								<div className={`absolute inset-0 bg-gradient-to-r from-[#8B5CF6] to-[#C084FC] rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#8B5CF6] to-[#C084FC] rounded-3xl blur transition duration-500 ${isLight ? 'opacity-10 group-hover:opacity-20' : 'opacity-20 group-hover:opacity-40'}`}></div>
 								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
 									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#8B5CF6]/10 text-[#8B5CF6]' : 'bg-[#8B5CF6]/20 text-[#C084FC]'}`}>
 										<GraduationCap className="w-8 h-8" />
@@ -220,7 +220,7 @@ export default function AboutPage() {
 
 							{/* Stat 3 */}
 							<div className="relative group">
-								<div className={`absolute inset-0 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-3xl blur transition duration-500 ${isLight ? 'opacity-10 group-hover:opacity-20' : 'opacity-20 group-hover:opacity-40'}`}></div>
 								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
 									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[#10B981]/20 text-[#34D399]'}`}>
 										<Star className="w-8 h-8" />
@@ -241,7 +241,7 @@ export default function AboutPage() {
 				<div className="max-w-7xl mx-auto px-4 md:px-6 pb-24">
 					<div className="relative rounded-[2rem] overflow-hidden p-[1px] group">
 						{/* Animated Gradient Border */}
-						<div className="absolute inset-0 bg-gradient-to-r from-[#2563EB] via-[#8B5CF6] to-[#38BDF8] opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+						<div className={`absolute inset-0 bg-gradient-to-r from-[#2563EB] via-[#8B5CF6] to-[#38BDF8] transition-opacity duration-500 ${isLight ? 'opacity-30 group-hover:opacity-80' : 'opacity-50 group-hover:opacity-100'}`}></div>
 						
 						{/* Card Content */}
 						<div className="relative bg-[var(--bg-card)] rounded-[2rem] p-12 text-center h-full w-full">
