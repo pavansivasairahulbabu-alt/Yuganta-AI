@@ -9,7 +9,10 @@ import {
 	Lightbulb, 
 	ShieldCheck, 
 	Globe,
-	ChevronRight
+	ChevronRight,
+	Users,
+	GraduationCap,
+	Star
 } from "lucide-react";
 
 export default function AboutPage() {
@@ -165,18 +168,53 @@ export default function AboutPage() {
 				{/* Statistics Section */}
 				<div className="py-24">
 					<div className="max-w-7xl mx-auto px-4 md:px-6">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-							<div className={`text-center p-8 bg-gradient-to-br ${isLight ? 'from-[#DBEAFE] to-[#EFF6FF] border-[#93C5FD]/40' : 'from-[rgba(37,99,235,0.08)] to-transparent border-[rgba(56,189,248,0.25)]'} rounded-3xl border`}>
-								<div className="text-5xl md:text-6xl font-bold mb-4">100+</div>
-								<div className="text-[#2563EB] font-bold tracking-wider uppercase text-sm">Active Students</div>
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							{/* Stat 1 */}
+							<div className="relative group">
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
+									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#2563EB]/10 text-[#2563EB]' : 'bg-[#2563EB]/20 text-[#38BDF8]'}`}>
+										<Users className="w-8 h-8" />
+									</div>
+									<div className="text-5xl md:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#38BDF8]">
+										100+
+									</div>
+									<div className="text-[var(--text-color)] font-bold tracking-wider uppercase text-sm opacity-80">
+										Active Students
+									</div>
+								</div>
 							</div>
-							<div className={`text-center p-8 bg-gradient-to-br ${isLight ? 'from-[#DBEAFE] to-[#EFF6FF] border-[#93C5FD]/40' : 'from-[rgba(37,99,235,0.08)] to-transparent border-[rgba(56,189,248,0.25)]'} rounded-3xl border`}>
-								<div className="text-5xl md:text-6xl font-bold mb-4">10+</div>
-								<div className="text-[#2563EB] font-bold tracking-wider uppercase text-sm">Expert Mentors</div>
+
+							{/* Stat 2 */}
+							<div className="relative group">
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#8B5CF6] to-[#C084FC] rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
+									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#8B5CF6]/10 text-[#8B5CF6]' : 'bg-[#8B5CF6]/20 text-[#C084FC]'}`}>
+										<GraduationCap className="w-8 h-8" />
+									</div>
+									<div className="text-5xl md:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#C084FC]">
+										10+
+									</div>
+									<div className="text-[var(--text-color)] font-bold tracking-wider uppercase text-sm opacity-80">
+										Expert Mentors
+									</div>
+								</div>
 							</div>
-							<div className={`text-center p-8 bg-gradient-to-br ${isLight ? 'from-[#DBEAFE] to-[#EFF6FF] border-[#93C5FD]/40' : 'from-[rgba(37,99,235,0.08)] to-transparent border-[rgba(56,189,248,0.25)]'} rounded-3xl border`}>
-								<div className="text-5xl md:text-6xl font-bold mb-4">4.9/5</div>
-								<div className="text-[#2563EB] font-bold tracking-wider uppercase text-sm">Student Satisfaction</div>
+
+							{/* Stat 3 */}
+							<div className="relative group">
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500`}></div>
+								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
+									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[#10B981]/20 text-[#34D399]'}`}>
+										<Star className="w-8 h-8" />
+									</div>
+									<div className="text-5xl md:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-[#34D399]">
+										4.9/5
+									</div>
+									<div className="text-[var(--text-color)] font-bold tracking-wider uppercase text-sm opacity-80">
+										Student Satisfaction
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
