@@ -54,31 +54,48 @@ export default function AboutPage() {
 				{/* Hero Section */}
 				<div className="relative py-20 md:py-32 overflow-hidden">
 					{/* Animated Background Orbs */}
-					<div className={`absolute top-0 left-1/4 w-96 h-96 bg-[#8B5CF6] ${isLight ? 'opacity-[0.05]' : 'opacity-10'} rounded-full blur-[120px] animate-pulse`}></div>
-					<div className={`absolute bottom-0 right-1/4 w-96 h-96 bg-[#38BDF8] ${isLight ? 'opacity-[0.05]' : 'opacity-10'} rounded-full blur-[120px] animate-pulse`} style={{ animationDelay: '2s' }}></div>
-					
-					<div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-						<div className="mb-8 animate-fadeIn">
-							<nav className="flex items-center gap-2 text-sm md:text-base text-[var(--text-color)]">
-								<Link to="/" className="hover:text-[#A855F7] transition-colors opacity-70 hover:opacity-100">Home</Link>
-								<ChevronRight className="w-4 h-4 opacity-50" />
-								<span className="font-bold">About Us</span>
-							</nav>
+					<div className={`absolute top-10 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-[#8B5CF6] to-[#2563EB] ${isLight ? 'opacity-10' : 'opacity-20'} rounded-full blur-[120px] animate-pulse`}></div>
+					<div className={`absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-l from-[#38BDF8] to-[#10B981] ${isLight ? 'opacity-10' : 'opacity-20'} rounded-full blur-[120px] animate-pulse`} style={{ animationDelay: '2s' }}></div>
+
+					<div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col items-center text-center">
+						<div className="mb-10 animate-fadeIn">
+							<div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full border ${isLight ? 'bg-white/80 border-[#8B5CF6]/20 shadow-sm' : 'bg-[#1E1E1E]/80 border-white/10 backdrop-blur-md'}`}>
+								<div className="relative flex h-2.5 w-2.5">
+									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8B5CF6] opacity-75"></span>
+									<span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#8B5CF6]"></span>
+								</div>
+								<nav className="flex items-center gap-2 text-sm font-semibold text-[var(--text-color)] ml-1">
+									<Link to="/" className="hover:text-[#8B5CF6] transition-colors opacity-70 hover:opacity-100">Home</Link>
+									<ChevronRight className="w-3 h-3 opacity-50" />
+									<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#38BDF8]">About Us</span>
+								</nav>
+							</div>
 						</div>
 						
-						<div className="max-w-4xl">
-							<h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
-								Architecting the AI-First Future
+						<div className="max-w-5xl mx-auto">
+							<h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1] tracking-tight text-[var(--text-color)]">
+								Architecting the <br className="hidden md:block" />
+								<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#2563EB] to-[#38BDF8] drop-shadow-sm">
+									AI-First Future
+								</span>
 							</h1>
-							<p className="text-xl md:text-2xl text-[var(--text-muted)] leading-relaxed mb-10">
+							<p className="text-xl md:text-2xl text-[var(--text-muted)] leading-relaxed mb-12 max-w-3xl mx-auto font-medium">
 								Yuganta AI is at the forefront of the intelligence revolution. We combine deep technical expertise with a passion for education to build products that matter.
 							</p>
-							<div className="flex flex-wrap gap-4">
-								<Link to="/courses" className="px-8 py-4 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-bold rounded-xl hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:scale-105 transition-all duration-300">
-									Explore Our Courses
+							<div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+								<Link to="/courses" className="relative group px-8 py-4 rounded-xl font-bold text-white overflow-hidden w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] transition-all duration-300 hover:-translate-y-1">
+									<div className="absolute inset-0 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] transition-transform duration-300 group-hover:scale-105"></div>
+									<div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_0%,transparent_100%)] transition-opacity duration-300"></div>
+									<span className="relative flex items-center justify-center gap-2">
+										Explore Our Courses
+										<Rocket className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+									</span>
 								</Link>
-								<Link to="/contact" className="px-8 py-4 border border-[var(--border-color)] text-[var(--text-color)] font-bold rounded-xl hover:bg-[var(--bg-secondary)] transition-all duration-300">
-									Contact Our Team
+								<Link to="/contact" className={`relative group px-8 py-4 rounded-xl font-bold w-full sm:w-auto border ${isLight ? 'border-gray-200 bg-white text-gray-800 hover:border-[#8B5CF6]/50 shadow-sm hover:bg-gray-50' : 'border-white/10 bg-[var(--bg-card)] text-white hover:bg-white/5 hover:border-white/20'} transition-all duration-300 hover:-translate-y-1`}>
+									<span className="flex items-center justify-center gap-2">
+										Contact Our Team
+										<Target className="w-5 h-5 group-hover:scale-110 transition-transform" />
+									</span>
 								</Link>
 							</div>
 						</div>
