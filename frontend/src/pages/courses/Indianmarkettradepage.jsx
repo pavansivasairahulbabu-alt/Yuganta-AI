@@ -530,7 +530,7 @@ export default function IndianMarketTradePage() {
                     </div>
                     <div className="rounded-2xl overflow-hidden border border-[var(--border-primary)] bg-[var(--card-bg)] shadow-[0_8px_32px_rgba(37,99,235,0.12)]">
                         <img
-                            src={theme === "light-theme" ? "/pioneer-light.png" : "/pioneer-dark.png"}
+                            src={theme === "light-theme" ? "/Trading-dark.png" : "/Trading-dark.png"}
                             alt="Program Personalized Roadmap"
                             className="w-full h-auto object-contain"
                             loading="lazy"
@@ -847,35 +847,6 @@ export default function IndianMarketTradePage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                        {/* Plan A – Pioneer */}
-                        <div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(37,99,235,0.12)]">
-                            <h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-2">Indian Market Trade Pro</h3>
-                            <div className="text-4xl md:text-5xl font-extrabold mb-6 text-[var(--text-color)]">₹9,999</div>
-                            <ul className="space-y-3 text-[var(--text-color)]">
-                                {[
-                                    "4 Months of Intensive Learning",
-                                    "25+ Deep-Dive Mentorship Sessions",
-                                    "150 Hours of Live Market Workshops",
-                                    "Industry-Grade Trade Projects",
-                                    "300+ Hours of Structured Curriculum",
-                                    "AV Certificate | NSE Certification Prep | WSU Certificate",
-                                ].map((item) => (
-                                    <li key={item} className="flex items-start gap-3">
-                                        <CheckCircle className="w-5 h-5 text-[#22C55E] mt-0.5 shrink-0" />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <div className="mt-8">
-                                <Link
-                                    to="/courses/indian-trade-market#fees"
-                                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                                    className="inline-flex items-center justify-center w-full rounded-xl bg-gradient-to-r from-[#2563EB] to-[#38BDF8] hover:from-[#1D4ED8] hover:to-[#2563EB] text-white font-semibold py-3 transition-all"
-                                >
-                                    View Details
-                                </Link>
-                            </div>
-                        </div>
 
                         {/* Plan B – Crash Course */}
                         <div className="rounded-2xl border-2 border-[#2563EB] bg-[var(--card-bg)] p-6 md:p-8 shadow-[0_8px_32px_rgba(37,99,235,0.2)] relative overflow-hidden">
