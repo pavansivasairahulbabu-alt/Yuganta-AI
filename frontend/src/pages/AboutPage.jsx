@@ -9,7 +9,10 @@ import {
 	Lightbulb, 
 	ShieldCheck, 
 	Globe,
-	ChevronRight
+	ChevronRight,
+	Users,
+	GraduationCap,
+	Star
 } from "lucide-react";
 
 export default function AboutPage() {
@@ -51,31 +54,48 @@ export default function AboutPage() {
 				{/* Hero Section */}
 				<div className="relative py-20 md:py-32 overflow-hidden">
 					{/* Animated Background Orbs */}
-					<div className={`absolute top-0 left-1/4 w-96 h-96 bg-[#8B5CF6] ${isLight ? 'opacity-[0.05]' : 'opacity-10'} rounded-full blur-[120px] animate-pulse`}></div>
-					<div className={`absolute bottom-0 right-1/4 w-96 h-96 bg-[#38BDF8] ${isLight ? 'opacity-[0.05]' : 'opacity-10'} rounded-full blur-[120px] animate-pulse`} style={{ animationDelay: '2s' }}></div>
-					
-					<div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-						<div className="mb-8 animate-fadeIn">
-							<nav className="flex items-center gap-2 text-sm md:text-base text-[var(--text-color)]">
-								<Link to="/" className="hover:text-[#A855F7] transition-colors opacity-70 hover:opacity-100">Home</Link>
-								<ChevronRight className="w-4 h-4 opacity-50" />
-								<span className="font-bold">About Us</span>
-							</nav>
+					<div className={`absolute top-10 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-[#8B5CF6] to-[#2563EB] ${isLight ? 'opacity-10' : 'opacity-20'} rounded-full blur-[120px] animate-pulse`}></div>
+					<div className={`absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-l from-[#38BDF8] to-[#10B981] ${isLight ? 'opacity-10' : 'opacity-20'} rounded-full blur-[120px] animate-pulse`} style={{ animationDelay: '2s' }}></div>
+
+					<div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10 flex flex-col items-center text-center">
+						<div className="mb-10 animate-fadeIn">
+							<div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full border ${isLight ? 'bg-white/80 border-[#8B5CF6]/20 shadow-sm' : 'bg-[#1E1E1E]/80 border-white/10 backdrop-blur-md'}`}>
+								<div className="relative flex h-2.5 w-2.5">
+									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8B5CF6] opacity-75"></span>
+									<span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#8B5CF6]"></span>
+								</div>
+								<nav className="flex items-center gap-2 text-sm font-semibold text-[var(--text-color)] ml-1">
+									<Link to="/" className="hover:text-[#8B5CF6] transition-colors opacity-70 hover:opacity-100">Home</Link>
+									<ChevronRight className="w-3 h-3 opacity-50" />
+									<span className={`text-transparent bg-clip-text bg-gradient-to-r ${isLight ? 'from-[#6D28D9] to-[#0284C7]' : 'from-[#8B5CF6] to-[#38BDF8]'}`}>About Us</span>
+								</nav>
+							</div>
 						</div>
 						
-						<div className="max-w-4xl">
-							<h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
-								Architecting the AI-First Future
+						<div className="max-w-5xl mx-auto">
+							<h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1] tracking-tight text-[var(--text-color)]">
+								Architecting the <br className="hidden md:block" />
+								<span className={`text-transparent bg-clip-text bg-gradient-to-r ${isLight ? 'from-[#6D28D9] via-[#1D4ED8] to-[#0284C7]' : 'from-[#8B5CF6] via-[#2563EB] to-[#38BDF8]'} drop-shadow-sm`}>
+									AI-First Future
+								</span>
 							</h1>
-							<p className="text-xl md:text-2xl text-[var(--text-muted)] leading-relaxed mb-10">
+							<p className="text-xl md:text-2xl text-[var(--text-muted)] leading-relaxed mb-12 max-w-3xl mx-auto font-medium">
 								Yuganta AI is at the forefront of the intelligence revolution. We combine deep technical expertise with a passion for education to build products that matter.
 							</p>
-							<div className="flex flex-wrap gap-4">
-								<Link to="/courses" className="px-8 py-4 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-bold rounded-xl hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:scale-105 transition-all duration-300">
-									Explore Our Courses
+							<div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+								<Link to="/courses" className="relative group px-8 py-4 rounded-xl font-bold text-white overflow-hidden w-full sm:w-auto shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] transition-all duration-300 hover:-translate-y-1">
+									<div className="absolute inset-0 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] transition-transform duration-300 group-hover:scale-105"></div>
+									<div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2)_0%,transparent_100%)] transition-opacity duration-300"></div>
+									<span className="relative flex items-center justify-center gap-2">
+										Explore Our Courses
+										<Rocket className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+									</span>
 								</Link>
-								<Link to="/contact" className="px-8 py-4 border border-[var(--border-color)] text-[var(--text-color)] font-bold rounded-xl hover:bg-[var(--bg-secondary)] transition-all duration-300">
-									Contact Our Team
+								<Link to="/contact" className={`relative group px-8 py-4 rounded-xl font-bold w-full sm:w-auto border ${isLight ? 'border-gray-200 bg-white text-gray-800 hover:border-[#8B5CF6]/50 shadow-sm hover:bg-gray-50' : 'border-white/10 bg-[var(--bg-card)] text-white hover:bg-white/5 hover:border-white/20'} transition-all duration-300 hover:-translate-y-1`}>
+									<span className="flex items-center justify-center gap-2">
+										Contact Our Team
+										<Target className="w-5 h-5 group-hover:scale-110 transition-transform" />
+									</span>
 								</Link>
 							</div>
 						</div>
@@ -165,18 +185,53 @@ export default function AboutPage() {
 				{/* Statistics Section */}
 				<div className="py-24">
 					<div className="max-w-7xl mx-auto px-4 md:px-6">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-							<div className={`text-center p-8 bg-gradient-to-br ${isLight ? 'from-[#DBEAFE] to-[#EFF6FF] border-[#93C5FD]/40' : 'from-[rgba(37,99,235,0.08)] to-transparent border-[rgba(56,189,248,0.25)]'} rounded-3xl border`}>
-								<div className="text-5xl md:text-6xl font-bold mb-4">100+</div>
-								<div className="text-[#2563EB] font-bold tracking-wider uppercase text-sm">Active Students</div>
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							{/* Stat 1 */}
+							<div className="relative group">
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] rounded-3xl blur transition duration-500 ${isLight ? 'opacity-10 group-hover:opacity-20' : 'opacity-20 group-hover:opacity-40'}`}></div>
+								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
+									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#2563EB]/10 text-[#2563EB]' : 'bg-[#2563EB]/20 text-[#38BDF8]'}`}>
+										<Users className="w-8 h-8" />
+									</div>
+									<div className="text-5xl md:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#38BDF8]">
+										100+
+									</div>
+									<div className="text-[var(--text-color)] font-bold tracking-wider uppercase text-sm opacity-80">
+										Active Students
+									</div>
+								</div>
 							</div>
-							<div className={`text-center p-8 bg-gradient-to-br ${isLight ? 'from-[#DBEAFE] to-[#EFF6FF] border-[#93C5FD]/40' : 'from-[rgba(37,99,235,0.08)] to-transparent border-[rgba(56,189,248,0.25)]'} rounded-3xl border`}>
-								<div className="text-5xl md:text-6xl font-bold mb-4">10+</div>
-								<div className="text-[#2563EB] font-bold tracking-wider uppercase text-sm">Expert Mentors</div>
+
+							{/* Stat 2 */}
+							<div className="relative group">
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#8B5CF6] to-[#C084FC] rounded-3xl blur transition duration-500 ${isLight ? 'opacity-10 group-hover:opacity-20' : 'opacity-20 group-hover:opacity-40'}`}></div>
+								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
+									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#8B5CF6]/10 text-[#8B5CF6]' : 'bg-[#8B5CF6]/20 text-[#C084FC]'}`}>
+										<GraduationCap className="w-8 h-8" />
+									</div>
+									<div className="text-5xl md:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] to-[#C084FC]">
+										10+
+									</div>
+									<div className="text-[var(--text-color)] font-bold tracking-wider uppercase text-sm opacity-80">
+										Expert Mentors
+									</div>
+								</div>
 							</div>
-							<div className={`text-center p-8 bg-gradient-to-br ${isLight ? 'from-[#DBEAFE] to-[#EFF6FF] border-[#93C5FD]/40' : 'from-[rgba(37,99,235,0.08)] to-transparent border-[rgba(56,189,248,0.25)]'} rounded-3xl border`}>
-								<div className="text-5xl md:text-6xl font-bold mb-4">4.9/5</div>
-								<div className="text-[#2563EB] font-bold tracking-wider uppercase text-sm">Student Satisfaction</div>
+
+							{/* Stat 3 */}
+							<div className="relative group">
+								<div className={`absolute inset-0 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-3xl blur transition duration-500 ${isLight ? 'opacity-10 group-hover:opacity-20' : 'opacity-20 group-hover:opacity-40'}`}></div>
+								<div className="relative p-8 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl text-center transform group-hover:-translate-y-2 transition-all duration-300">
+									<div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${isLight ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[#10B981]/20 text-[#34D399]'}`}>
+										<Star className="w-8 h-8" />
+									</div>
+									<div className="text-5xl md:text-6xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-[#34D399]">
+										4.9/5
+									</div>
+									<div className="text-[var(--text-color)] font-bold tracking-wider uppercase text-sm opacity-80">
+										Student Satisfaction
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -184,22 +239,31 @@ export default function AboutPage() {
 
 				{/* Final CTA */}
 				<div className="max-w-7xl mx-auto px-4 md:px-6 pb-24">
-					<div className="bg-gradient-to-r from-[#2563EB] to-[#38BDF8] rounded-[2rem] p-12 text-center relative overflow-hidden group">
-						<div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
-						<div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-10 rounded-full -ml-20 -mb-20 blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+					<div className="relative rounded-[2rem] overflow-hidden p-[1px] group">
+						{/* Animated Gradient Border */}
+						<div className={`absolute inset-0 bg-gradient-to-r from-[#2563EB] via-[#8B5CF6] to-[#38BDF8] transition-opacity duration-500 ${isLight ? 'opacity-30 group-hover:opacity-80' : 'opacity-50 group-hover:opacity-100'}`}></div>
 						
-						<div className="relative z-10">
-							<h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Start Your AI Journey?</h2>
-							<p className="text-white/80 text-xl mb-10 max-w-2xl mx-auto">
-								Join hundreds of students and professionals who are already building the future with Yuganta AI.
-							</p>
-							<div className="flex flex-col sm:flex-row gap-4 justify-center">
-								<Link to="/signup" className="px-10 py-4 bg-white text-[#2563EB] font-bold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-									Join Now
-								</Link>
-								<Link to="/talk-to-expert" className="px-10 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all duration-300">
-									Talk to an Expert
-								</Link>
+						{/* Card Content */}
+						<div className="relative bg-[var(--bg-card)] rounded-[2rem] p-12 text-center h-full w-full">
+							{/* Background Glow */}
+							<div className="absolute top-0 right-0 w-64 h-64 bg-[#8B5CF6] opacity-10 rounded-full -mr-20 -mt-20 blur-[80px] group-hover:scale-150 transition-transform duration-700"></div>
+							<div className="absolute bottom-0 left-0 w-64 h-64 bg-[#38BDF8] opacity-10 rounded-full -ml-20 -mb-20 blur-[80px] group-hover:scale-150 transition-transform duration-700"></div>
+							
+							<div className="relative z-10">
+								<h2 className="text-4xl md:text-5xl font-bold mb-6 text-[var(--text-color)]">
+									Ready to Start Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#38BDF8]">AI Journey?</span>
+								</h2>
+								<p className="text-[var(--text-muted)] text-xl mb-10 max-w-2xl mx-auto font-medium">
+									Join hundreds of students and professionals who are already building the future with Yuganta AI.
+								</p>
+								<div className="flex flex-col sm:flex-row gap-4 justify-center">
+									<Link to="/signup" className="px-10 py-4 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white font-bold rounded-xl hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:scale-105 transition-all duration-300">
+										Join Now
+									</Link>
+									<Link to="/talk-to-expert" className="px-10 py-4 border border-[var(--border-color)] text-[var(--text-color)] font-bold rounded-xl hover:bg-[var(--bg-secondary)] hover:scale-105 transition-all duration-300">
+										Talk to an Expert
+									</Link>
+								</div>
 							</div>
 						</div>
 					</div>
