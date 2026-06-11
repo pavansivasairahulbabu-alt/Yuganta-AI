@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import API_URL from "../config/api";
 import { useAuth } from "../context/AuthContext";
+import { Panel, Group as PanelGroup, Separator as PanelResizeHandle } from "react-resizable-panels";
 
 export default function CourseDetailPage() {
 	const { id } = useParams();
@@ -21,6 +22,8 @@ export default function CourseDetailPage() {
 	const selectedVideoElementRef = useRef(null);
 	const lastSavedTimeRef = useRef(0);
 	const resumeTimeRef = useRef(0);
+	const [rightTab, setRightTab] = useState("theory");
+	const [isStudyMode, setIsStudyMode] = useState(false);
 
 	const normalizeVideoUrl = (url) => {
 		if (!url || typeof url !== "string") return "";
@@ -382,414 +385,281 @@ export default function CourseDetailPage() {
 	}
 
 	return (
-		<div className='min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-20 transition-colors duration-300'>
+		<div className='h-[calc(100vh-64px)] flex flex-col bg-[var(--bg-color)] text-[var(--text-color)] transition-colors duration-300 overflow-hidden'>
 			{/* Navigation Breadcrumb */}
-			<div className='fixed top-20 left-0 right-0 z-50 bg-[var(--bg-color)]/85 backdrop-blur-sm border-b border-[var(--border-color)] transition-colors duration-300'>
-				<div className='max-w-7xl mx-auto px-6 py-4'>
-					<div className='flex items-center space-x-2 text-sm'>
-						<Link 
-							to='/' 
-							className='text-[var(--text-muted)] flex items-center space-x-1'>
-							<svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-								<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' />
-							</svg>
-							<span>Home</span>
-						</Link>
-						<span className='text-[var(--text-muted)]'>/</span>
-						<Link 
-							to='/courses' 
-							className='text-[var(--text-muted)]'>
-							Courses
-						</Link>
-						<span className='text-[var(--text-muted)]'>/</span>
-						<span className='text-[var(--text-color)] font-semibold truncate max-w-md'>{course.title}</span>
-					</div>
+			<div className='flex-none border-b border-gray-800/60 bg-[var(--bg-primary)]/80 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.1)] z-10'>
+				<div className='flex items-center space-x-3 text-sm font-medium'>
+					<Link 
+						to='/' 
+						className='text-gray-400 hover:text-[#00BCD4] flex items-center space-x-1.5 transition-all duration-300'>
+						<svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+							<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' />
+						</svg>
+						<span>Home</span>
+					</Link>
+					<span className='text-gray-600'>/</span>
+					<Link 
+						to='/courses' 
+						className='text-gray-400 hover:text-[#00BCD4] transition-all duration-300'>
+						Courses
+					</Link>
+					<span className='text-gray-600'>/</span>
+					<span className='text-[var(--text-primary)] font-semibold truncate max-w-xs md:max-w-md tracking-wide'>{course.title}</span>
 				</div>
-			</div>
-
-			{/* Course Header */}
-			<div className='bg-[var(--card-bg)] border-b border-[var(--border-color)] transition-colors duration-300'>
-				<div className='max-w-7xl mx-auto px-6 py-10'>
-					<div className='max-w-3xl'>
-						{course.level && (
-							<p className='text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2'>
-								{course.level}
-							</p>
-						)}
-						<h1 className='text-4xl font-bold mb-3 text-[var(--text-color)]'>
-							{course.title}
-						</h1>
-						<p className='text-base sm:text-lg text-[var(--text-muted)] leading-relaxed'>
-							{course.description}
-						</p>
-						<div className='mt-5 flex flex-wrap gap-4 text-sm text-[var(--text-muted)]'>
-							<div className='flex items-center space-x-2'>
-								<svg
-									className='w-5 h-5'
-									fill='none'
-									stroke='currentColor'
-									viewBox='0 0 24 24'>
-									<path
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth={2}
-										d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-									/>
-								</svg>
-								<span>{course.duration}</span>
-							</div>
-							<div className='flex items-center space-x-2'>
-								<svg
-									className='w-5 h-5'
-									fill='none'
-									stroke='currentColor'
-									viewBox='0 0 24 24'>
-									<path
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										strokeWidth={2}
-										d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-									/>
-								</svg>
-								<span>{course.modules?.length || 0} Modules</span>
-							</div>
+				<div className="flex items-center space-x-6">
+					<button 
+						onClick={() => setIsStudyMode(!isStudyMode)}
+						className="flex items-center space-x-2.5 bg-gray-800 hover:bg-gray-700 transition-colors pl-1.5 pr-4 py-1.5 rounded-full cursor-pointer border border-gray-800/60 shadow-sm">
+						<div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isStudyMode ? 'bg-[#00BCD4]' : 'bg-[var(--bg-card)]'}`}>
+							<span className={`inline-block h-4 w-4 transform rounded-full transition-transform ${isStudyMode ? 'bg-white translate-x-4 shadow-[0_0_10px_rgba(255,255,255,0.8)]' : 'bg-gray-400 translate-x-0.5'}`} />
 						</div>
+						<span className="text-gray-400 font-medium text-sm">Study view</span>
+					</button>
+					<div className="flex flex-col items-end">
+						<span className='text-xs text-gray-400 uppercase tracking-wider mb-1'>Course Progress</span>
+						<span className='text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00BCD4] to-blue-400 drop-shadow-[0_0_8px_rgba(0,188,212,0.3)]'>
+							{Math.round(getOverallProgress())}% Complete
+						</span>
 					</div>
 				</div>
 			</div>
 
-			{/* Course Content */}
-			<div className='max-w-7xl mx-auto px-6 py-8'>
+			{/* Resizable Layout */}
+			<div className='flex-1 overflow-hidden bg-[var(--bg-primary)]'>
 				{course.modules && course.modules.length > 0 ? (
-					<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-						{/* Video Player */}
-						<div className='lg:col-span-2'>
-						{/* Overall Progress Bar */}
-						<div className='bg-[var(--card-bg)] rounded-xl p-6 mb-6 transition-colors duration-300 border border-[var(--border-color)]'>
-							<div className='flex items-center justify-between mb-3'>
-								<h3 className='text-lg font-bold text-[var(--text-color)]'>Overall Progress</h3>
-								<span className='text-sm font-semibold text-[#00BCD4]'>
-									{Math.round(getOverallProgress())}% Complete
-								</span>
-							</div>
-							<div className='w-full bg-gray-700 rounded-full h-3 overflow-hidden'>
-								<div 
-									className='h-full bg-gradient-to-r from-[#00BCD4] to-[#4DD0E1] rounded-full transition-all duration-500 ease-out'
-									style={{ width: `${getOverallProgress()}%` }}
-								/>
-							</div>
-							<div className='mt-2 text-xs text-[var(--text-muted)]'>
-								{completedVideos.size} of {course.modules?.reduce((sum, m) => sum + (m.videos?.length || 0), 0)} videos completed
-							</div>
-						</div>
-
-						<div className='bg-[var(--card-bg)] rounded-xl overflow-hidden transition-colors duration-300 border border-[var(--border-color)]'>
-							{selectedVideo ? (
-								<div>
-									<div className='relative bg-black aspect-video'>
-										<video
-											key={activeVideoSource || selectedVideo.url}
-											controls
-											controlsList='nodownload'
-											onContextMenu={(e) => e.preventDefault()}
-											playsInline
-											preload='metadata'
-											className='w-full h-full'
-											src={activeVideoSource || selectedVideo.url}
-											ref={selectedVideoElementRef}
-											onError={handleVideoError}
-											onLoadedData={(event) => {
-												if (resumeTimeRef.current > 0) {
-													event.target.currentTime = resumeTimeRef.current;
-													toast.success(`Resumed from ${Math.round(resumeTimeRef.current)}s`, { id: "resume-toast" });
-													resumeTimeRef.current = 0;
-												}
-												maxAllowedPlaybackTimeRef.current = event.target.currentTime || 0;
-												setVideoLoadError("");
-											}}
-											onPause={handleVideoPause}
-											onEnded={handleVideoEnded}
-											onSeeking={handleVideoSeeking}
-											onTimeUpdate={handleVideoTimeUpdate}>
-												Your browser does not support the video tag.
-											</video>
+					<PanelGroup direction="horizontal">
+						{/* Left Sidebar: Modules (Hidden in Study Mode) */}
+						{!isStudyMode && (
+							<>
+								<Panel defaultSize={25} minSize={15} className="bg-[var(--bg-card)] border-r border-gray-800/60 flex flex-col shadow-[inset_-10px_0_20px_-10px_rgba(0,0,0,0.5)] z-20">
+									<div className="p-5 border-b border-gray-800/60 flex items-center justify-between bg-gradient-to-b from-gray-800/10 to-transparent">
+										<h3 className="font-bold text-lg text-[var(--text-primary)] tracking-tight">{course.title}</h3>
+										<div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-800 text-[#00BCD4] border border-gray-700/50">
+											{completedVideos.size}/{course.modules?.reduce((sum, m) => sum + (m.videos?.length || 0), 0)}
 										</div>
-										<div className='p-6'>
-										{videoLoadError && (
-											<div className='mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm'>
-												<div className='font-semibold mb-1'>Unable to play this video</div>
-												<div className='break-all text-xs'>{videoLoadError}</div>
-											</div>
-										)}
-										<div className='flex items-start justify-between mb-4'>
-											<h2 className='text-2xl font-bold text-[var(--text-color)] flex-1'>
-												{selectedVideo.title}
-											</h2>
-											<button
-												onClick={markVideoCompleted}
-												disabled={isMarkingComplete || completedVideos.has(selectedVideoKey) || !selectedVideoCanComplete}
-												className={`ml-4 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
-													completedVideos.has(selectedVideoKey)
-														? 'bg-green-500/20 text-green-400 border border-green-500/40 cursor-default'
-														: selectedVideoCanComplete
-															? 'bg-[#00BCD4]/10 text-[#00BCD4] border border-[#00BCD4]/40 hover:bg-[#00BCD4]/20 shadow-[0_0_10px_rgba(0,188,212,0.2)]'
-															: 'bg-gray-500/10 text-gray-400 border border-gray-500/40 cursor-not-allowed opacity-50'
-												}`}>
-												{isMarkingComplete ? (
-													<span className='flex items-center space-x-2'>
-														<svg className='animate-spin h-4 w-4 text-[#00BCD4]' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-															<circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-															<path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-														</svg>
-														<span>Saving...</span>
-													</span>
-												) : completedVideos.has(selectedVideoKey) ? (
-													<span className='flex items-center space-x-1'>
-														<svg className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20'>
-															<path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
-														</svg>
-														<span>Completed</span>
-													</span>
-												) : (
-													`Mark Complete (${Math.min(100, Math.round(selectedVideoWatched))}% watched)`
-												)}
-											</button>
-										</div>
-										{!completedVideos.has(selectedVideoKey) && !selectedVideoCanComplete && (
-											<p className='text-xs text-[var(--text-muted)] mb-4'>
-												Watch at least 75% of this video to enable completion.
-											</p>
-										)}
-										{selectedVideo.description && (
-											<p className='text-[var(--text-muted)] mb-4'>
-												{selectedVideo.description}
-											</p>
-										)}
-										{selectedVideo.duration && (
-											<div className='text-sm text-[var(--text-muted)]'>
-													Duration: {selectedVideo.duration}
+									</div>
+									<div className='flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3'>
+										{course.modules
+											.sort((a, b) => a.order - b.order)
+											.map((module, moduleIndex) => {
+												const progress = moduleProgress[moduleIndex] || 0;
+												return (
+												<div key={moduleIndex} className='rounded-xl overflow-hidden border border-gray-800/40 hover:border-gray-700/80 hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] transition-all duration-300 bg-[var(--bg-primary)]/50'>
+													<button
+														onClick={() => setActiveModule(activeModule === moduleIndex ? null : moduleIndex)}
+														className='w-full px-4 py-3 hover:bg-gray-800/40 flex items-center justify-between group transition-colors'>
+														<div className='flex flex-col items-start'>
+															<span className="font-semibold text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)] transition-colors">{module.title}</span>
+															<span className="text-[11px] text-gray-500 font-medium mt-0.5">{module.videos?.length || 0} videos</span>
+														</div>
+														<div className={`p-1.5 rounded-md transition-all duration-300 ${activeModule === moduleIndex ? "bg-[#00BCD4]/10 text-[#00BCD4]" : "text-gray-500 group-hover:bg-gray-800 group-hover:text-gray-300"}`}>
+															<svg className={`w-4 h-4 transition-transform duration-300 ${activeModule === moduleIndex ? "rotate-180" : ""}`} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+																<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M19 9l-7 7-7-7' />
+															</svg>
+														</div>
+													</button>
+													{activeModule === moduleIndex && module.videos && module.videos.length > 0 && (
+														<div className='bg-[var(--bg-primary)]/30 flex flex-col border-t border-gray-800/40'>
+															{module.videos.sort((a, b) => a.order - b.order).map((video, videoIndex) => {
+																const videoKey = getVideoKey(moduleIndex, videoIndex, video);
+																const isCompleted = completedVideos.has(videoKey);
+																const isSelected = normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video);
+																return (
+																	<button
+																		key={videoIndex}
+																		onClick={() => handleVideoSelect(video, moduleIndex)}
+																		className={`w-full px-4 py-3 text-left transition-all duration-300 border-l-[3px] group relative overflow-hidden ${isSelected ? "border-[#00BCD4] bg-gradient-to-r from-[#00BCD4]/10 to-transparent" : "border-transparent hover:bg-gray-800/30"}`}>
+																		{isSelected && <div className="absolute inset-y-0 left-0 w-[1px] bg-[#00BCD4] shadow-[0_0_10px_#00BCD4]" />}
+																		<div className='flex items-start space-x-3'>
+																			{isCompleted ? (
+																				<div className="mt-0.5 p-0.5 rounded-full bg-green-500/20 text-green-400 ring-1 ring-green-500/30 shadow-[0_0_8px_rgba(34,197,94,0.3)]">
+																					<svg className='w-3 h-3 flex-shrink-0' fill='currentColor' viewBox='0 0 20 20'>
+																						<path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
+																					</svg>
+																				</div>
+																			) : (
+																				<div className={`mt-0.5 p-0.5 rounded-full transition-colors ${isSelected ? "bg-[#00BCD4]/20 text-[#00BCD4] ring-1 ring-[#00BCD4]/50 shadow-[0_0_8px_rgba(0,188,212,0.4)]" : "text-gray-500 group-hover:text-gray-300"}`}>
+																					<svg className='w-3 h-3 flex-shrink-0' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+																						<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' />
+																						<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2.5} d='M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+																					</svg>
+																				</div>
+																			)}
+																			<span className={`text-xs flex-1 leading-relaxed ${isSelected ? "text-[var(--text-primary)] font-semibold" : "text-gray-400 group-hover:text-[var(--text-primary)]"}`}>{video.title}</span>
+																		</div>
+																	</button>
+																);
+															})}
+														</div>
+													)}
 												</div>
-											)}
-										</div>
+											)})}
 									</div>
-								) : (
-									<div className='aspect-video bg-gray-900 flex items-center justify-center'>
-										<div className='text-center'>
-											<svg
-												className='w-20 h-20 mx-auto mb-4 text-gray-600'
-												fill='none'
-												stroke='currentColor'
-												viewBox='0 0 24 24'>
-												<path
-													strokeLinecap='round'
-													strokeLinejoin='round'
-													strokeWidth={2}
-													d='M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z'
-												/>
-												<path
-													strokeLinecap='round'
-													strokeLinejoin='round'
-													strokeWidth={2}
-													d='M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-												/>
-											</svg>
-											<p className='text-gray-500'>
-												Select a video from the modules to start
-												learning
-											</p>
-										</div>
-									</div>
-								)}
-							</div>
+								</Panel>
+								<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-30">
+									<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+								</PanelResizeHandle>
+							</>
+						)}
 
-							{/* Module Content Below Video */}
-							{activeModule !== null && course.modules[activeModule] && (
-								<div className='mt-6 bg-[var(--card-bg)] rounded-xl p-6 transition-colors duration-300 border border-[var(--border-color)]'>
-									<div className='mb-4'>
-										<h3 className='text-xl font-bold text-[#00BCD4] mb-2'>
-											Module {course.modules[activeModule].order}: {course.modules[activeModule].title}
-										</h3>
-										{course.modules[activeModule].description && (
-											<p className='text-[var(--text-muted)] leading-relaxed'>
-												{course.modules[activeModule].description}
-											</p>
-										)}
-									</div>
-									<div className='border-t border-[var(--border-color)] pt-4 mt-4'>
-										<div className='grid grid-cols-2 gap-4'>
-											<div>
-												<p className='text-[var(--text-muted)] text-sm'>Videos in this module</p>
-												<p className='text-2xl font-bold text-[var(--text-color)]'>
-													{course.modules[activeModule].videos?.length || 0}
-												</p>
-											</div>
-											<div>
-												<p className='text-[var(--text-muted)] text-sm'>Current video</p>
-												<p className='text-sm font-medium text-[#00BCD4] truncate'>
-													{selectedVideo?.title || "No video selected"}
-												</p>
-											</div>
-										</div>
+						{/* Center: Video Player */}
+						<Panel defaultSize={75} minSize={30} className="flex flex-col bg-[var(--bg-secondary)] shadow-[0_0_30px_rgba(0,0,0,0.8)] z-10">
+							{selectedVideo ? (
+								<PanelGroup direction="vertical">
+									{/* Top Empty Space (Allows resizing from Top) */}
+									<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
+									<PanelResizeHandle className="relative h-1.5 bg-gray-800 hover:bg-[#00BCD4]/20 cursor-row-resize transition-all duration-300 z-30" />
+
+									{/* Top Video Section */}
+									{!isStudyMode && (
+										<>
+											<Panel defaultSize={75} minSize={20} className="flex flex-col relative bg-black">
+												<PanelGroup direction="horizontal">
+													<Panel defaultSize={100} minSize={30} className="flex flex-col relative bg-black justify-center">
+														<video
+															key={activeVideoSource || selectedVideo.url}
+															controls
+															controlsList='nodownload'
+															onContextMenu={(e) => e.preventDefault()}
+															playsInline
+															preload='metadata'
+															className='w-full h-full object-contain'
+															src={activeVideoSource || selectedVideo.url}
+															ref={selectedVideoElementRef}
+															onError={handleVideoError}
+															onLoadedData={(event) => {
+																if (resumeTimeRef.current > 0) {
+																	event.target.currentTime = resumeTimeRef.current;
+																	toast.success(`Resumed from ${Math.round(resumeTimeRef.current)}s`, { id: "resume-toast" });
+																	resumeTimeRef.current = 0;
+																}
+																maxAllowedPlaybackTimeRef.current = event.target.currentTime || 0;
+																setVideoLoadError("");
+															}}
+															onPause={handleVideoPause}
+															onEnded={handleVideoEnded}
+															onSeeking={handleVideoSeeking}
+															onTimeUpdate={handleVideoTimeUpdate}>
+																Your browser does not support the video tag.
+														</video>
+														{videoLoadError && (
+															<div className='absolute inset-0 flex items-center justify-center bg-black/80 z-10 p-6'>
+																<div className='bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-lg max-w-lg text-center'>
+																	<div className='font-bold mb-2'>Video Error</div>
+																	<div className='text-sm break-all'>{videoLoadError}</div>
+																</div>
+															</div>
+														)}
+													</Panel>
+
+													{/* Right Empty Space (Allows resizing from Right) */}
+													<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-20">
+														<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors opacity-0 group-hover:opacity-100" />
+													</PanelResizeHandle>
+													<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
+												</PanelGroup>
+											</Panel>
+
+											<PanelResizeHandle className="relative h-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-row-resize transition-all duration-300 flex items-center justify-center z-20">
+												<div className="absolute w-8 h-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+											</PanelResizeHandle>
+										</>
+									)}
+
+									{/* Bottom Info & Description Section */}
+									<Panel defaultSize={25} minSize={10} className="flex flex-col bg-[var(--bg-secondary)]">
+										<PanelGroup direction="vertical">
+											<Panel defaultSize={100} className="flex flex-col relative">
+												<PanelGroup direction="horizontal">
+													{/* Left Empty Space */}
+													<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
+													<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-20">
+														<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors opacity-0 group-hover:opacity-100" />
+													</PanelResizeHandle>
+
+													<Panel defaultSize={100} minSize={20} className="flex flex-col bg-[var(--bg-primary)] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-gray-800/40 relative">
+														<div className="flex-1 overflow-y-auto custom-scrollbar relative">
+															{/* Video Controls / Info Header */}
+															<div className="bg-[var(--bg-card)] px-5 sm:px-6 py-4 sm:py-5 border-b border-gray-800/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] sticky top-0 z-10">
+																<div className="flex flex-col flex-1 min-w-0">
+																	<h2 className="text-lg sm:text-xl font-extrabold text-[var(--text-primary)] tracking-tight break-words">{selectedVideo.title}</h2>
+																	<div className="text-xs font-medium text-gray-400 mt-1.5 flex flex-wrap items-center gap-2">
+																		{activeModule !== null && course.modules[activeModule] && (
+																			<>
+																				<span className="px-2 py-0.5 rounded bg-gray-800 border border-gray-700 whitespace-nowrap">Module {course.modules[activeModule].order}</span>
+																				<span className="truncate">{course.modules[activeModule].title}</span>
+																			</>
+																		)}
+																	</div>
+																</div>
+																<button
+																	onClick={markVideoCompleted}
+																	disabled={isMarkingComplete || completedVideos.has(selectedVideoKey) || !selectedVideoCanComplete}
+																	className={`w-full md:w-auto shrink-0 px-4 sm:px-5 py-2.5 text-sm rounded-xl font-bold transition-all duration-300 flex items-center justify-center space-x-2 ${
+																		completedVideos.has(selectedVideoKey)
+																			? 'bg-green-500/10 text-green-400 border border-green-500/30 cursor-default'
+																			: selectedVideoCanComplete
+																				? 'bg-gradient-to-r from-[#00BCD4]/10 to-blue-500/10 text-[#00BCD4] border border-[#00BCD4]/40 hover:border-[#00BCD4]/80 hover:shadow-[0_0_20px_rgba(0,188,212,0.3)] hover:-translate-y-0.5'
+																				: 'bg-gray-800/50 text-gray-500 border border-gray-700/50 cursor-not-allowed'
+																	}`}>
+																	{isMarkingComplete ? (
+																		<><svg className='animate-spin h-4 w-4' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'><circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle><path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path></svg><span>Saving...</span></>
+																	) : completedVideos.has(selectedVideoKey) ? (
+																		<><svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'><path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' /></svg><span>Completed</span></>
+																	) : (
+																		<span>Mark Complete ({Math.min(100, Math.round(selectedVideoWatched))}%)</span>
+																	)}
+																</button>
+															</div>
+															
+															{/* Description Content */}
+															<div className="p-5 sm:p-6 break-words">
+																<h3 className="text-lg font-bold text-[var(--text-primary)] mb-3 tracking-wide">About</h3>
+																<div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap max-w-4xl">
+																	{selectedVideo.description || (activeModule !== null && course.modules[activeModule]?.description) || course.description || "No description provided."}
+																</div>
+															</div>
+														</div>
+													</Panel>
+
+													{/* Right Empty Space */}
+													<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-20">
+														<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors opacity-0 group-hover:opacity-100" />
+													</PanelResizeHandle>
+													<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
+												</PanelGroup>
+											</Panel>
+
+											{/* Bottom Empty Space */}
+											<PanelResizeHandle className="relative h-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-row-resize transition-all duration-300 flex items-center justify-center z-20">
+												<div className="absolute w-8 h-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+											</PanelResizeHandle>
+											<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
+										</PanelGroup>
+									</Panel>
+								</PanelGroup>
+							) : (
+								<div className='flex-1 flex items-center justify-center bg-[var(--bg-secondary)]'>
+									<div className='text-center p-8'>
+										<svg className='w-16 h-16 mx-auto mb-4 text-gray-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+											<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z' />
+											<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+										</svg>
+										<p className='text-gray-500 font-medium'>Select a video to start learning</p>
 									</div>
 								</div>
 							)}
-						</div>
-
-						{/* Modules Sidebar */}
-						<div className='lg:col-span-1'>
-							<div className='bg-[var(--card-bg)] rounded-xl p-6 transition-colors duration-300 border border-[var(--border-color)] sticky top-24'>
-								<h3 className='text-xl font-bold mb-4 text-[var(--text-color)]'>
-									Course Content
-								</h3>
-								<div className='space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar'>
-									{course.modules
-										.sort((a, b) => a.order - b.order)
-										.map((module, moduleIndex) => {
-											const progress = moduleProgress[moduleIndex] || 0;
-											return (
-											<div
-												key={moduleIndex}
-												className='border border-[var(--border-color)] rounded-lg overflow-hidden hover:border-[#00BCD4] transition-colors duration-200'>
-												<button
-													onClick={() =>
-														setActiveModule(
-															activeModule === moduleIndex
-																? null
-																: moduleIndex
-														)
-													}
-													className='w-full px-4 py-3 bg-[var(--card-bg-secondary)] hover:bg-[var(--card-bg-hover)] flex items-center justify-between transition-colors duration-200'>
-													<div className='text-left flex-1'>
-														<div className='font-semibold text-[var(--text-color)] flex items-center space-x-2'>
-															<span>Module {module.order}: {module.title}</span>
-															{progress === 100 && (
-																<svg className='w-5 h-5 text-green-400' fill='currentColor' viewBox='0 0 20 20'>
-																	<path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
-																</svg>
-															)}
-														</div>
-														<div className='text-xs text-[var(--text-muted)] mt-1'>
-															{module.videos?.length || 0} video(s)
-														</div>
-														{/* Progress Bar for Module */}
-														<div className='mt-2 w-full bg-gray-700 rounded-full h-1.5 overflow-hidden'>
-															<div 
-																className='h-full bg-gradient-to-r from-[#00BCD4] to-[#4DD0E1] rounded-full transition-all duration-500'
-																style={{ width: `${progress}%` }}
-															/>
-														</div>
-													</div>
-													<svg
-														className={`w-5 h-5 transition-transform text-[var(--text-muted)] ${
-															activeModule === moduleIndex
-																? "rotate-180"
-																: ""
-															}`}
-														fill='none'
-														stroke='currentColor'
-														viewBox='0 0 24 24'>
-														<path
-															strokeLinecap='round'
-															strokeLinejoin='round'
-															strokeWidth={2}
-															d='M19 9l-7 7-7-7'
-														/>
-													</svg>
-												</button>
-												{activeModule === moduleIndex &&
-													module.videos &&
-													module.videos.length > 0 && (
-														<div className='bg-[var(--bg-secondary)]'>
-															{module.videos
-																.sort(
-																	(a, b) =>
-																		a.order - b.order
-																)
-																.map((video, videoIndex) => {
-																	const videoKey = getVideoKey(moduleIndex, videoIndex, video);
-																	const isCompleted = completedVideos.has(videoKey);
-																	return (
-																	<button
-																		key={videoIndex}
-																		onClick={() =>
-																			handleVideoSelect(
-																				video,
-																				moduleIndex
-																			)
-																		}
-																		className={`w-full px-4 py-3 text-left hover:bg-[var(--card-bg-hover)] transition-colors duration-200 border-l-4 ${
-																			normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video)
-																				? "border-[#00BCD4] bg-[var(--card-bg-hover)]"
-																				: "border-transparent"
-																			}`}>
-																		<div className='flex items-start space-x-3'>
-																			{isCompleted ? (
-																				<svg className='w-5 h-5 mt-0.5 flex-shrink-0 text-green-400' fill='currentColor' viewBox='0 0 20 20'>
-																					<path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
-																				</svg>
-																			) : (
-																				<svg
-																					className='w-5 h-5 mt-0.5 flex-shrink-0 text-[#00BCD4]'
-																					fill='none'
-																					stroke='currentColor'
-																					viewBox='0 0 24 24'>
-																					<path
-																						strokeLinecap='round'
-																						strokeLinejoin='round'
-																						strokeWidth={2}
-																						d='M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z'
-																					/>
-																					<path
-																						strokeLinecap='round'
-																						strokeLinejoin='round'
-																						strokeWidth={2}
-																						d='M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
-																					/>
-																				</svg>
-																			)}
-																			<div className='flex-1'>
-																				<div className='text-sm font-medium text-[var(--text-color)]'>
-																					{video.title}
-																				</div>
-																				{video.duration && (
-																					<div className='text-xs text-[var(--text-muted)] mt-1 flex items-center space-x-2'>
-																						<span>{video.duration}</span>
-																						{isCompleted && (
-																							<span className='text-green-400 text-xs'>✓ Completed</span>
-																						)}
-																					</div>
-																				)}
-																			</div>
-																		</div>
-																	</button>
-																);})}
-														</div>
-													)}
-											</div>
-											);})}
-								</div>
-							</div>
-						</div>
-					</div>
+						</Panel>
+					</PanelGroup>
 				) : (
-					<div className='bg-[var(--card-bg)] rounded-xl p-12 text-center transition-colors duration-300'>
-						<svg
-							className='w-20 h-20 mx-auto mb-4 text-gray-600'
-							fill='none'
-							stroke='currentColor'
-							viewBox='0 0 24 24'>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth={2}
-								d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
-							/>
-						</svg>
-						<h3 className='text-xl font-bold mb-2'>No Content Yet</h3>
-						<p className='text-gray-400'>
-							This course doesn't have any modules or videos yet. Check
-							back later!
-						</p>
+					<div className="h-full flex items-center justify-center">
+						<div className='bg-[var(--card-bg)] rounded-xl p-12 text-center'>
+							<svg className='w-20 h-20 mx-auto mb-4 text-gray-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+								<path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' />
+							</svg>
+							<h3 className='text-xl font-bold mb-2'>No Content Yet</h3>
+							<p className='text-gray-400'>This course doesn't have any modules or videos yet. Check back later!</p>
+						</div>
 					</div>
 				)}
 			</div>

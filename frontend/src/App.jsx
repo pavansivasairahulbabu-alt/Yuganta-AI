@@ -119,6 +119,19 @@ function CoursesLayout({ children }) {
 	);
 }
 
+function NoFooterLayout({ children }) {
+	return (
+		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+			<SideNavbar />
+			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
+				<main className="flex-grow">
+					{children}
+				</main>
+			</div>
+		</div>
+	);
+}
+
 export default function App() {
 	const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark-theme");
 	const [loading, setLoading] = useState(true);
@@ -299,9 +312,9 @@ export default function App() {
 									<Route
 										path='/courses/:id'
 										element={
-											<CoursesLayout>
+											<NoFooterLayout>
 												<CourseDetailPage />
-											</CoursesLayout>
+											</NoFooterLayout>
 										}
 									/>
 									<Route
