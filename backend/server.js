@@ -2,11 +2,15 @@ import crypto from "crypto";
 if (!globalThis.crypto) {
   globalThis.crypto = crypto.webcrypto || crypto;
 }
+import dotenv from "dotenv";
+import dns from "dns";
 
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
 import compression from "compression";
-import dotenv from "dotenv";
+
 import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
