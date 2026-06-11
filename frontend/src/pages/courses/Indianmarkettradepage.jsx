@@ -644,8 +644,6 @@ export default function IndianMarketTradePage() {
                     )}
                 </div>
             </section>
-
-
             {/* ── PRICING ── */}
             <section id="fees" className="bg-gradient-to-b from-[var(--bg-primary)] via-[var(--bg-secondary)] to-[var(--bg-primary)] py-16 md:py-20">
                 <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -674,7 +672,7 @@ export default function IndianMarketTradePage() {
                                     "30+ Hours of Live Market Workshops",
                                     "Industry-Grade Trade Projects",
                                     "Structured Curriculum",
-                                    "AV Certificate | NSE Certification Prep | WSU Certificate",
+
                                 ].map((item) => (
                                     <li key={item} className="flex items-start gap-3">
                                         <CheckCircle className="w-5 h-5 text-[#22C55E] mt-0.5 shrink-0" />

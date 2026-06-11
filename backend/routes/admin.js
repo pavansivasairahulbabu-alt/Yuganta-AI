@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Mentor from "../models/Mentor.js";
@@ -17,6 +18,40 @@ import multer from "multer";
 const memStorage = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
+
+// Helper: sanitize modules/videos payload before saving to DB
+const sanitizeModules = (modules) => {
+	if (!modules || !Array.isArray(modules)) return [];
+	return modules.map((mod, mIdx) => {
+		const cleanModule = { ...mod };
+
+		// Remove invalid _id so Mongoose will generate one for new subdocs
+		if (cleanModule._id && !mongoose.Types.ObjectId.isValid(String(cleanModule._id))) {
+			delete cleanModule._id;
+		}
+
+		// Ensure module title and order exist
+		if (!cleanModule.title) cleanModule.title = `Module ${mIdx + 1}`;
+		cleanModule.order = typeof cleanModule.order === 'number' ? cleanModule.order : mIdx + 1;
+
+		// Sanitize videos array
+		if (cleanModule.videos && Array.isArray(cleanModule.videos)) {
+			cleanModule.videos = cleanModule.videos.map((v, vIdx) => {
+				const vid = { ...v };
+				if (vid._id && !mongoose.Types.ObjectId.isValid(String(vid._id))) {
+					delete vid._id;
+				}
+				if (!vid.title) vid.title = `Video ${vIdx + 1}`;
+				vid.order = typeof vid.order === 'number' ? vid.order : vIdx + 1;
+				return vid;
+			});
+		} else {
+			cleanModule.videos = [];
+		}
+
+		return cleanModule;
+	});
+};
 
 // Email configuration - Gmail SMTP
 
@@ -817,6 +852,28 @@ router.get("/courses", verifyAdmin, async (req, res) => {
 	}
 });
 
+// Reorder courses - update `order` field based on provided orderedIds array
+// PUT /api/admin/courses/reorder
+router.put("/courses/reorder", verifyAdmin, async (req, res) => {
+	const { orderedIds } = req.body;
+	try {
+		if (!Array.isArray(orderedIds)) {
+			return res.status(400).json({ message: "orderedIds must be an array" });
+		}
+
+		await Promise.all(
+			orderedIds.map((id, idx) =>
+				Course.findByIdAndUpdate(id, { order: idx })
+			)
+		);
+
+		res.json({ success: true });
+	} catch (err) {
+		console.error("Reorder courses error:", err);
+		res.status(500).json({ message: "Failed to save order" });
+	}
+});
+
 const validateVideoUrl = (url) => {
 	if (!url) return false;
 	const cleanUrl = url.trim();
@@ -840,10 +897,13 @@ router.post("/courses", verifyAdmin, async (req, res) => {
 
 		console.log("📝 Creating course:", title);
 
+		// Sanitize modules/videos to remove invalid _id values and ensure required fields
+		const modulesSanitized = sanitizeModules(modules);
+
 		// Validate all video URLs in the modules array if present
-		if (modules && Array.isArray(modules)) {
-			for (let mIdx = 0; mIdx < modules.length; mIdx++) {
-				const module = modules[mIdx];
+		if (modulesSanitized && Array.isArray(modulesSanitized)) {
+			for (let mIdx = 0; mIdx < modulesSanitized.length; mIdx++) {
+				const module = modulesSanitized[mIdx];
 				const moduleTitle = module.title || `Module ${mIdx + 1}`;
 				if (module.videos && Array.isArray(module.videos)) {
 					for (let vIdx = 0; vIdx < module.videos.length; vIdx++) {
@@ -868,7 +928,7 @@ router.post("/courses", verifyAdmin, async (req, res) => {
 			image,
 			price: price || "Free",
 			isFree: isFree !== undefined ? isFree : true,
-			modules: modules || [],
+			modules: modulesSanitized || [],
 			instructor: instructor || "YugantaAI",
 			instructorId: instructorId || null,
 			students: 0,
@@ -900,11 +960,13 @@ router.put("/courses/:id", verifyAdmin, async (req, res) => {
 			return res.status(404).json({ message: "Course not found" });
 		}
 
-		// Update modules if provided
+		// Update modules if provided - sanitize first
 		if (modules !== undefined && Array.isArray(modules)) {
+			const modulesSanitized = sanitizeModules(modules);
+
 			// Validate all video URLs in the modules array
-			for (let mIdx = 0; mIdx < modules.length; mIdx++) {
-				const module = modules[mIdx];
+			for (let mIdx = 0; mIdx < modulesSanitized.length; mIdx++) {
+				const module = modulesSanitized[mIdx];
 				const moduleTitle = module.title || `Module ${mIdx + 1}`;
 				if (module.videos && Array.isArray(module.videos)) {
 					for (let vIdx = 0; vIdx < module.videos.length; vIdx++) {
@@ -918,7 +980,7 @@ router.put("/courses/:id", verifyAdmin, async (req, res) => {
 					}
 				}
 			}
-			course.modules = modules;
+			course.modules = modulesSanitized;
 		}
 
 		// Update basic fields
@@ -931,7 +993,7 @@ router.put("/courses/:id", verifyAdmin, async (req, res) => {
 		if (price !== undefined) course.price = price;
 		if (isFree !== undefined) course.isFree = isFree;
 		if (instructor !== undefined) course.instructor = instructor;
-		
+
 		// Handle instructorId: set to null if empty string or invalid, otherwise use provided value
 		if (instructorId !== undefined) {
 			if (typeof instructorId === 'string' && instructorId.trim()) {

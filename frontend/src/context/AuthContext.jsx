@@ -14,6 +14,14 @@ export const AuthProvider = ({ children }) => {
 			const response = await fetch(`${API_URL}/api/users/enrolled`, {
 				headers: { Authorization: `Bearer ${authToken}` },
 			});
+
+			if (response.status === 401) {
+				// Token invalid or expired — force logout to clear stored credentials
+				console.warn("AuthContext: enrolled endpoint returned 401 — logging out");
+				logout();
+				return;
+			}
+
 			if (response.ok) {
 				const data = await response.json();
 				setEnrolledCourses(Array.isArray(data) ? data : []);
@@ -257,7 +265,7 @@ export const AuthProvider = ({ children }) => {
 		try {
 			// Ensure API_URL doesn't have a trailing slash
 			let baseUrl = API_URL.trim().endsWith('/') ? API_URL.trim().slice(0, -1) : API_URL.trim();
-			
+
 			// Detect if baseUrl already includes /api
 			let apiPath = "/api/users/delete-account";
 			if (baseUrl.endsWith('/api')) {
@@ -265,10 +273,10 @@ export const AuthProvider = ({ children }) => {
 			} else if (baseUrl.includes('/api/')) {
 				baseUrl = baseUrl.split('/api')[0];
 			}
-			
+
 			const targetUrl = `${baseUrl}${apiPath}`;
 			console.log(`🔍 DIAGNOSTIC: baseUrl=${baseUrl}, API_URL=${API_URL}, targetUrl=${targetUrl}`);
-			
+
 			// DIAGNOSTIC: Check health endpoint first
 			console.log(`🔍 DIAGNOSTIC: Checking backend health at ${baseUrl}/api/users/health`);
 			try {
@@ -310,7 +318,7 @@ export const AuthProvider = ({ children }) => {
 				} else {
 					const text = await response.text();
 					console.log("Delete account non-json response body:", text.substring(0, 100));
-					
+
 					// If we get a non-JSON 404, it might be the frontend serving its index.html
 					if (response.status === 404) {
 						return {
@@ -318,7 +326,7 @@ export const AuthProvider = ({ children }) => {
 							error: `Server error: 404 Not Found at ${targetUrl}. Please ensure your backend is running and the VITE_API_URL is correctly set.`,
 						};
 					}
-					
+
 					return {
 						success: false,
 						error: `Server error: ${response.status} ${response.statusText}. Please check the console for more details.`,
@@ -346,6 +354,12 @@ export const AuthProvider = ({ children }) => {
 					},
 				}
 			);
+
+			if (response.status === 401) {
+				console.warn("AuthContext: enroll endpoint returned 401 — logging out");
+				logout();
+				return { success: false, error: "Unauthorized. Please log in again." };
+			}
 
 			const data = await response.json();
 

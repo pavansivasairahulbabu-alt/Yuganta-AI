@@ -10,14 +10,34 @@ export default function MyLearningPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedTab, setSelectedTab] = useState("all");
 	const [loading, setLoading] = useState(true);
-	const { user, token } = useAuth();
+	const { user, token, enrolledCourses: authEnrolledCourses, refreshUser } = useAuth();
 	const navigate = useNavigate();
 
 	useEffect(() => {
+		// If AuthContext has enrolled courses available, use them immediately
+		if (Array.isArray(authEnrolledCourses) && authEnrolledCourses.length > 0) {
+			const courses = authEnrolledCourses
+				.map(enrollment => ({
+					...enrollment.courseId,
+					enrollmentId: enrollment._id,
+					progress: enrollment.progress,
+					completed: enrollment.completed,
+					enrolledAt: enrollment.enrolledAt,
+					lastWatchedVideoId: enrollment.lastWatchedVideoId,
+					lastWatchedTimestamp: enrollment.lastWatchedTimestamp,
+					lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle,
+				}))
+				.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
+
+			setEnrolledCourses(courses);
+			setLoading(false);
+			return;
+		}
+
 		if (user && token) {
 			fetchEnrolledCourses();
 		}
-	}, [user, token]);
+	}, [user, token, authEnrolledCourses]);
 
 	const fetchEnrolledCourses = async () => {
 		try {
@@ -86,7 +106,7 @@ export default function MyLearningPage() {
 	// Filter courses based on search and selected tab
 	const getFilteredCourses = () => {
 		const query = searchQuery.toLowerCase().trim();
-		
+
 		// First filter by selected tab
 		let list = enrolledCourses;
 		if (selectedTab !== "all") {
@@ -265,13 +285,13 @@ export default function MyLearningPage() {
 									{searchQuery ? "No matching courses found" : "No enrolled courses found"}
 								</h3>
 								<p className='text-[var(--text-muted)] mb-6'>
-									{searchQuery 
-										? `We couldn't find any enrolled courses matching "${searchQuery}".` 
+									{searchQuery
+										? `We couldn't find any enrolled courses matching "${searchQuery}".`
 										: "You haven't enrolled in any programs yet."}
 								</p>
 								<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
 									{searchQuery ? (
-										<button 
+										<button
 											onClick={() => setSearchQuery("")}
 											className='px-6 py-2 bg-purple-600 rounded-lg font-medium hover:bg-purple-700 transition'
 										>
@@ -282,7 +302,7 @@ export default function MyLearningPage() {
 											Browse Courses
 										</Link>
 									)}
-									<button 
+									<button
 										onClick={fetchEnrolledCourses}
 										className='px-6 py-2 border border-[var(--border-color)] rounded-lg font-medium hover:bg-[var(--card-bg)] transition'
 									>
@@ -498,11 +518,10 @@ export default function MyLearningPage() {
 													<div className="mt-auto space-y-3">
 														<Link
 															to={`/courses/${course._id}${course.lastWatchedVideoId ? "?resume=true" : ""}`}
-															className={`block w-full px-4 py-3 rounded-lg text-center font-semibold transition ${
-																progress === 0
+															className={`block w-full px-4 py-3 rounded-lg text-center font-semibold transition ${progress === 0
 																	? "border border-blue-500 text-blue-500 bg-transparent hover:bg-blue-500 hover:text-white"
 																	: "bg-blue-500 text-white hover:bg-blue-600"
-															}`}
+																}`}
 														>
 															{progress === 0
 																? "Start Course"

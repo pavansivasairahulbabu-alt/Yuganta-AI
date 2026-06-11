@@ -35,6 +35,9 @@ export default function AdminCourseManagement() {
     instructorId: "",
     modules: [],
   });
+  const [courseOrder, setCourseOrder] = useState([]);
+  const [draggingId, setDraggingId] = useState(null);
+  const [orderSaved, setOrderSaved] = useState(true);
   const [newModuleTitle, setNewModuleTitle] = useState("");
   const [newModuleDescription, setNewModuleDescription] = useState("");
   const [showAddModuleForm, setShowAddModuleForm] = useState(false);
@@ -70,6 +73,7 @@ export default function AdminCourseManagement() {
     "Web Development",
     "Cloud Computing",
     "Interview Prep",
+    "Trading"
   ];
 
   useEffect(() => {
@@ -120,6 +124,9 @@ export default function AdminCourseManagement() {
 
       const data = await response.json();
       setCourses(data);
+      setCourseOrder(data.map((c) => c._id));
+      setOrderSaved(true);
+
     } catch (error) {
       console.error("Fetch courses error:", error);
       toast.error("Failed to fetch courses");
@@ -455,7 +462,7 @@ export default function AdminCourseManagement() {
   const handleMoveVideo = (moduleIndex, videoIndex, direction) => {
     const updatedModules = [...formData.modules];
     const videos = [...(updatedModules[moduleIndex].videos || [])];
-    
+
     if (direction === "up" && videoIndex > 0) {
       const temp = videos[videoIndex];
       videos[videoIndex] = videos[videoIndex - 1];
@@ -465,11 +472,11 @@ export default function AdminCourseManagement() {
       videos[videoIndex] = videos[videoIndex + 1];
       videos[videoIndex + 1] = temp;
     }
-    
+
     videos.forEach((v, i) => {
       v.order = i + 1;
     });
-    
+
     updatedModules[moduleIndex].videos = videos;
     setFormData({ ...formData, modules: updatedModules });
     toast.success("Video/Lesson order updated");
@@ -558,11 +565,6 @@ export default function AdminCourseManagement() {
     }
   };
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === "All" || course.category === filterCategory;
-    return matchesSearch && matchesCategory;
-  });
 
   if (loading) {
     return (
@@ -578,7 +580,59 @@ export default function AdminCourseManagement() {
       </div>
     );
   }
-
+  const orderedCourses = courseOrder
+    .map((id) => courses.find((c) => c._id === id))
+    .filter(Boolean);
+  const filteredCourses = orderedCourses.filter((course) => {
+    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === "All" || course.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+  const handleDragStart = (e, id) => {
+    setDraggingId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+  const handleDragOver = (e, targetId) => {
+    e.preventDefault();
+    if (!draggingId || draggingId === targetId) return;
+    const updated = [...courseOrder];
+    const fromIdx = updated.indexOf(draggingId);
+    const toIdx = updated.indexOf(targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    updated.splice(fromIdx, 1);
+    updated.splice(toIdx, 0, draggingId);
+    setCourseOrder(updated);
+    setOrderSaved(false);
+  };
+  const handleMoveCourse = (id, direction) => {
+    const updated = [...courseOrder];
+    const idx = updated.indexOf(id);
+    if (direction === "up" && idx > 0) {
+      [updated[idx], updated[idx - 1]] = [updated[idx - 1], updated[idx]];
+    } else if (direction === "down" && idx < updated.length - 1) {
+      [updated[idx], updated[idx + 1]] = [updated[idx + 1], updated[idx]];
+    }
+    setCourseOrder(updated);
+    setOrderSaved(false);
+  };
+  const handleSaveCourseOrder = async () => {
+    try {
+      toast.loading("Saving order...");
+      const token = localStorage.getItem("adminToken");
+      const response = await fetch(`${API_URL}/api/admin/courses/reorder`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ orderedIds: courseOrder }),
+      });
+      if (!response.ok) throw new Error("Failed to save order");
+      toast.dismiss();
+      toast.success("Course order saved");
+      setOrderSaved(true);
+    } catch (err) {
+      toast.dismiss();
+      toast.error("Failed to save order");
+    }
+  };
   return (
     <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-color)] pt-24 md:pt-28 pb-16">
       <AdminNavbar />
@@ -592,12 +646,22 @@ export default function AdminCourseManagement() {
               Manage all courses: create, edit details, modules, content, thumbnail, and instructors
             </p>
           </div>
-          <button
-            onClick={handleCreateClick}
-            className="self-start sm:self-center px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#EC4899] text-white rounded-xl font-bold shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_25px_rgba(168,85,247,0.6)]"
-          >
-            + Create Course
-          </button>
+          <div className="flex items-center gap-3">
+            {!orderSaved && (
+              <button
+                onClick={handleSaveCourseOrder}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all duration-300"
+              >
+                💾 Save Order
+              </button>
+            )}
+            <button
+              onClick={handleCreateClick}
+              className="px-6 py-3 bg-gradient-to-r from-[#A855F7] to-[#EC4899] text-white rounded-xl font-bold shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_25px_rgba(168,85,247,0.6)]"
+            >
+              + Create Course
+            </button>
+          </div>
         </div>
 
         {/* Search and Filter */}
@@ -631,6 +695,7 @@ export default function AdminCourseManagement() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(139,92,246,0.3)] bg-[rgba(139,92,246,0.1)]">
+                  <th className="px-4 py-4 text-left text-sm font-semibold text-[#A855F7] w-20">Order</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#A855F7]">Course Title</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#A855F7]">Instructor</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-[#A855F7]">Category</th>
@@ -642,7 +707,28 @@ export default function AdminCourseManagement() {
               <tbody>
                 {filteredCourses.length > 0 ? (
                   filteredCourses.map((course) => (
-                    <tr key={course._id} className="border-b border-[rgba(139,92,246,0.2)] hover:bg-[rgba(139,92,246,0.05)] transition-colors">
+                    <tr key={course._id} className="border-b border-[rgba(139,92,246,0.2)] hover:bg-[rgba(139,92,246,0.05)] transition-colors" draggable
+                      onDragStart={(e) => handleDragStart(e, course._id)}
+                      onDragOver={(e) => handleDragOver(e, course._id)}
+                      onDragEnd={() => setDraggingId(null)}
+                      style={{ opacity: draggingId === course._id ? 0.4 : 1, cursor: "grab" }}>
+
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col gap-0.5 items-center">
+                          <button
+                            onClick={() => handleMoveCourse(course._id, "up")}
+                            disabled={courseOrder.indexOf(course._id) === 0}
+                            className="p-1 text-white hover:bg-[rgba(139,92,246,0.2)] rounded disabled:opacity-30 text-xs"
+                          >▲</button>
+                          <span className="text-xs text-[#9A93B5]">
+                            {courseOrder.indexOf(course._id) + 1}
+                          </span>
+                          <button onClick={() => handleMoveCourse(course._id, "down")}
+                            disabled={courseOrder.indexOf(course._id) === courseOrder.length - 1}
+                            className="p-1 text-white hover:bg-[rgba(139,92,246,0.2)] rounded disabled:opacity-30 text-xs"
+                          >▼</button>
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           {course.thumbnail && (
@@ -915,8 +1001,8 @@ export default function AdminCourseManagement() {
                       key={index}
                       className="bg-[rgba(139,92,246,0.1)] border border-[rgba(139,92,246,0.3)] rounded-lg overflow-hidden animate-fadeIn"
                     >
-                      <div 
-                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-[rgba(139,92,246,0.15)] transition-colors" 
+                      <div
+                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-[rgba(139,92,246,0.15)] transition-colors"
                         onClick={() => setExpandedModuleIndex(expandedModuleIndex === index ? null : index)}
                       >
                         <div className="flex-1" onClick={(e) => e.stopPropagation()}>
@@ -1168,33 +1254,30 @@ export default function AdminCourseManagement() {
                               <button
                                 type="button"
                                 onClick={() => setAddVideoMode({ ...addVideoMode, [index]: "upload" })}
-                                className={`px-3 py-1 text-xs font-semibold rounded transition ${
-                                  (addVideoMode[index] || "upload") === "upload"
-                                    ? "bg-[#A855F7] text-white"
-                                    : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
-                                }`}
+                                className={`px-3 py-1 text-xs font-semibold rounded transition ${(addVideoMode[index] || "upload") === "upload"
+                                  ? "bg-[#A855F7] text-white"
+                                  : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
+                                  }`}
                               >
                                 Upload Video
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setAddVideoMode({ ...addVideoMode, [index]: "library" })}
-                                className={`px-3 py-1 text-xs font-semibold rounded transition ${
-                                  addVideoMode[index] === "library"
-                                    ? "bg-[#A855F7] text-white"
-                                    : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
-                                }`}
+                                className={`px-3 py-1 text-xs font-semibold rounded transition ${addVideoMode[index] === "library"
+                                  ? "bg-[#A855F7] text-white"
+                                  : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
+                                  }`}
                               >
                                 Select from Library
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setAddVideoMode({ ...addVideoMode, [index]: "custom" })}
-                                className={`px-3 py-1 text-xs font-semibold rounded transition ${
-                                  addVideoMode[index] === "custom"
-                                    ? "bg-[#A855F7] text-white"
-                                    : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
-                                }`}
+                                className={`px-3 py-1 text-xs font-semibold rounded transition ${addVideoMode[index] === "custom"
+                                  ? "bg-[#A855F7] text-white"
+                                  : "text-[#C7C3D6] hover:bg-[rgba(139,92,246,0.15)]"
+                                  }`}
                               >
                                 Video URL / External
                               </button>
