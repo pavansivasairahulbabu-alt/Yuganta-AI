@@ -103,7 +103,7 @@ export default function MyLearningPage() {
 			(sum, m) => sum + (m.videos?.length || 0),
 			0
 		) || 0;
-		const totalHours = course.duration || "30 Hours";
+		const totalHours = course.duration || Math.ceil(totalVideos * 0.5);
 		return { totalVideos, totalHours };
 	};
 
@@ -162,7 +162,7 @@ export default function MyLearningPage() {
 						</h1>
 						<p className="text-gray-400 text-lg">Ready to conquer your next milestone?</p>
 					</div>
-					
+
 					{/* Search */}
 					<div className="relative w-full md:w-80 group">
 						<div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -191,11 +191,10 @@ export default function MyLearningPage() {
 						<button
 							key={tab.id}
 							onClick={() => setSelectedTab(tab.id)}
-							className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all whitespace-nowrap border ${
-								selectedTab === tab.id 
-									? 'bg-[var(--text-primary)] text-[var(--bg-primary)] border-[var(--text-primary)] shadow-md' 
-									: 'bg-[var(--card-bg)] border-gray-800/60 text-gray-400 hover:text-[var(--text-primary)] hover:border-gray-600/80 hover:bg-gray-800/20'
-							}`}>
+							className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all whitespace-nowrap border ${selectedTab === tab.id
+								? 'bg-[var(--text-primary)] text-[var(--bg-primary)] border-[var(--text-primary)] shadow-md'
+								: 'bg-[var(--card-bg)] border-gray-800/60 text-gray-400 hover:text-[var(--text-primary)] hover:border-gray-600/80 hover:bg-gray-800/20'
+								}`}>
 							{tab.label}
 						</button>
 					))}
@@ -221,28 +220,28 @@ export default function MyLearningPage() {
 								)}
 								<div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 md:from-black/90 to-transparent md:to-black/30 pointer-events-none" />
 							</div>
-							
+
 							<div className="md:w-2/3 p-6 md:p-8 flex flex-col justify-center relative bg-[var(--card-bg)]/50 backdrop-blur-xl">
 								<div className="flex items-center justify-between mb-3">
 									<span className="text-xs font-bold tracking-wider uppercase text-[#00BCD4]">Continue Learning</span>
 									<span className="text-sm font-bold text-gray-300">{calculateProgress(featuredCourse)}%</span>
 								</div>
-								
+
 								<h3 className="text-2xl md:text-3xl font-extrabold text-[var(--text-primary)] mb-2 line-clamp-2">{featuredCourse.title}</h3>
-								
+
 								{featuredCourse.lastWatchedVideoTitle && (
 									<p className="text-gray-400 text-sm mb-6 flex items-center gap-2">
 										<span className="w-1.5 h-1.5 rounded-full bg-[#00BCD4] animate-pulse"></span>
 										Up next: <span className="text-gray-300 font-medium truncate">{featuredCourse.lastWatchedVideoTitle}</span>
 									</p>
 								)}
-								
+
 								<div className="w-full bg-gray-800/60 rounded-full h-1.5 mb-6 overflow-hidden">
 									<div className="h-full bg-gradient-to-r from-[#00BCD4] to-blue-500 rounded-full relative" style={{ width: `${calculateProgress(featuredCourse)}%` }}>
 										<div className="absolute inset-0 bg-white/20 w-full animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
 									</div>
 								</div>
-								
+
 								<div className="flex items-center gap-4 mt-auto">
 									<Link to={`/courses/${featuredCourse._id}${featuredCourse.lastWatchedVideoId ? "?resume=true" : ""}`} className="px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center gap-2">
 										Resume <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4l12 6-12 6z" /></svg>
@@ -264,7 +263,7 @@ export default function MyLearningPage() {
 									key={course._id}
 									to={`/courses/${course._id}${course.lastWatchedVideoId ? "?resume=true" : ""}`}
 									className='group flex flex-col bg-[var(--card-bg)] rounded-[24px] border border-gray-800/50 overflow-hidden hover:border-[#00BCD4]/40 hover:shadow-[0_12px_40px_rgba(0,188,212,0.15)] transition-all duration-300 transform hover:-translate-y-1'>
-									
+
 									<div className="relative h-48 sm:h-52 overflow-hidden bg-gray-900">
 										{getCourseThumbnail(course) ? (
 											<img src={getCourseThumbnail(course)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={course.title} />
@@ -274,7 +273,7 @@ export default function MyLearningPage() {
 											</div>
 										)}
 										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
-										
+
 										{/* Status Badge */}
 										{course.completed ? (
 											<div className="absolute top-4 left-4 bg-green-500/90 backdrop-blur-md text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
@@ -295,14 +294,14 @@ export default function MyLearningPage() {
 											<div className="h-full bg-gradient-to-r from-[#00BCD4] to-blue-500 transition-all duration-500" style={{ width: `${progress}%` }} />
 										</div>
 									</div>
-									
+
 									<div className="p-5 flex flex-col flex-1">
 										<h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 line-clamp-2 group-hover:text-[#00BCD4] transition-colors">{course.title}</h3>
-										
+
 										<div className="flex items-center gap-3 text-xs text-gray-400 font-medium mb-4">
-											<span className="flex items-center gap-1"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg> {stats.totalVideos} Videos</span>
+											<span className="flex items-center gap-1"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> {stats.totalVideos} Videos</span>
 											<span className="w-1 h-1 rounded-full bg-gray-600"></span>
-											<span className="flex items-center gap-1"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> {stats.totalHours}</span>
+											<span className="flex items-center gap-1"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {stats.totalHours}</span>
 										</div>
 
 										<div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-800/40">
@@ -310,7 +309,7 @@ export default function MyLearningPage() {
 												<span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-0.5">Overall Progress</span>
 												<span className="text-sm font-extrabold text-[var(--text-primary)]">{progress}%</span>
 											</div>
-											
+
 											<div className="w-10 h-10 rounded-full bg-gray-800/80 border border-gray-700/50 flex items-center justify-center text-gray-300 group-hover:bg-[#00BCD4] group-hover:border-[#00BCD4] group-hover:text-white transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(0,188,212,0.4)]">
 												<svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 20 20">
 													<path d="M4 4l12 6-12 6z" />

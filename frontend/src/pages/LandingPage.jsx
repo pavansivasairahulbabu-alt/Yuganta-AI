@@ -227,9 +227,7 @@ export default function LandingPage() {
 							</div>
 
 							<div className="flex items-center gap-3 text-[var(--text-muted)] text-sm mb-4">
-								<span>30+ Hours</span>
-								<span>•</span>
-								<span>4 Weeks</span>
+
 							</div>
 
 							<h3 className="text-2xl md:text-3xl font-bold text-[var(--text-color)] mb-4 leading-tight">
