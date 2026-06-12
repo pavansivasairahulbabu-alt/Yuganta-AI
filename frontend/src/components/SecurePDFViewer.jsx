@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { ChevronLeft, ChevronRight, X, Loader2 } from 'lucide-react';
 import API_URL from '../config/api';
@@ -17,6 +17,10 @@ export default function SecurePDFViewer({ document, courseId, token, onClose }) 
     // (Assuming the backend route is: /api/courses/:courseId/documents/:documentKey)
     const docKey = document.key || (document.url ? document.url.split('/').pop() : "");
     const pdfUrl = `${API_URL}/api/courses/${courseId}/documents/stream?key=${encodeURIComponent(docKey)}`;
+    const pdfFile = useMemo(() => ({
+        url: pdfUrl,
+        httpHeaders: token ? { Authorization: `Bearer ${token}` } : {}
+    }), [pdfUrl, token]);
 
     const onDocumentLoadSuccess = ({ numPages }) => {
         setNumPages(numPages);
@@ -51,16 +55,15 @@ export default function SecurePDFViewer({ document, courseId, token, onClose }) 
                         </div>
                     ) : (
                         <Document
-                            file={{
-                                url: pdfUrl,
-                                httpHeaders: token ? { Authorization: `Bearer ${token}` } : {}
-                            }}
+                            key={pdfUrl}
+                            file={pdfFile}
                             onLoadSuccess={onDocumentLoadSuccess}
                             onLoadError={(err) => setError(err.message)}
                             loading={<div className="mt-20"><Loader2 className="w-10 h-10 text-[#00BCD4] animate-spin" /></div>}
                             className="drop-shadow-2xl"
                         >
                             <Page
+                                key={`${docKey}-${pageNumber}`}
                                 pageNumber={pageNumber}
                                 renderTextLayer={false} // Prevents users from highlighting/copying text
                                 renderAnnotationLayer={false}
