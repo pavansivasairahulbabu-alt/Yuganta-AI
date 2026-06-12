@@ -502,7 +502,7 @@ export default function CourseDetailPage() {
 									</div>
 								</Panel>
 								<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-30">
-									<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+									<div className="absolute h-8 w-1 rounded-full bg-gray-500 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-60 group-hover:opacity-100" />
 								</PanelResizeHandle>
 							</>
 						)}
@@ -559,14 +559,14 @@ export default function CourseDetailPage() {
 
 													{/* Right Empty Space (Allows resizing from Right) */}
 													<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-20">
-														<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+														<div className="absolute h-8 w-1 rounded-full bg-gray-500 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-60 group-hover:opacity-100" />
 													</PanelResizeHandle>
 													<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
 												</PanelGroup>
 											</Panel>
 
 											<PanelResizeHandle className="relative h-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-row-resize transition-all duration-300 flex items-center justify-center z-20">
-												<div className="absolute w-8 h-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+												<div className="absolute w-8 h-1 rounded-full bg-gray-500 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-60 group-hover:opacity-100" />
 											</PanelResizeHandle>
 										</>
 									)}
@@ -579,7 +579,7 @@ export default function CourseDetailPage() {
 													{/* Left Empty Space */}
 													<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
 													<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-20">
-														<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+														<div className="absolute h-8 w-1 rounded-full bg-gray-500 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-60 group-hover:opacity-100" />
 													</PanelResizeHandle>
 
 													<Panel defaultSize={100} minSize={20} className="flex flex-col bg-[var(--bg-primary)] shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-gray-800/40 relative">
@@ -629,7 +629,7 @@ export default function CourseDetailPage() {
 
 													{/* Right Empty Space */}
 													<PanelResizeHandle className="relative w-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-col-resize transition-all duration-300 flex items-center justify-center z-20">
-														<div className="absolute h-8 w-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+														<div className="absolute h-8 w-1 rounded-full bg-gray-500 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-60 group-hover:opacity-100" />
 													</PanelResizeHandle>
 													<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
 												</PanelGroup>
@@ -637,7 +637,7 @@ export default function CourseDetailPage() {
 
 											{/* Bottom Empty Space */}
 											<PanelResizeHandle className="relative h-1.5 bg-gray-800 group hover:bg-[#00BCD4]/20 cursor-row-resize transition-all duration-300 flex items-center justify-center z-20">
-												<div className="absolute w-8 h-1 rounded-full bg-gray-400 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-0 group-hover:opacity-100" />
+												<div className="absolute w-8 h-1 rounded-full bg-gray-500 group-hover:bg-[#00BCD4] transition-colors shadow-[0_0_5px_rgba(0,188,212,0.5)] opacity-60 group-hover:opacity-100" />
 											</PanelResizeHandle>
 											<Panel defaultSize={0} collapsible minSize={0} className="bg-[var(--bg-secondary)] transition-all" />
 										</PanelGroup>
