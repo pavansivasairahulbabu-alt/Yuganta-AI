@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight, 
   Trash2, Pencil, CheckSquare, Square, AlertCircle, Loader2, 
-  X, Eye, Calendar, Clock, Film, UploadCloud, ShieldAlert, Play
+  X, Eye, Calendar, Clock, Film, UploadCloud, ShieldAlert, Play, FileText
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -38,9 +38,12 @@ export default function AdminVideoManage() {
   const [editCategory, setEditCategory] = useState("");
   const [editTags, setEditTags] = useState([]);
   const [editTagInput, setEditTagInput] = useState("");
+  const [editDocuments, setEditDocuments] = useState([]);
+  const [newDocumentFiles, setNewDocumentFiles] = useState([]);
   
   // Course Association states
   const [courseId, setCourseId] = useState("");
+  const [originalCourseId, setOriginalCourseId] = useState("");
   const [moduleName, setModuleName] = useState("");
   const [videoOrder, setVideoOrder] = useState("");
   
@@ -49,7 +52,10 @@ export default function AdminVideoManage() {
   const [editThumbUrl, setEditThumbUrl] = useState("");
   const [isUploadingThumb, setIsUploadingThumb] = useState(false);
   const [thumbProgress, setThumbProgress] = useState(0);
+  const [isUploadingDocs, setIsUploadingDocs] = useState(false);
+  const [docProgress, setDocProgress] = useState(0);
   const thumbInputRef = useRef(null);
+  const docInputRef = useRef(null);
 
   useEffect(() => {
     const authed = localStorage.getItem("adminAuthed") === "true";
@@ -190,6 +196,8 @@ export default function AdminVideoManage() {
     setEditDesc(video.description || "");
     setEditCategory(video.category);
     setEditTags(video.tags || []);
+    setEditDocuments(video.documents || []);
+    setNewDocumentFiles([]);
     setEditThumbUrl(video.thumbnailUrl || "");
     setNewThumbFile(null);
     setThumbProgress(0);
@@ -218,6 +226,7 @@ export default function AdminVideoManage() {
     }
 
     setCourseId(foundCourseId);
+    setOriginalCourseId(foundCourseId);
     setModuleName(foundModuleName);
     setVideoOrder(foundOrder);
     setIsEditModalOpen(true);
@@ -263,7 +272,7 @@ export default function AdminVideoManage() {
         setIsUploadingThumb(false);
         setEditThumbUrl(downloadUrl);
         toast.success("Thumbnail replaced (Simulation Mode)");
-        return;
+        return downloadUrl;
       }
 
       await axios.put(uploadUrl, file, {
@@ -276,12 +285,86 @@ export default function AdminVideoManage() {
       setIsUploadingThumb(false);
       setEditThumbUrl(downloadUrl);
       toast.success("Thumbnail replaced successfully!");
+      return downloadUrl;
     } catch (err) {
       console.error(err);
       setIsUploadingThumb(false);
       setThumbProgress(0);
       toast.error("Thumbnail upload failed");
+      throw err;
     }
+  };
+
+  const allowedDocumentTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+  ];
+
+  const isAllowedDocument = (file) => {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    return allowedDocumentTypes.includes(file.type) || ["pdf", "doc", "docx", "txt"].includes(extension);
+  };
+
+  const handleDocumentSelection = (files) => {
+    const selected = Array.from(files || []);
+    const validFiles = [];
+
+    selected.forEach((file) => {
+      if (!isAllowedDocument(file)) {
+        toast.error(`${file.name} is not a supported document`);
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds the 25MB document limit`);
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    if (validFiles.length > 0) {
+      setNewDocumentFiles((prev) => [...prev, ...validFiles]);
+      setDocProgress(0);
+    }
+  };
+
+  const uploadDocument = async (file) => {
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      reader.onload = async () => {
+        try {
+          const base64Data = reader.result.split(",")[1];
+          const uploadResponse = await api.post("/videos/upload", {
+            fileName: file.name,
+            fileType: file.type,
+            purpose: "document",
+            fileData: base64Data,
+          });
+
+          resolve({
+            name: file.name,
+            url: uploadResponse.data.downloadUrl,
+            key: uploadResponse.data.key,
+            type: file.type,
+            size: file.size,
+          });
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeExistingDocument = (indexToRemove) => {
+    setEditDocuments((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const removeNewDocumentFile = (indexToRemove) => {
+    setNewDocumentFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSaveEdit = async (e) => {
@@ -294,7 +377,20 @@ export default function AdminVideoManage() {
 
       if (newThumbFile) {
         // Trigger upload before saving metadata
-        await uploadThumbnailReplacement(newThumbFile);
+        finalThumbUrl = await uploadThumbnailReplacement(newThumbFile);
+      }
+
+      let finalDocuments = editDocuments;
+      if (newDocumentFiles.length > 0) {
+        setIsUploadingDocs(true);
+        const uploadedDocs = [];
+        for (let i = 0; i < newDocumentFiles.length; i += 1) {
+          const uploadedDoc = await uploadDocument(newDocumentFiles[i]);
+          uploadedDocs.push(uploadedDoc);
+          setDocProgress(Math.round(((i + 1) / newDocumentFiles.length) * 100));
+        }
+        finalDocuments = [...editDocuments, ...uploadedDocs];
+        setIsUploadingDocs(false);
       }
 
       const payload = {
@@ -303,6 +399,7 @@ export default function AdminVideoManage() {
         category: editCategory,
         tags: editTags,
         thumbnailUrl: finalThumbUrl,
+        documents: finalDocuments,
       };
 
       if (courseId) {
@@ -313,13 +410,14 @@ export default function AdminVideoManage() {
         payload.courseId = courseId;
         payload.moduleName = moduleName.trim();
         payload.videoOrder = Number(videoOrder) || "";
-      } else {
+      } else if (originalCourseId) {
         payload.courseId = ""; // Send empty string to clear previous association if removed
       }
 
       updateMutation.mutate({ id: editingVideo._id, payload });
     } catch (err) {
       console.error(err);
+      setIsUploadingDocs(false);
     }
   };
 
@@ -538,6 +636,12 @@ export default function AdminVideoManage() {
                               <Calendar className="w-3 h-3" />
                               {new Date(video.uploadDate).toLocaleDateString()}
                             </span>
+                            {(video.documents?.length || 0) > 0 && (
+                              <span className="flex items-center gap-1">
+                                <FileText className="w-3 h-3" />
+                                {video.documents.length} doc{video.documents.length === 1 ? "" : "s"}
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="py-4 px-4">
@@ -824,6 +928,70 @@ export default function AdminVideoManage() {
                   </div>
                 </div>
 
+                <div className="p-4 bg-[rgba(139,92,246,0.05)] border border-[rgba(139,92,246,0.15)] rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-white">
+                      <FileText className="w-4 h-4 text-[#A855F7]" />
+                      <span>Documents</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => docInputRef.current?.click()}
+                      className="text-[10px] px-2.5 py-1 rounded-lg border border-[rgba(139,92,246,0.25)] text-[#C7C3D6] hover:text-white hover:bg-[rgba(139,92,246,0.12)] transition-colors"
+                    >
+                      Add files
+                    </button>
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={docInputRef}
+                    accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    multiple
+                    onChange={(e) => handleDocumentSelection(e.target.files)}
+                    className="hidden"
+                  />
+
+                  <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                    {editDocuments.length === 0 && newDocumentFiles.length === 0 ? (
+                      <p className="text-[11px] text-[#9A93B5]">No supporting documents attached.</p>
+                    ) : (
+                      <>
+                        {editDocuments.map((doc, idx) => (
+                          <div key={`${doc.url}-${idx}`} className="flex items-center justify-between gap-3 rounded-lg bg-[rgba(26,21,44,0.55)] border border-[rgba(139,92,246,0.14)] px-3 py-2">
+                            <a href={doc.url} target="_blank" rel="noreferrer" className="text-[11px] text-[#C7C3D6] hover:text-white truncate">
+                              {doc.name}
+                            </a>
+                            <button type="button" onClick={() => removeExistingDocument(idx)} className="text-[#9A93B5] hover:text-red-400 shrink-0">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                        {newDocumentFiles.map((file, idx) => (
+                          <div key={`${file.name}-${idx}`} className="flex items-center justify-between gap-3 rounded-lg bg-[rgba(139,92,246,0.12)] border border-[rgba(139,92,246,0.24)] px-3 py-2">
+                            <span className="text-[11px] text-white truncate">{file.name}</span>
+                            <button type="button" onClick={() => removeNewDocumentFile(idx)} className="text-[#9A93B5] hover:text-red-400 shrink-0">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+
+                  {isUploadingDocs && (
+                    <div className="space-y-1 pt-1">
+                      <div className="w-full bg-gray-800 rounded-full h-1.5">
+                        <div className="bg-[#A855F7] h-1.5 rounded-full" style={{ width: `${docProgress}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[9px] text-[#C7C3D6]">
+                        <span>Uploading documents...</span>
+                        <span>{docProgress}%</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-3 justify-end pt-4">
                   <button
                     type="button"
@@ -834,7 +1002,7 @@ export default function AdminVideoManage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={updateMutation.isPending || isUploadingThumb}
+                    disabled={updateMutation.isPending || isUploadingThumb || isUploadingDocs}
                     className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] text-white font-semibold shadow-md hover:opacity-95 transition-opacity text-sm flex items-center gap-1.5"
                   >
                     {updateMutation.isPending && (

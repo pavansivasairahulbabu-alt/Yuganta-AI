@@ -43,6 +43,38 @@ const videoSchema = new mongoose.Schema(
       type: Number,
       default: 0, // In bytes
     },
+    documents: [
+      {
+        name: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        url: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        key: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+        type: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+        size: {
+          type: Number,
+          default: 0,
+        },
+        uploadedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     uploadDate: {
       type: Date,
       default: Date.now,

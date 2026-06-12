@@ -63,6 +63,7 @@ const normalizeCourseModules = (modules) => {
 							duration: String(video.duration || ""),
 							description: String(video.description || ""),
 							order: Number(video.order) || videoIndex + 1,
+							documents: Array.isArray(video.documents) ? video.documents : []
 						}))
 				: [];
 
@@ -633,7 +634,7 @@ router.delete("/instructor/:courseId/modules/:moduleId", protectInstructor, asyn
 // @access  Private (Instructor)
 router.post("/instructor/:courseId/modules/:moduleId/videos", protectInstructor, async (req, res) => {
 	try {
-		const { title, url, publicId, duration, description, order } = req.body;
+		const { title, url, publicId, duration, description, order,documents } = req.body;
 
 		// Validate Video URL
 		if (!validateVideoUrl(url)) {
@@ -667,7 +668,8 @@ router.post("/instructor/:courseId/modules/:moduleId/videos", protectInstructor,
 			publicId: publicId || "",
 			duration: duration || "",
 			description: description || "",
-			order: order || course.modules[moduleIndex].videos.length + 1
+			order: order || course.modules[moduleIndex].videos.length + 1,
+			documents: documents || []
 		};
 
 		course.modules[moduleIndex].videos.push(newVideo);
@@ -689,7 +691,7 @@ router.post("/instructor/:courseId/modules/:moduleId/videos", protectInstructor,
 // @access  Private (Instructor)
 router.put("/instructor/:courseId/modules/:moduleId/videos/:videoId", protectInstructor, async (req, res) => {
 	try {
-		const { title, url, publicId, duration, description, order } = req.body;
+		const { title, url, publicId, duration, description, order,documents } = req.body;
 
 		// Validate Video URL if passed
 		if (url !== undefined && !validateVideoUrl(url)) {
@@ -731,6 +733,7 @@ router.put("/instructor/:courseId/modules/:moduleId/videos/:videoId", protectIns
 		if (duration !== undefined) course.modules[moduleIndex].videos[videoIndex].duration = duration;
 		if (description !== undefined) course.modules[moduleIndex].videos[videoIndex].description = description;
 		if (order) course.modules[moduleIndex].videos[videoIndex].order = order;
+		if (documents !== undefined) course.modules[moduleIndex].videos[videoIndex].documents = documents; 
 
 		await course.save();
 

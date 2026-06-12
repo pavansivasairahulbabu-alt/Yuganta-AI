@@ -4,6 +4,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import Video from "../models/Video.js";
 import Category from "../models/Category.js";
 import Course from "../models/Course.js";
+import User from "../models/User.js";
 import { verifyAdmin } from "../middleware/adminAuth.js";
 
 const router = express.Router();
@@ -47,7 +48,7 @@ router.post("/videos/upload", verifyAdmin, async (req, res) => {
       return res.status(400).json({ message: "fileName, fileType, and fileData are required" });
     }
 
-    const folder = purpose === "thumbnail" ? "thumbnails" : "videos";
+    const folder = purpose === "thumbnail" ? "thumbnails" : purpose === "document" ? "documents" : "videos";
     const uniqueFileName = `${folder}/${Date.now()}_${fileName.replace(/\s+/g, "_")}`;
 
     if (!hasR2Config) {
@@ -87,7 +88,7 @@ router.post("/videos/presign", verifyAdmin, async (req, res) => {
       return res.status(400).json({ message: "fileName and fileType are required" });
     }
 
-    const folder = purpose === "thumbnail" ? "thumbnails" : "videos";
+    const folder = purpose === "thumbnail" ? "thumbnails" : purpose === "document" ? "documents" : "videos";
     const uniqueFileName = `${folder}/${Date.now()}_${fileName.replace(/\s+/g, "_")}`;
 
     if (!hasR2Config) {
@@ -132,6 +133,141 @@ const deleteFromR2 = async (url) => {
   } catch (error) {
     console.error("Failed to delete file from Cloudflare R2:", error);
   }
+};
+
+const sanitizeDocuments = (documents = []) => {
+  if (!Array.isArray(documents)) return [];
+
+  return documents
+    .filter((doc) => doc && doc.name && doc.url)
+    .map((doc) => ({
+      name: String(doc.name).trim(),
+      url: String(doc.url).trim(),
+      key: doc.key ? String(doc.key).trim() : "",
+      type: doc.type ? String(doc.type).trim() : "",
+      size: Number(doc.size) || 0,
+    }));
+};
+
+const getCourseVideoKeys = (moduleIndex, videoIndex, video) => {
+  if (!video) return [];
+  const keys = new Set();
+  if (video._id) keys.add(`id:${video._id.toString()}`);
+
+  const urlPart = video.url || "";
+  const orderPart = Number(video.order) || videoIndex + 1;
+  keys.add(`${moduleIndex}:${orderPart}:${urlPart || (video.title || "untitled")}`);
+
+  return [...keys];
+};
+
+const cleanupUserProgressForDeletedVideos = async (courseKeyMap) => {
+  const entries = Object.entries(courseKeyMap || {});
+  if (entries.length === 0) return 0;
+
+  let updatedUsers = 0;
+
+  for (const [courseId, keyList] of entries) {
+    const deletedKeys = new Set(keyList);
+    if (deletedKeys.size === 0) continue;
+
+    const course = await Course.findById(courseId).lean();
+    const totalVideos = (course?.modules || []).reduce((sum, moduleObj) => sum + (moduleObj.videos?.length || 0), 0);
+    const users = await User.find({ "enrolledCourses.courseId": courseId });
+
+    for (const user of users) {
+      let modified = false;
+
+      for (const enrollment of user.enrolledCourses || []) {
+        if (!enrollment.courseId || enrollment.courseId.toString() !== courseId) continue;
+
+        const beforeCount = enrollment.completedVideos?.length || 0;
+        enrollment.completedVideos = (enrollment.completedVideos || []).filter((key) => !deletedKeys.has(key));
+        if (enrollment.completedVideos.length !== beforeCount) {
+          modified = true;
+        }
+
+        if (enrollment.lastWatchedVideoId && deletedKeys.has(enrollment.lastWatchedVideoId)) {
+          enrollment.lastWatchedVideoId = "";
+          enrollment.lastWatchedTimestamp = 0;
+          enrollment.lastWatchedVideoTitle = "";
+          modified = true;
+        }
+
+        const completedCount = new Set(enrollment.completedVideos || []).size;
+        enrollment.progress = totalVideos > 0 ? Math.min(100, Math.round((completedCount / totalVideos) * 100)) : 0;
+        enrollment.completed = totalVideos > 0 && enrollment.progress >= 100;
+      }
+
+      if (modified) {
+        await user.save();
+        updatedUsers += 1;
+      }
+    }
+  }
+
+  return updatedUsers;
+};
+
+const removeVideosFromCourses = async (videos = []) => {
+  const videoList = Array.isArray(videos) ? videos : [videos];
+  const matchers = videoList
+    .filter(Boolean)
+    .map((video) => ({
+      id: video._id ? String(video._id) : "",
+      url: video.videoUrl || "",
+      title: video.title || "",
+    }));
+
+  if (matchers.length === 0) return 0;
+
+  const courses = await Course.find({});
+  let updatedCourses = 0;
+  const deletedKeysByCourse = {};
+
+  for (const course of courses) {
+    let modified = false;
+
+    for (let moduleIndex = (course.modules || []).length - 1; moduleIndex >= 0; moduleIndex -= 1) {
+      const moduleObj = course.modules[moduleIndex];
+      const initialLength = moduleObj.videos?.length || 0;
+
+      moduleObj.videos = (moduleObj.videos || []).filter((courseVideo, videoIndex) => {
+        const courseVideoId = courseVideo._id ? String(courseVideo._id) : "";
+        const shouldDelete = matchers.some((matcher) => (
+          (matcher.id && courseVideoId === matcher.id) ||
+          (matcher.url && courseVideo.url === matcher.url) ||
+          (matcher.title && courseVideo.title === matcher.title)
+        ));
+
+        if (shouldDelete) {
+          const courseId = course._id.toString();
+          deletedKeysByCourse[courseId] = deletedKeysByCourse[courseId] || [];
+          deletedKeysByCourse[courseId].push(...getCourseVideoKeys(moduleIndex, videoIndex, courseVideo));
+        }
+
+        return !shouldDelete;
+      });
+
+      if ((moduleObj.videos?.length || 0) !== initialLength) {
+        modified = true;
+      }
+
+      if ((moduleObj.videos?.length || 0) === 0) {
+        course.modules.splice(moduleIndex, 1);
+        modified = true;
+      }
+    }
+
+    if (modified) {
+      await course.save();
+      updatedCourses += 1;
+    }
+  }
+
+  const updatedUsers = await cleanupUserProgressForDeletedVideos(deletedKeysByCourse);
+
+  return { updatedCourses, updatedUsers };
 };
 
 // ==========================================
@@ -352,7 +488,7 @@ router.get("/videos/:id", verifyAdmin, async (req, res) => {
 // Create video metadata
 router.post("/videos", verifyAdmin, async (req, res) => {
   try {
-    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize, courseId, moduleName, videoOrder } = req.body;
+    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize, documents, courseId, moduleName, videoOrder } = req.body;
 
     if (!title || !category || !videoUrl) {
       return res.status(400).json({ message: "Title, category, and video URL are required" });
@@ -378,6 +514,7 @@ router.post("/videos", verifyAdmin, async (req, res) => {
       videoUrl,
       duration: duration || 0,
       fileSize: fileSize || 0,
+      documents: sanitizeDocuments(documents),
       uploadDate: new Date(),
     });
 
@@ -413,6 +550,7 @@ router.post("/videos", verifyAdmin, async (req, res) => {
         duration: duration ? String(duration) : "",
         description: description || "",
         order: newVideoOrder,
+        documents: video.documents,
       });
 
       // Sort videos within this module by order
@@ -435,12 +573,15 @@ router.post("/videos", verifyAdmin, async (req, res) => {
 router.put("/videos/:id", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize, courseId, moduleName, videoOrder } = req.body;
+    const { title, description, category, tags, thumbnailUrl, videoUrl, duration, fileSize, documents, courseId, moduleName, videoOrder } = req.body;
 
     const video = await Video.findById(id);
     if (!video) {
       return res.status(404).json({ message: "Video not found" });
     }
+
+    const previousVideoUrl = video.videoUrl;
+    const previousTitle = video.title;
 
     // If changing thumbnail or video URL, delete old ones from Cloudflare R2
     if (thumbnailUrl && thumbnailUrl !== video.thumbnailUrl) {
@@ -448,6 +589,16 @@ router.put("/videos/:id", verifyAdmin, async (req, res) => {
     }
     if (videoUrl && videoUrl !== video.videoUrl) {
       await deleteFromR2(video.videoUrl);
+    }
+    if (documents !== undefined) {
+      const nextDocuments = sanitizeDocuments(documents);
+      const nextUrls = new Set(nextDocuments.map((doc) => doc.url));
+      for (const doc of video.documents || []) {
+        if (doc.url && !nextUrls.has(doc.url)) {
+          await deleteFromR2(doc.url);
+        }
+      }
+      video.documents = nextDocuments;
     }
 
     if (title) video.title = title;
@@ -461,82 +612,113 @@ router.put("/videos/:id", verifyAdmin, async (req, res) => {
 
     await video.save();
 
-    // First, scrub the video from ALL courses so it doesn't duplicate
+    const matchesCourseVideo = (courseVideo) => {
+      if (!courseVideo) return false;
+      return (
+        (previousVideoUrl && courseVideo.url === previousVideoUrl) ||
+        (video.videoUrl && courseVideo.url === video.videoUrl) ||
+        (previousTitle && courseVideo.title === previousTitle) ||
+        (video.title && courseVideo.title === video.title)
+      );
+    };
+
+    const videoDataForCourse = (order) => ({
+      title: video.title.trim(),
+      url: video.videoUrl,
+      publicId: "",
+      duration: video.duration ? String(video.duration) : "",
+      description: video.description || "",
+      order,
+      documents: video.documents || [],
+    });
+
     const allCourses = await Course.find({});
-    for (let c of allCourses) {
-      let modified = false;
-      if (c.modules) {
-        for (let i = c.modules.length - 1; i >= 0; i--) {
-          let m = c.modules[i];
-          if (m.videos) {
-            const initialLen = m.videos.length;
-            m.videos = m.videos.filter(v => v.url !== video.videoUrl && v.title !== video.title);
-            if (m.videos.length !== initialLen) {
+
+    if (courseId !== undefined) {
+      // Course association was intentionally edited. Remove old copies first.
+      for (let c of allCourses) {
+        let modified = false;
+        if (c.modules) {
+          for (let i = c.modules.length - 1; i >= 0; i--) {
+            let m = c.modules[i];
+            if (m.videos) {
+              const initialLen = m.videos.length;
+              m.videos = m.videos.filter((v) => !matchesCourseVideo(v));
+              if (m.videos.length !== initialLen) {
+                modified = true;
+              }
+            }
+            // Remove module if it became empty
+            if (m.videos.length === 0) {
+              c.modules.splice(i, 1);
               modified = true;
             }
           }
-          // Remove module if it became empty
-          if (m.videos.length === 0) {
-            c.modules.splice(i, 1);
-            modified = true;
-          }
+        }
+        if (modified) {
+          await c.save();
         }
       }
-      if (modified) {
-        await c.save();
+
+      // Empty string means the admin intentionally removed the course association.
+      if (courseId) {
+        if (!moduleName || !moduleName.trim()) {
+          return res.status(400).json({ message: "Module name is required when associating with a course" });
+        }
+        // Re-fetch the target course just in case it was modified in the scrub
+        const course = await Course.findById(courseId);
+        if (!course) {
+          return res.status(404).json({ message: "Selected course not found" });
+        }
+
+        // Find or create module
+        let moduleObj = course.modules.find(
+          (m) => m.title.trim().toLowerCase() === moduleName.trim().toLowerCase()
+        );
+
+        if (!moduleObj) {
+          // Calculate module order
+          const maxModuleOrder = course.modules.reduce((max, m) => Math.max(max, m.order || 0), 0);
+          moduleObj = {
+            title: moduleName.trim(),
+            description: "",
+            order: maxModuleOrder + 1,
+            videos: [],
+          };
+          course.modules.push(moduleObj);
+          moduleObj = course.modules[course.modules.length - 1];
+        }
+
+        const newVideoOrder = Number(videoOrder) || (moduleObj.videos.length + 1);
+
+        // Add new video (we already scrubbed duplicates)
+        moduleObj.videos.push(videoDataForCourse(newVideoOrder));
+
+        // Sort videos within this module by order
+        moduleObj.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        // Sort modules by order
+        course.modules.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        await course.save();
       }
-    }
-
-    // Now, if a new course is selected, attach it there
-    if (courseId) {
-      if (!moduleName || !moduleName.trim()) {
-        return res.status(400).json({ message: "Module name is required when associating with a course" });
+    } else {
+      // Metadata/documents changed only. Keep the current course placement and sync lesson data.
+      for (let c of allCourses) {
+        let modified = false;
+        for (const moduleObj of c.modules || []) {
+          for (const courseVideo of moduleObj.videos || []) {
+            if (matchesCourseVideo(courseVideo)) {
+              const order = courseVideo.order || 1;
+              courseVideo.set(videoDataForCourse(order));
+              modified = true;
+            }
+          }
+        }
+        if (modified) {
+          await c.save();
+        }
       }
-      // Re-fetch the target course just in case it was modified in the scrub
-      const course = await Course.findById(courseId);
-      if (!course) {
-        return res.status(404).json({ message: "Selected course not found" });
-      }
-
-      // Find or create module
-      let moduleObj = course.modules.find(
-        (m) => m.title.trim().toLowerCase() === moduleName.trim().toLowerCase()
-      );
-
-      if (!moduleObj) {
-        // Calculate module order
-        const maxModuleOrder = course.modules.reduce((max, m) => Math.max(max, m.order || 0), 0);
-        moduleObj = {
-          title: moduleName.trim(),
-          description: "",
-          order: maxModuleOrder + 1,
-          videos: [],
-        };
-        course.modules.push(moduleObj);
-        moduleObj = course.modules[course.modules.length - 1];
-      }
-      
-      const newVideoOrder = Number(videoOrder) || (moduleObj.videos.length + 1);
-
-      const videoDataForCourse = {
-        title: video.title.trim(),
-        url: video.videoUrl,
-        publicId: "",
-        duration: video.duration ? String(video.duration) : "",
-        description: video.description || "",
-        order: newVideoOrder,
-      };
-
-      // Add new video (we already scrubbed duplicates)
-      moduleObj.videos.push(videoDataForCourse);
-
-      // Sort videos within this module by order
-      moduleObj.videos.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-      // Sort modules by order
-      course.modules.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-      await course.save();
     }
 
     res.json(video);
@@ -558,9 +740,17 @@ router.delete("/videos/:id", verifyAdmin, async (req, res) => {
     // Delete media assets from Cloudflare R2
     await deleteFromR2(video.thumbnailUrl);
     await deleteFromR2(video.videoUrl);
+    for (const doc of video.documents || []) {
+      await deleteFromR2(doc.url);
+    }
 
+    const cleanup = await removeVideosFromCourses(video);
     await Video.findByIdAndDelete(id);
-    res.json({ message: "Video and associated storage assets deleted successfully" });
+    res.json({
+      message: "Complete video upload data deleted successfully",
+      updatedCourses: cleanup.updatedCourses,
+      updatedUsers: cleanup.updatedUsers,
+    });
   } catch (error) {
     console.error("Delete video error:", error);
     res.status(500).json({ message: "Server error deleting video" });
@@ -581,13 +771,20 @@ router.post("/videos/bulk-delete", verifyAdmin, async (req, res) => {
     for (const video of videos) {
       await deleteFromR2(video.thumbnailUrl);
       await deleteFromR2(video.videoUrl);
+      for (const doc of video.documents || []) {
+        await deleteFromR2(doc.url);
+      }
     }
+
+    const cleanup = await removeVideosFromCourses(videos);
 
     // Delete metadata documents
     const result = await Video.deleteMany({ _id: { $in: ids } });
     
     res.json({ 
-      message: `Successfully deleted ${result.deletedCount} video(s) and their associated storage assets.` 
+      message: `Successfully deleted ${result.deletedCount} complete video upload record(s).`,
+      updatedCourses: cleanup.updatedCourses,
+      updatedUsers: cleanup.updatedUsers,
     });
   } catch (error) {
     console.error("Bulk delete error:", error);

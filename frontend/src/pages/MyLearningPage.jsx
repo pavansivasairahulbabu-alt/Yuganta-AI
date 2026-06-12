@@ -10,34 +10,63 @@ export default function MyLearningPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedTab, setSelectedTab] = useState("all");
 	const [loading, setLoading] = useState(true);
-	const { user, token, enrolledCourses: authEnrolledCourses, refreshUser } = useAuth();
+	const { user, token, enrolledCourses: authEnrolledCourses } = useAuth();
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		// If AuthContext has enrolled courses available, use them immediately
-		if (Array.isArray(authEnrolledCourses) && authEnrolledCourses.length > 0) {
-			const courses = authEnrolledCourses
-				.map(enrollment => ({
-					...enrollment.courseId,
-					enrollmentId: enrollment._id,
-					progress: enrollment.progress,
-					completed: enrollment.completed,
-					enrolledAt: enrollment.enrolledAt,
-					lastWatchedVideoId: enrollment.lastWatchedVideoId,
-					lastWatchedTimestamp: enrollment.lastWatchedTimestamp,
-					lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle,
-				}))
-				.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
+	const normalizeEnrollments = (enrollments = []) => {
+		return enrollments
+			.filter((enrollment) => enrollment?.courseId && enrollment.courseId._id)
+			.map(enrollment => ({
+				...enrollment.courseId,
+				enrollmentId: enrollment._id,
+				progress: enrollment.progress,
+				completed: enrollment.completed,
+				enrolledAt: enrollment.enrolledAt,
+				lastWatchedVideoId: enrollment.lastWatchedVideoId,
+				lastWatchedTimestamp: enrollment.lastWatchedTimestamp,
+				lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle,
+			}))
+			.filter((course) => {
+				const totalVideos = course?.modules?.reduce(
+					(sum, module) => sum + (module.videos?.length || 0),
+					0
+				) || 0;
+				return course?._id && totalVideos > 0;
+			})
+			.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
+	};
 
-			setEnrolledCourses(courses);
+	useEffect(() => {
+		if (!user || !token) {
+			setEnrolledCourses([]);
 			setLoading(false);
 			return;
 		}
 
-		if (user && token) {
-			fetchEnrolledCourses();
+		if (Array.isArray(authEnrolledCourses) && authEnrolledCourses.length > 0) {
+			setEnrolledCourses(normalizeEnrollments(authEnrolledCourses));
 		}
-	}, [user, token, authEnrolledCourses]);
+
+		fetchEnrolledCourses();
+	}, [user, token]);
+
+	useEffect(() => {
+		if (!user || !token) return;
+
+		const refreshOnVisible = () => {
+			if (document.visibilityState === "visible") {
+				fetchEnrolledCourses();
+			}
+		};
+
+		window.addEventListener("focus", fetchEnrolledCourses);
+		document.addEventListener("visibilitychange", refreshOnVisible);
+
+		return () => {
+			window.removeEventListener("focus", fetchEnrolledCourses);
+			document.removeEventListener("visibilitychange", refreshOnVisible);
+		};
+	}, [user, token]);
 
 	const fetchEnrolledCourses = async () => {
 		try {
@@ -58,21 +87,7 @@ export default function MyLearningPage() {
 
 			const data = await response.json();
 
-			// Extract course data from enrollment objects
-			const courses = data
-				.map(enrollment => ({
-					...enrollment.courseId,
-					enrollmentId: enrollment._id,
-					progress: enrollment.progress,
-					completed: enrollment.completed,
-					enrolledAt: enrollment.enrolledAt,
-					lastWatchedVideoId: enrollment.lastWatchedVideoId,
-					lastWatchedTimestamp: enrollment.lastWatchedTimestamp,
-					lastWatchedVideoTitle: enrollment.lastWatchedVideoTitle,
-				}))
-				.sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
-
-			setEnrolledCourses(courses);
+			setEnrolledCourses(normalizeEnrollments(Array.isArray(data) ? data : []));
 			setLoading(false);
 		} catch (error) {
 			console.error("Error fetching courses:", error);
