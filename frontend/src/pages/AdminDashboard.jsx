@@ -50,6 +50,42 @@ export default function AdminDashboard() {
 
         {/* Management Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Quiz Management Card */}
+          <Link
+            to="/admin/quizzes"
+            className="group bg-[var(--card-bg)] border border-[rgba(249,115,22,0.35)] rounded-2xl p-8 shadow-[0_8px_32px_rgba(249,115,22,0.1)] hover:shadow-[0_12px_48px_rgba(249,115,22,0.25)] hover:border-[rgba(249,115,22,0.7)] transition-all duration-300 hover:-translate-y-2">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="text-sm text-[#9A93B5] font-semibold uppercase tracking-wider mb-2">Assessments</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Quiz Management</h2>
+                <p className="text-[#C7C3D6] text-sm">Create module-wise quizzes, publish question banks, track attempts, and store student scores in MongoDB.</p>
+              </div>
+              <div className="p-4 bg-gradient-to-br from-[rgba(249,115,22,0.22)] to-[rgba(236,72,153,0.1)] rounded-xl group-hover:scale-110 transition-transform duration-300">
+                <svg className='w-8 h-8 text-orange-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5h6m-7 4h8m-8 4h5m-8 8h14a2 2 0 002-2V7.5L16.5 3H5a2 2 0 00-2 2v14a2 2 0 002 2z' />
+                </svg>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              {["1 to n questions per quiz", "Easy / Medium / Hard tagging", "3 student attempts, best score kept"].map((text) => (
+                <div key={text} className="flex items-center gap-3">
+                  <svg className='w-5 h-5 text-orange-400' fill='currentColor' viewBox='0 0 20 20'>
+                    <path fillRule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' clipRule='evenodd' />
+                  </svg>
+                  <span className="text-xs text-[#C7C3D6]">{text}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 text-orange-400 font-semibold group-hover:gap-3 transition-all duration-300 mt-auto">
+              <span>Go to Quizzes</span>
+              <svg className='w-5 h-5 group-hover:translate-x-1 transition-transform duration-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 7l5 5m0 0l-5 5m5-5H6' />
+              </svg>
+            </div>
+          </Link>
+
           {/* Mentors Management Card */}
           <Link
             to="/admin/mentors"

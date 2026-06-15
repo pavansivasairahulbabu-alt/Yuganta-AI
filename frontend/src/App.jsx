@@ -46,6 +46,8 @@ import AdminVideoManage from "./pages/AdminVideoManage";
 import AdminVideoCategories from "./pages/AdminVideoCategories";
 import AdminMentorshipBookings from "./pages/AdminMentorshipBookings";
 import AdminCalls from "./pages/AdminCalls";
+import AdminQuizManagement from "./pages/AdminQuizManagement";
+import StudentQuizPage from "./pages/StudentQuizPage";
 import InstructorForgotPasswordPage from "./pages/InstructorForgotPasswordPage";
 import BlogsPage from "./pages/BlogsPage";
 import BlogDetailPage from "./pages/BlogDetailPage";
@@ -318,6 +320,14 @@ export default function App() {
 										}
 									/>
 									<Route
+										path='/courses/:courseId/quiz/:quizId'
+										element={
+											<NoFooterLayout>
+												<StudentQuizPage />
+											</NoFooterLayout>
+										}
+									/>
+									<Route
 										path='/courses/agentic-ai-crash-course-page'
 										element={
 											<CoursesLayout>
@@ -459,6 +469,7 @@ export default function App() {
 									<Route path='/admin/video-upload' element={<AdminVideoUpload />} />
 									<Route path='/admin/video-manage' element={<AdminVideoManage />} />
 									<Route path='/admin/video-categories' element={<AdminVideoCategories />} />
+									<Route path='/admin/quizzes' element={<AdminQuizManagement />} />
 									<Route path='/admin/assign-instructors' element={<AdminAssignInstructors />} />
 									<Route path='/admin/registrations' element={<AdminRegistrations />} />
 

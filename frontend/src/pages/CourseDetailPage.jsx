@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import API_URL from "../config/api";
 import { useAuth } from "../context/AuthContext";
-import { FileText, CheckCircle2, PlayCircle, LayoutDashboard, Loader2, AlertTriangle, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
+import { FileText, CheckCircle2, PlayCircle, LayoutDashboard, Loader2, AlertTriangle, ChevronDown, ChevronUp, BookOpen, ClipboardList } from "lucide-react";
 import SecurePDFViewer from "../components/SecurePDFViewer";
 export default function CourseDetailPage() {
 	const { id } = useParams();
@@ -13,6 +13,7 @@ export default function CourseDetailPage() {
 	const [selectedVideo, setSelectedVideo] = useState(null);
 	const [activeModule, setActiveModule] = useState(null);
 	const [completedVideos, setCompletedVideos] = useState(new Set());
+	const [moduleQuizzes, setModuleQuizzes] = useState([]);
 	const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 	const [moduleProgress, setModuleProgress] = useState({});
 	const [videoWatchPercent, setVideoWatchPercent] = useState({});
@@ -26,6 +27,7 @@ export default function CourseDetailPage() {
 	const [leftPanelWidth, setLeftPanelWidth] = useState(300);
 	const [isResizingLeftPanel, setIsResizingLeftPanel] = useState(false);
 	const layoutRef = useRef(null);
+	const [mobilePanelTab, setMobilePanelTab] = useState("content");
 
 	// New state for handling the secure PDF modal
 	const [viewingDocument, setViewingDocument] = useState(null);
@@ -48,6 +50,17 @@ export default function CourseDetailPage() {
 		const urlPart = resolveVideoUrl(video);
 		const orderPart = Number(video?.order) || videoIndex + 1;
 		return `${moduleIndex}:${orderPart}:${urlPart || (video?.title || "untitled")}`;
+	};
+
+	const getModuleId = (module, moduleIndex) => module?._id?.toString() || `module-${moduleIndex + 1}`;
+	const getModuleQuiz = (module, moduleIndex) => {
+		const moduleId = getModuleId(module, moduleIndex);
+		return moduleQuizzes.find((item) => item.moduleId === moduleId)?.quiz || null;
+	};
+	const isModuleComplete = (module, moduleIndex) => {
+		const videos = module?.videos || [];
+		if (videos.length === 0) return false;
+		return videos.every((video, videoIndex) => completedVideos.has(getVideoKey(moduleIndex, videoIndex, video)));
 	};
 
 	const selectedVideoIndex = useMemo(() => {
@@ -116,6 +129,14 @@ export default function CourseDetailPage() {
 				if (progressResponse.ok) {
 					progressData = await progressResponse.json();
 					setCompletedVideos(new Set(progressData.completedVideos || []));
+				}
+
+				const quizResponse = await fetch(`${API_URL}/api/quizzes/course/${id}`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				if (quizResponse.ok) {
+					const quizData = await quizResponse.json();
+					setModuleQuizzes(Array.isArray(quizData.modules) ? quizData.modules : []);
 				}
 			}
 
@@ -382,24 +403,24 @@ export default function CourseDetailPage() {
 	}
 
 	return (
-		<div className='h-[calc(100vh-64px)] flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] font-sans overflow-hidden'>
+		<div className='min-h-[calc(100dvh-64px)] lg:h-[calc(100dvh-64px)] flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] font-sans overflow-hidden'>
 
 			{/* Top Navigation Bar */}
-			<div className='flex-none bg-[var(--bg-card)] border-b border-gray-500/20 px-6 py-3 flex items-center justify-between z-20'>
-				<div className='flex items-center space-x-3 text-sm font-medium'>
+			<div className='flex-none bg-[var(--bg-card)] border-b border-gray-500/20 px-4 sm:px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 z-20'>
+				<div className='flex items-center space-x-3 text-sm font-medium min-w-0'>
 					<Link to='/courses' className='flex items-center space-x-2 text-[var(--text-primary)] hover:text-[#00BCD4] transition-colors'>
 						<LayoutDashboard className='w-4 h-4' />
-						<span className="hidden md:inline">Courses</span>
+						<span className="hidden sm:inline">Courses</span>
 					</Link>
 					<span className='text-gray-500'>/</span>
-					<span className='text-[var(--text-primary)] font-bold truncate max-w-[200px] md:max-w-md lg:max-w-lg'>
+					<span className='text-[var(--text-primary)] font-bold truncate max-w-[180px] sm:max-w-xs md:max-w-md lg:max-w-lg'>
 						{course.title}
 					</span>
 				</div>
 
-				<div className="flex items-center space-x-4 md:space-x-6">
+				<div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 md:gap-6 w-full sm:w-auto">
 					{/* Focus Mode Toggle */}
-					<div className="flex items-center space-x-2 md:space-x-3 bg-[var(--bg-primary)] border border-gray-500/20 px-3 py-1.5 rounded-full cursor-pointer hover:border-gray-500/40 transition-colors" onClick={() => setIsStudyMode(!isStudyMode)}>
+					<div className="flex items-center space-x-2 md:space-x-3 bg-[var(--bg-primary)] border border-gray-500/20 px-3 py-1.5 rounded-full cursor-pointer hover:border-gray-500/40 transition-colors shrink-0" onClick={() => setIsStudyMode(!isStudyMode)}>
 						<span className="hidden md:inline text-xs font-semibold text-gray-500">Study Mode</span>
 						<div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-300 ${isStudyMode ? 'bg-[#00BCD4]' : 'bg-gray-500/30'}`}>
 							<span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isStudyMode ? 'translate-x-4' : 'translate-x-0.5'}`} />
@@ -407,9 +428,9 @@ export default function CourseDetailPage() {
 					</div>
 
 					{/* Progress Indicator */}
-					<div className="flex flex-col items-end min-w-[100px] md:min-w-[120px]">
+					<div className="flex flex-col items-end min-w-[92px] sm:min-w-[100px] md:min-w-[120px]">
 						<div className="flex items-center justify-between w-full mb-1">
-							<span className='text-[10px] text-gray-500 font-bold uppercase tracking-widest'>Progress</span>
+							<span className='text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest'>Progress</span>
 							<span className='text-xs font-bold text-[#00BCD4]'>{Math.round(overallProgress)}%</span>
 						</div>
 						<div className="w-full h-1.5 bg-gray-500/20 rounded-full overflow-hidden">
@@ -423,7 +444,7 @@ export default function CourseDetailPage() {
 			<div
 				ref={layoutRef}
 				style={{ "--left-panel-width": `${leftPanelWidth}px` }}
-				className={`flex-1 overflow-hidden grid transition-all duration-300 ${isStudyMode
+				className={`flex-1 min-h-0 overflow-y-auto lg:overflow-hidden grid transition-all duration-300 ${isStudyMode
 					? 'grid-cols-1 lg:grid-cols-[1fr_350px] xl:grid-cols-[1fr_400px]'
 					: 'grid-cols-1 lg:[grid-template-columns:var(--left-panel-width)_8px_minmax(0,1fr)_320px] xl:[grid-template-columns:var(--left-panel-width)_8px_minmax(0,1fr)_380px]'
 					}`}>
@@ -452,9 +473,9 @@ export default function CourseDetailPage() {
 											{isActiveModule ? <ChevronUp className="w-4 h-4 text-[#00BCD4] shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />}
 										</button>
 
-										{isActiveModule && module.videos && module.videos.length > 0 && (
+										{isActiveModule && (
 											<div className='flex flex-col pb-2 px-2'>
-												{module.videos.sort((a, b) => a.order - b.order).map((video, videoIndex) => {
+												{module.videos && module.videos.length > 0 && module.videos.sort((a, b) => a.order - b.order).map((video, videoIndex) => {
 													const videoKey = getVideoKey(moduleIndex, videoIndex, video);
 													const isCompleted = completedVideos.has(videoKey);
 													const isSelected = normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video);
@@ -488,6 +509,7 @@ export default function CourseDetailPage() {
 														</button>
 													);
 												})}
+												<ModuleQuizLink courseId={id} module={module} moduleIndex={moduleIndex} quiz={getModuleQuiz(module, moduleIndex)} unlocked={isModuleComplete(module, moduleIndex)} />
 											</div>
 										)}
 									</div>
@@ -514,7 +536,7 @@ export default function CourseDetailPage() {
 				)}
 
 				{/* COLUMN 2: CENTER VIDEO PLAYER */}
-				<div className="flex flex-col h-full bg-black relative shadow-[0_0_30px_rgba(0,0,0,0.5)] z-10 w-full overflow-hidden">
+				<div className="flex flex-col h-full min-h-0 bg-black relative shadow-[0_0_30px_rgba(0,0,0,0.5)] z-10 w-full overflow-hidden">
 					{selectedVideo ? (
 						<>
 							<video
@@ -524,7 +546,7 @@ export default function CourseDetailPage() {
 								onContextMenu={(e) => e.preventDefault()}
 								playsInline
 								preload='metadata'
-								className='w-full h-full object-contain'
+								className='w-full aspect-video lg:aspect-auto lg:h-full max-h-full object-contain bg-black'
 								src={activeVideoSource || selectedVideo.url}
 								ref={selectedVideoElementRef}
 								onError={handleVideoError}
@@ -552,18 +574,162 @@ export default function CourseDetailPage() {
 							)}
 						</>
 					) : (
-						<div className='flex-1 flex items-center justify-center bg-[var(--bg-primary)] h-full'>
-							<div className='text-center p-8'>
-								<PlayCircle className='w-16 h-16 text-gray-600 mx-auto mb-4' />
-								<h3 className="text-xl font-bold text-[var(--text-primary)]">Ready to Learn?</h3>
+						<div className='flex-1 flex items-center justify-center bg-[var(--bg-primary)] h-full min-h-[280px]'>
+							<div className='text-center p-6 sm:p-8'>
+								<PlayCircle className='w-14 h-14 sm:w-16 sm:h-16 text-gray-600 mx-auto mb-4' />
+								<h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">Ready to Learn?</h3>
 								<p className='text-gray-500 text-sm mt-2'>Select a lesson from the sidebar.</p>
 							</div>
 						</div>
 					)}
 				</div>
 
+				{/* MOBILE CONTENT SHEET */}
+				<div className="lg:hidden px-4 pb-6 pt-4 space-y-4">
+					<div className="rounded-2xl border border-gray-500/20 bg-[var(--bg-card)] overflow-hidden">
+						<div className="grid grid-cols-3 border-b border-gray-500/20">
+							{[
+								{ id: "content", label: "Content" },
+								{ id: "overview", label: "Overview" },
+								{ id: "resources", label: "Resources" },
+							].map((tab) => (
+								<button
+									key={tab.id}
+									onClick={() => setMobilePanelTab(tab.id)}
+									className={`py-3 text-xs sm:text-sm font-bold uppercase tracking-wider transition-colors ${mobilePanelTab === tab.id ? "text-[#00BCD4] bg-white/5" : "text-gray-500 hover:text-[var(--text-primary)]"}`}
+								>
+									{tab.label}
+								</button>
+							))}
+						</div>
+
+						<div className="p-4 sm:p-5">
+							{mobilePanelTab === "content" && (
+								<div className="space-y-4">
+									<div>
+										<p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Course Content</p>
+										<h3 className="text-lg font-extrabold text-[var(--text-primary)] leading-tight">{course.title}</h3>
+										<p className="text-xs text-gray-500 mt-1">{completedVideos.size} / {course.modules?.reduce((sum, m) => sum + (m.videos?.length || 0), 0)} lessons</p>
+									</div>
+
+									<div className="space-y-2">
+										{course.modules.sort((a, b) => a.order - b.order).map((module, moduleIndex) => {
+											const isActiveModule = activeModule === moduleIndex;
+											return (
+												<div key={`mobile-${moduleIndex}`} className={`rounded-xl overflow-hidden border ${isActiveModule ? 'border-[#00BCD4]/40 bg-[#00BCD4]/10' : 'border-gray-500/10 bg-[var(--bg-primary)]'}`}>
+													<button
+														onClick={() => setActiveModule(isActiveModule ? null : moduleIndex)}
+														className="w-full px-4 py-3 flex items-center justify-between text-left"
+													>
+														<div className="min-w-0 pr-3">
+															<p className={`text-sm font-bold truncate ${isActiveModule ? 'text-[#00BCD4]' : 'text-[var(--text-primary)]'}`}>{module.title}</p>
+															<p className="text-[10px] text-gray-500 mt-0.5">{module.videos?.length || 0} lessons</p>
+														</div>
+														{isActiveModule ? <ChevronUp className="w-4 h-4 text-[#00BCD4] shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />}
+													</button>
+
+													{isActiveModule && (
+														<div className="px-2 pb-2">
+															{module.videos?.length > 0 && module.videos.sort((a, b) => a.order - b.order).map((video, videoIndex) => {
+																const videoKey = getVideoKey(moduleIndex, videoIndex, video);
+																const isCompleted = completedVideos.has(videoKey);
+																const isSelected = normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video);
+
+																return (
+																	<button
+																		key={`mobile-video-${videoIndex}`}
+																		onClick={() => handleVideoSelect(video, moduleIndex)}
+																		className={`w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 mb-1 ${isSelected ? "bg-[var(--bg-card)] border border-[#00BCD4]/25" : "hover:bg-white/5"}`}
+																	>
+																		{isCompleted ? (
+																			<CheckCircle2 className={`w-4 h-4 ${isSelected ? 'text-[#00BCD4]' : 'text-green-500'}`} />
+																		) : (
+																			<PlayCircle className="w-4 h-4 text-gray-500 shrink-0" />
+																		)}
+																		<div className="min-w-0 flex-1">
+																			<p className={`text-sm truncate ${isSelected ? "text-[var(--text-primary)] font-bold" : "text-[var(--text-color)]"}`}>{video.title}</p>
+																			{video.duration && <p className="text-[10px] text-gray-500 mt-0.5">{video.duration}</p>}
+																		</div>
+																	</button>
+																);
+															})}
+															<ModuleQuizLink courseId={id} module={module} moduleIndex={moduleIndex} quiz={getModuleQuiz(module, moduleIndex)} unlocked={isModuleComplete(module, moduleIndex)} />
+														</div>
+													)}
+												</div>
+											);
+										})}
+									</div>
+								</div>
+							)}
+
+							{mobilePanelTab === "overview" && (
+								<div className="space-y-4">
+									<div>
+										<p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Overview</p>
+										<h3 className="text-lg font-extrabold text-[var(--text-primary)] leading-tight">{selectedVideo?.title || course.title}</h3>
+									</div>
+									<p className="text-sm text-[var(--text-color)] opacity-80 leading-relaxed whitespace-pre-wrap">
+										{selectedVideo?.description || course.description || "No description provided for this lesson."}
+									</p>
+								</div>
+							)}
+
+							{mobilePanelTab === "resources" && (
+								<div className="space-y-4">
+									<div>
+										<p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Resources</p>
+										<h3 className="text-lg font-extrabold text-[var(--text-primary)] leading-tight">{selectedVideo?.title || course.title}</h3>
+									</div>
+									{selectedVideo?.documents?.length > 0 ? (
+										<div className="space-y-3">
+											{selectedVideo.documents.map((doc, idx) => (
+												<div key={`mobile-doc-${idx}`} className="flex items-center justify-between gap-3 p-3 rounded-xl border border-gray-500/20 bg-[var(--bg-primary)]">
+													<div className="min-w-0">
+														<p className="text-sm font-semibold text-[var(--text-primary)] truncate">{doc.name}</p>
+														{formatDocumentSize(doc.size) && <p className="text-[10px] text-gray-500 mt-0.5">{formatDocumentSize(doc.size)}</p>}
+													</div>
+													<button
+														onClick={() => setViewingDocument(doc)}
+														className="px-3 py-2 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-[#00BCD4] to-blue-500"
+													>
+														View
+													</button>
+												</div>
+											))}
+										</div>
+									) : (
+										<p className="text-sm text-gray-500">No resources attached to this lesson.</p>
+									)}
+								</div>
+							)}
+						</div>
+					</div>
+
+					<div className="flex items-center gap-3">
+						<button
+							onClick={markVideoCompleted}
+							disabled={isMarkingComplete || completedVideos.has(selectedVideoKey) || !selectedVideoCanComplete}
+							className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center space-x-2 text-sm ${completedVideos.has(selectedVideoKey)
+								? 'bg-green-500/10 text-green-500 border border-green-500/30'
+								: selectedVideoCanComplete
+									? 'bg-[#00BCD4] text-white'
+									: 'bg-[var(--bg-card)] text-gray-500 border border-gray-500/20 cursor-not-allowed'
+								}`}
+						>
+							{isMarkingComplete ? (
+								<><Loader2 className='animate-spin h-4 w-4' /><span>Saving...</span></>
+							) : completedVideos.has(selectedVideoKey) ? (
+								<><CheckCircle2 className='w-4 h-4' /><span>Completed</span></>
+							) : (
+								<><span>Mark as Completed</span><span className="opacity-70 text-[10px]">({Math.min(100, Math.round(selectedVideoWatched))}%)</span></>
+							)}
+						</button>
+					</div>
+				</div>
+
 				{/* COLUMN 3: RIGHT SIDEBAR (Stacked Overview & Resources) */}
-				<div className="hidden lg:flex flex-col bg-[var(--bg-primary)] border-l border-gray-500/20 h-full overflow-hidden">
+				<div className="hidden lg:flex flex-col bg-[var(--bg-primary)] border-l border-gray-500/20 h-full overflow-hidden min-h-0">
 					{selectedVideo ? (
 						<div className="flex flex-col h-full">
 
@@ -684,5 +850,55 @@ export default function CourseDetailPage() {
 				/>
 			)}
 		</div>
+	);
+}
+
+function ModuleQuizLink({ courseId, module, moduleIndex, quiz, unlocked }) {
+	if (!quiz) {
+		return (
+			<div className="mt-2 rounded-lg border border-gray-500/10 bg-[var(--bg-primary)]/60 p-3 text-left">
+				<div className="flex items-center gap-3">
+					<ClipboardList className="w-4 h-4 text-gray-500 shrink-0" />
+					<div className="min-w-0">
+						<p className="text-[13px] font-bold text-[var(--text-color)] opacity-70">Module Quiz</p>
+						<p className="text-[10px] text-gray-500 mt-0.5">Not published yet</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	const bestAttempt = quiz.bestAttempt;
+	const moduleTitle = module?.title || `Module ${moduleIndex + 1}`;
+
+	if (!unlocked) {
+		return (
+			<div className="mt-2 rounded-lg border border-gray-500/10 bg-[var(--bg-primary)]/60 p-3 text-left opacity-70">
+				<div className="flex items-center gap-3">
+					<ClipboardList className="w-4 h-4 text-gray-500 shrink-0" />
+					<div className="min-w-0">
+						<p className="text-[13px] font-bold text-[var(--text-color)] truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
+						<p className="text-[10px] text-gray-500 mt-0.5">Complete all lessons to unlock</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<Link
+			to={`/courses/${courseId}/quiz/${quiz._id}`}
+			className="mt-2 rounded-lg border border-orange-500/25 bg-orange-500/10 p-3 text-left transition-all hover:border-orange-500/60 hover:bg-orange-500/15 flex items-center gap-3"
+		>
+			<ClipboardList className="w-4 h-4 text-orange-400 shrink-0" />
+			<div className="min-w-0 flex-1">
+				<p className="text-[13px] font-bold text-orange-300 truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
+				<p className="text-[10px] text-orange-200/70 mt-0.5">
+					{bestAttempt
+						? `Best: ${bestAttempt.score}/${bestAttempt.totalMarks} • Attempts left: ${quiz.attemptsRemaining ?? 0}`
+						: `${quiz.totalQuestions || 0} questions • ${quiz.maxAttempts || 3} attempts`}
+				</p>
+			</div>
+		</Link>
 	);
 }
