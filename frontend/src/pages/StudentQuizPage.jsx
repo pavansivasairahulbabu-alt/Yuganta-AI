@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -85,8 +86,8 @@ export default function StudentQuizPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-[#101010] flex items-center justify-center">
-				<Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+			<div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
+				<Loader2 className="w-10 h-10 text-[#3B82F6] animate-spin" />
 			</div>
 		);
 	}
@@ -94,16 +95,16 @@ export default function StudentQuizPage() {
 	if (!quiz) return null;
 
 	return (
-		<div className="min-h-[calc(100dvh-64px)] bg-[#101010] text-white">
+		<div className="min-h-[calc(100dvh-64px)] bg-[var(--bg-primary)] text-[var(--text-color)]">
 			<div className="grid min-h-[calc(100dvh-64px)] grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)]">
-				<aside className="hidden lg:flex flex-col border-r border-white/10 bg-[#171717]">
-					<div className="p-5 border-b border-white/10">
-						<Link to={`/courses/${courseId}`} className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white">
+				<aside className="hidden lg:flex flex-col border-r border-[var(--border-primary)] bg-[var(--card-bg)]">
+					<div className="p-5 border-b border-[var(--border-primary)]">
+						<Link to={`/courses/${courseId}`} className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-color)]">
 							<ArrowLeft className="w-4 h-4" /> Back to course
 						</Link>
-						<h1 className="mt-5 text-lg font-extrabold leading-tight">{quiz.moduleTitle}</h1>
-						<p className="text-sm text-gray-500 mt-1">{answeredCount}/{quiz.questions.length} answered</p>
-						<p className="text-sm text-orange-400 mt-2">{attemptsRemaining}/{maxAttempts} attempts left</p>
+						<h1 className="mt-5 text-lg font-extrabold leading-tight text-[var(--text-color)]">{quiz.moduleTitle}</h1>
+						<p className="text-sm text-[var(--text-muted)] mt-1">{answeredCount}/{quiz.questions.length} answered</p>
+						<p className="text-sm text-[#3B82F6] mt-2">{attemptsRemaining}/{maxAttempts} attempts left</p>
 					</div>
 					<div className="p-4 space-y-2 overflow-y-auto">
 						{quiz.questions.map((question, index) => (
@@ -113,17 +114,16 @@ export default function StudentQuizPage() {
 									setStarted(true);
 									setActiveIndex(index);
 								}}
-								className={`w-full rounded-xl px-4 py-3 text-left transition border ${
-									activeIndex === index
-										? "border-orange-500 bg-orange-500/10 text-white"
-										: "border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
-								}`}
+								className={`w-full rounded-xl px-4 py-3 text-left transition border ${activeIndex === index
+										? "border-[#3B82F6] bg-[#3B82F6]/10 text-[var(--text-color)]"
+										: "border-[var(--border-primary)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-[var(--text-color)]"
+									}`}
 							>
 								<div className="flex items-center justify-between gap-3">
 									<span className="font-bold text-sm">Question {index + 1}</span>
-									<span className={`h-2.5 w-2.5 rounded-full ${answers[question._id] ? "bg-green-500" : "bg-gray-600"}`} />
+									<span className={`h-2.5 w-2.5 rounded-full ${answers[question._id] ? "bg-green-500" : "bg-[var(--text-muted)]/30"}`} />
 								</div>
-								<p className="text-xs truncate mt-1">{question.title}</p>
+								<p className="text-xs truncate mt-1 text-[var(--text-muted)]">{question.title}</p>
 							</button>
 						))}
 					</div>
@@ -135,14 +135,14 @@ export default function StudentQuizPage() {
 					) : !started ? (
 						<div className="min-h-[calc(100dvh-130px)] flex items-center justify-center">
 							<div className="max-w-xl text-center">
-								<div className="mx-auto mb-6 h-20 w-20 rounded-2xl bg-orange-500/15 border border-orange-500/40 flex items-center justify-center">
-									<ClipboardList className="w-10 h-10 text-orange-400" />
+								<div className="mx-auto mb-6 h-20 w-20 rounded-2xl bg-[#3B82F6]/15 border border-[#3B82F6]/40 flex items-center justify-center">
+									<ClipboardList className="w-10 h-10 text-[#3B82F6]" />
 								</div>
-								<h2 className="text-2xl md:text-3xl font-extrabold">Ready For Quiz On {quiz.moduleTitle}?</h2>
-								<p className="mt-3 text-gray-500">Let's get started and see how much you've learned</p>
-								<div className="mt-8 rounded-2xl border border-white/10 bg-[#202020] p-5 text-left">
-									<h3 className="font-bold mb-4">Instructions</h3>
-									<ul className="space-y-3 text-sm text-gray-400 list-disc pl-5">
+								<h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text-color)]">Ready For Quiz On {quiz.moduleTitle}?</h2>
+								<p className="mt-3 text-[var(--text-muted)]">Let's get started and see how much you've learned</p>
+								<div className="mt-8 rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-5 text-left">
+									<h3 className="font-bold text-[var(--text-color)] mb-4">Instructions</h3>
+									<ul className="space-y-3 text-sm text-[var(--text-muted)] list-disc pl-5">
 										<li>This quiz consists of {quiz.questions.length} question{quiz.questions.length === 1 ? "" : "s"}</li>
 										<li>Each question has multiple options, but only one correct answer</li>
 										<li>There is no negative marking for incorrect answers or unanswered questions</li>
@@ -150,11 +150,15 @@ export default function StudentQuizPage() {
 									</ul>
 								</div>
 								{quiz.bestAttempt && (
-									<div className="mt-4 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+									<div className="mt-4 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-500">
 										Best Score: {quiz.bestAttempt.score}/{quiz.bestAttempt.totalMarks} ({quiz.bestAttempt.percentage}%)
 									</div>
 								)}
-								<button disabled={attemptsRemaining <= 0} onClick={() => setStarted(true)} className="mt-6 rounded-xl bg-orange-600 px-6 py-3 font-bold text-white hover:bg-orange-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
+								<button
+									disabled={attemptsRemaining <= 0}
+									onClick={() => setStarted(true)}
+									className="mt-6 rounded-xl bg-[#3B82F6] px-6 py-3 font-bold text-white hover:bg-[#2563EB] transition disabled:opacity-50 disabled:cursor-not-allowed"
+								>
 									{attemptsRemaining <= 0 ? "No Attempts Left" : "Start Now"}
 								</button>
 							</div>
@@ -163,19 +167,23 @@ export default function StudentQuizPage() {
 						<div className="max-w-4xl mx-auto">
 							<div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 								<div>
-									<p className="text-sm text-orange-400 font-bold">Question {activeIndex + 1} of {quiz.questions.length}</p>
-									<h1 className="text-2xl md:text-3xl font-extrabold mt-1">{quiz.title}</h1>
-									<p className="text-sm text-gray-500 mt-2">Attempts left: {attemptsRemaining}/{maxAttempts}</p>
+									<p className="text-sm text-[#3B82F6] font-bold">Question {activeIndex + 1} of {quiz.questions.length}</p>
+									<h1 className="text-2xl md:text-3xl font-extrabold mt-1 text-[var(--text-color)]">{quiz.title}</h1>
+									<p className="text-sm text-[var(--text-muted)] mt-2">Attempts left: {attemptsRemaining}/{maxAttempts}</p>
 								</div>
-								<div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-gray-300">{answeredCount}/{quiz.questions.length} answered</div>
+								<div className="rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-4 py-2 text-sm text-[var(--text-muted)]">
+									{answeredCount}/{quiz.questions.length} answered
+								</div>
 							</div>
 
-							<div className="rounded-2xl border border-white/10 bg-[#171717] p-5 md:p-7">
+							<div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-5 md:p-7">
 								<div className="flex items-start justify-between gap-4">
 									<div>
-										<p className="text-xs uppercase tracking-widest text-gray-500">{activeQuestion.difficulty} • {activeQuestion.topic || "General"}</p>
-										<h2 className="mt-3 text-xl md:text-2xl font-bold leading-snug">{activeQuestion.title}</h2>
-										{activeQuestion.description && <p className="mt-3 text-gray-400">{activeQuestion.description}</p>}
+										<p className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
+											{activeQuestion.difficulty} • {activeQuestion.topic || "General"}
+										</p>
+										<h2 className="mt-3 text-xl md:text-2xl font-bold leading-snug text-[var(--text-color)]">{activeQuestion.title}</h2>
+										{activeQuestion.description && <p className="mt-3 text-[var(--text-muted)]">{activeQuestion.description}</p>}
 									</div>
 								</div>
 
@@ -186,13 +194,14 @@ export default function StudentQuizPage() {
 											<button
 												key={option.key}
 												onClick={() => setAnswers((prev) => ({ ...prev, [activeQuestion._id]: option.key }))}
-												className={`rounded-2xl border px-5 py-4 text-left transition ${
-													selected
-														? "border-orange-500 bg-orange-500/12 text-white"
-														: "border-white/10 bg-white/[0.03] text-gray-300 hover:border-orange-500/50 hover:text-white"
-												}`}
+												className={`rounded-2xl border px-5 py-4 text-left transition ${selected
+														? "border-[#3B82F6] bg-[#3B82F6]/12 text-[var(--text-color)]"
+														: "border-[var(--border-primary)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:border-[#3B82F6]/50 hover:text-[var(--text-color)]"
+													}`}
 											>
-												<span className="mr-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 font-bold">{option.key}</span>
+												<span className="mr-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-primary)] font-bold text-[var(--text-color)]">
+													{option.key}
+												</span>
 												{option.text}
 											</button>
 										);
@@ -204,14 +213,23 @@ export default function StudentQuizPage() {
 								<button
 									onClick={() => setActiveIndex((prev) => Math.max(0, prev - 1))}
 									disabled={activeIndex === 0}
-									className="rounded-xl border border-white/10 px-5 py-3 font-semibold text-gray-300 disabled:opacity-40"
+									className="rounded-xl border border-[var(--border-primary)] px-5 py-3 font-semibold text-[var(--text-muted)] bg-[var(--bg-secondary)] disabled:opacity-40 hover:text-[var(--text-color)]"
 								>
 									Previous
 								</button>
 								{activeIndex < quiz.questions.length - 1 ? (
-									<button onClick={() => setActiveIndex((prev) => prev + 1)} className="rounded-xl bg-orange-600 px-5 py-3 font-bold text-white hover:bg-orange-500">Next</button>
+									<button
+										onClick={() => setActiveIndex((prev) => prev + 1)}
+										className="rounded-xl bg-[#3B82F6] px-5 py-3 font-bold text-white hover:bg-[#2563EB]"
+									>
+										Next
+									</button>
 								) : (
-									<button onClick={submitQuiz} disabled={submitting} className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-500 disabled:opacity-60">
+									<button
+										onClick={submitQuiz}
+										disabled={submitting}
+										className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white hover:bg-green-500 disabled:opacity-60"
+									>
 										{submitting ? "Submitting..." : "Submit Quiz"}
 									</button>
 								)}
@@ -228,18 +246,18 @@ function ResultView({ result, courseId }) {
 	const mistakes = (result.answers || []).filter((answer) => !answer.isCorrect);
 	return (
 		<div className="max-w-5xl mx-auto space-y-6">
-			<div className="rounded-2xl border border-white/10 bg-[#171717] p-6 md:p-8">
+			<div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
-						<p className="text-sm text-orange-400 font-bold uppercase tracking-widest">Quiz Result</p>
-						<h1 className="text-3xl md:text-4xl font-extrabold mt-2">Score: {result.score}/{result.totalMarks}</h1>
-						<p className="text-gray-400 mt-2">Percentage: {result.percentage}%</p>
+						<p className="text-sm text-[#3B82F6] font-bold uppercase tracking-widest">Quiz Result</p>
+						<h1 className="text-3xl md:text-4xl font-extrabold mt-2 text-[var(--text-color)]">Score: {result.score}/{result.totalMarks}</h1>
+						<p className="text-[var(--text-muted)] mt-2">Percentage: {result.percentage}%</p>
 						{result.bestAttempt && (
-							<p className="text-green-400 mt-2">Best Score: {result.bestAttempt.score}/{result.bestAttempt.totalMarks} ({result.bestAttempt.percentage}%)</p>
+							<p className="text-green-500 mt-2">Best Score: {result.bestAttempt.score}/{result.bestAttempt.totalMarks} ({result.bestAttempt.percentage}%)</p>
 						)}
-						<p className="text-gray-500 mt-2">Attempts used: {result.attemptCount}/{result.maxAttempts}</p>
+						<p className="text-[var(--text-muted)] mt-2">Attempts used: {result.attemptCount}/{result.maxAttempts}</p>
 					</div>
-					<div className={`rounded-2xl px-5 py-4 border ${result.status === "Passed" ? "border-green-500/40 bg-green-500/10 text-green-400" : "border-red-500/40 bg-red-500/10 text-red-400"}`}>
+					<div className={`rounded-2xl px-5 py-4 border ${result.status === "Passed" ? "border-green-500/40 bg-green-500/10 text-green-500" : "border-red-500/40 bg-red-500/10 text-red-500"}`}>
 						{result.status === "Passed" ? <CheckCircle2 className="w-8 h-8 mb-2" /> : <XCircle className="w-8 h-8 mb-2" />}
 						<p className="font-extrabold">Status: {result.status}</p>
 					</div>
@@ -251,30 +269,32 @@ function ResultView({ result, courseId }) {
 				</div>
 				{result.topicsNeedingImprovement?.length > 0 && (
 					<div className="mt-6">
-						<p className="text-sm text-gray-500 mb-2">Topics needing improvement</p>
+						<p className="text-sm text-[var(--text-muted)] mb-2">Topics needing improvement</p>
 						<div className="flex flex-wrap gap-2">
 							{result.topicsNeedingImprovement.map((topic) => (
-								<span key={topic} className="rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-sm text-orange-300">{topic}</span>
+								<span key={topic} className="rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-sm text-[#3B82F6]">
+									{topic}
+								</span>
 							))}
 						</div>
 					</div>
 				)}
 			</div>
 
-			<div className="rounded-2xl border border-white/10 bg-[#171717] p-6 md:p-8">
-				<h2 className="text-2xl font-extrabold mb-5">Mistake Review</h2>
+			<div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--card-bg)] p-6 md:p-8">
+				<h2 className="text-2xl font-extrabold text-[var(--text-color)] mb-5">Mistake Review</h2>
 				{mistakes.length === 0 ? (
-					<p className="text-green-400 font-semibold">Perfect. No incorrect answers.</p>
+					<p className="text-green-500 font-semibold">Perfect. No incorrect answers.</p>
 				) : (
 					<div className="space-y-4">
 						{mistakes.map((answer) => (
 							<div key={answer.questionId} className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-5">
-								<h3 className="font-bold text-lg">{answer.questionTitle}</h3>
-								<p className="mt-3 text-red-300">Your Answer: {answer.selectedAnswerText || "Not answered"} - Incorrect</p>
-								<p className="mt-2 text-green-300">Correct Answer: {answer.correctAnswerText} - Correct</p>
-								<div className="mt-4 rounded-xl bg-black/25 border border-white/10 p-4">
-									<p className="text-sm text-gray-500 mb-1">Explanation</p>
-									<p className="text-gray-300 leading-relaxed">{answer.explanation}</p>
+								<h3 className="font-bold text-lg text-[var(--text-color)]">{answer.questionTitle}</h3>
+								<p className="mt-3 text-red-400">Your Answer: {answer.selectedAnswerText || "Not answered"} - Incorrect</p>
+								<p className="mt-2 text-green-400">Correct Answer: {answer.correctAnswerText} - Correct</p>
+								<div className="mt-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-primary)] p-4">
+									<p className="text-sm text-[var(--text-muted)] mb-1">Explanation</p>
+									<p className="text-[var(--text-color)] leading-relaxed">{answer.explanation}</p>
 								</div>
 							</div>
 						))}
@@ -282,7 +302,7 @@ function ResultView({ result, courseId }) {
 				)}
 			</div>
 
-			<Link to={`/courses/${courseId}`} className="inline-flex rounded-xl bg-orange-600 px-5 py-3 font-bold text-white hover:bg-orange-500">
+			<Link to={`/courses/${courseId}`} className="inline-flex rounded-xl bg-[#3B82F6] px-5 py-3 font-bold text-white hover:bg-[#2563EB]">
 				Back to Course
 			</Link>
 		</div>
@@ -291,9 +311,9 @@ function ResultView({ result, courseId }) {
 
 function SummaryCard({ label, value }) {
 	return (
-		<div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-			<p className="text-2xl font-extrabold">{value}</p>
-			<p className="text-sm text-gray-500 mt-1">{label}</p>
+		<div className="rounded-2xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+			<p className="text-2xl font-extrabold text-[var(--text-color)]">{value}</p>
+			<p className="text-sm text-[var(--text-muted)] mt-1">{label}</p>
 		</div>
 	);
 }

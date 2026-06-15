@@ -853,15 +853,64 @@ export default function CourseDetailPage() {
 	);
 }
 
+// function ModuleQuizLink({ courseId, module, moduleIndex, quiz, unlocked }) {
+// 	if (!quiz) {
+// 		return (
+// 			<div className="mt-2 rounded-lg border border-gray-500/10 bg-[var(--bg-primary)]/60 p-3 text-left">
+// 				<div className="flex items-center gap-3">
+// 					<ClipboardList className="w-4 h-4 text-gray-500 shrink-0" />
+// 					<div className="min-w-0">
+// 						<p className="text-[13px] font-bold text-[var(--text-color)] opacity-70">Module Quiz</p>
+// 						<p className="text-[10px] text-gray-500 mt-0.5">Not published yet</p>
+// 					</div>
+// 				</div>
+// 			</div>
+// 		);
+// 	}
+
+// 	const bestAttempt = quiz.bestAttempt;
+// 	const moduleTitle = module?.title || `Module ${moduleIndex + 1}`;
+
+// 	if (!unlocked) {
+// 		return (
+// 			<div className="mt-2 rounded-lg border border-gray-500/10 bg-[var(--bg-primary)]/60 p-3 text-left opacity-70">
+// 				<div className="flex items-center gap-3">
+// 					<ClipboardList className="w-4 h-4 text-gray-500 shrink-0" />
+// 					<div className="min-w-0">
+// 						<p className="text-[13px] font-bold text-[var(--text-color)] truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
+// 						<p className="text-[10px] text-gray-500 mt-0.5">Complete all lessons to unlock</p>
+// 					</div>
+// 				</div>
+// 			</div>
+// 		);
+// 	}
+
+// 	return (
+// 		<Link
+// 			to={`/courses/${courseId}/quiz/${quiz._id}`}
+// 			className="mt-2 rounded-lg border border-orange-500/25 bg-orange-500/10 p-3 text-left transition-all hover:border-orange-500/60 hover:bg-orange-500/15 flex items-center gap-3"
+// 		>
+// 			<ClipboardList className="w-4 h-4 text-orange-400 shrink-0" />
+// 			<div className="min-w-0 flex-1">
+// 				<p className="text-[13px] font-bold text-orange-300 truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
+// 				<p className="text-[10px] text-orange-200/70 mt-0.5">
+// 					{bestAttempt
+// 						? `Best: ${bestAttempt.score}/${bestAttempt.totalMarks} • Attempts left: ${quiz.attemptsRemaining ?? 0}`
+// 						: `${quiz.totalQuestions || 0} questions • ${quiz.maxAttempts || 3} attempts`}
+// 				</p>
+// 			</div>
+// 		</Link>
+// 	);
+// }
 function ModuleQuizLink({ courseId, module, moduleIndex, quiz, unlocked }) {
 	if (!quiz) {
 		return (
-			<div className="mt-2 rounded-lg border border-gray-500/10 bg-[var(--bg-primary)]/60 p-3 text-left">
+			<div className="mt-2 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-primary)]/60 p-3 text-left">
 				<div className="flex items-center gap-3">
-					<ClipboardList className="w-4 h-4 text-gray-500 shrink-0" />
+					<ClipboardList className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
 					<div className="min-w-0">
 						<p className="text-[13px] font-bold text-[var(--text-color)] opacity-70">Module Quiz</p>
-						<p className="text-[10px] text-gray-500 mt-0.5">Not published yet</p>
+						<p className="text-[10px] text-[var(--text-muted)] mt-0.5">Not published yet</p>
 					</div>
 				</div>
 			</div>
@@ -873,12 +922,12 @@ function ModuleQuizLink({ courseId, module, moduleIndex, quiz, unlocked }) {
 
 	if (!unlocked) {
 		return (
-			<div className="mt-2 rounded-lg border border-gray-500/10 bg-[var(--bg-primary)]/60 p-3 text-left opacity-70">
+			<div className="mt-2 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-primary)]/60 p-3 text-left opacity-70">
 				<div className="flex items-center gap-3">
-					<ClipboardList className="w-4 h-4 text-gray-500 shrink-0" />
+					<ClipboardList className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
 					<div className="min-w-0">
 						<p className="text-[13px] font-bold text-[var(--text-color)] truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
-						<p className="text-[10px] text-gray-500 mt-0.5">Complete all lessons to unlock</p>
+						<p className="text-[10px] text-[var(--text-muted)] mt-0.5">Complete all lessons to unlock</p>
 					</div>
 				</div>
 			</div>
@@ -888,12 +937,12 @@ function ModuleQuizLink({ courseId, module, moduleIndex, quiz, unlocked }) {
 	return (
 		<Link
 			to={`/courses/${courseId}/quiz/${quiz._id}`}
-			className="mt-2 rounded-lg border border-orange-500/25 bg-orange-500/10 p-3 text-left transition-all hover:border-orange-500/60 hover:bg-orange-500/15 flex items-center gap-3"
+			className="mt-2 rounded-lg border border-[#3B82F6]/30 bg-[#3B82F6]/10 p-3 text-left transition-all hover:border-[#3B82F6]/60 hover:bg-[#3B82F6]/15 flex items-center gap-3"
 		>
-			<ClipboardList className="w-4 h-4 text-orange-400 shrink-0" />
+			<ClipboardList className="w-4 h-4 text-[#3B82F6] shrink-0" />
 			<div className="min-w-0 flex-1">
-				<p className="text-[13px] font-bold text-orange-300 truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
-				<p className="text-[10px] text-orange-200/70 mt-0.5">
+				<p className="text-[13px] font-bold text-[var(--text-color)] truncate">{quiz.title || `${moduleTitle} Quiz`}</p>
+				<p className="text-[11px] text-[var(--text-muted)] mt-0.5">
 					{bestAttempt
 						? `Best: ${bestAttempt.score}/${bestAttempt.totalMarks} • Attempts left: ${quiz.attemptsRemaining ?? 0}`
 						: `${quiz.totalQuestions || 0} questions • ${quiz.maxAttempts || 3} attempts`}
