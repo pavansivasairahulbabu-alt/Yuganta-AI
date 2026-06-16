@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Mentor from "../models/Mentor.js";
@@ -7,6 +8,7 @@ import User from "../models/User.js";
 import Instructor from "../models/Instructor.js";
 import Blog from "../models/Blog.js";
 import Course from "../models/Course.js";
+import Video from "../models/Video.js";
 import Job from "../models/Job.js";
 import MentorshipSession from "../models/MentorshipSession.js";
 import sgMail from "../config/mailer.js";
@@ -18,6 +20,193 @@ import multer from "multer";
 const memStorage = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
+
+const deleteFromR2 = async (url) => {
+	if (
+		!url ||
+		!process.env.CLOUDFLARE_R2_ACCOUNT_ID ||
+		!process.env.CLOUDFLARE_R2_ACCESS_KEY_ID ||
+		!process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY ||
+		!process.env.CLOUDFLARE_R2_BUCKET_NAME ||
+		!process.env.CLOUDFLARE_R2_PUBLIC_URL
+	) {
+		return;
+	}
+
+	try {
+		const publicUrlPrefix = process.env.CLOUDFLARE_R2_PUBLIC_URL.replace(/\/$/, "");
+		if (!url.startsWith(publicUrlPrefix)) return;
+
+		const s3Client = new S3Client({
+			endpoint: `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+			credentials: {
+				accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
+				secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
+			},
+			region: "auto",
+		});
+
+		const key = url.replace(`${publicUrlPrefix}/`, "");
+		await s3Client.send(new DeleteObjectCommand({
+			Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME,
+			Key: key,
+		}));
+		console.log(`Deleted from R2: ${key}`);
+	} catch (error) {
+		console.error("Failed to delete file from Cloudflare R2:", error);
+	}
+};
+
+const deleteVideoAssets = async (video) => {
+	if (!video) return;
+	await deleteFromR2(video.thumbnailUrl);
+	await deleteFromR2(video.videoUrl || video.url);
+	for (const doc of video.documents || []) {
+		await deleteFromR2(doc.url);
+	}
+};
+
+const deleteCourseVideoRecordsAndAssets = async (courseVideos = []) => {
+	const embeddedVideos = Array.isArray(courseVideos) ? courseVideos : [courseVideos];
+	const urls = [...new Set(embeddedVideos.map((video) => video?.url).filter(Boolean))];
+	const matchingVideoDocs = urls.length > 0 ? await Video.find({ videoUrl: { $in: urls } }) : [];
+	const handledUrls = new Set();
+
+	for (const videoDoc of matchingVideoDocs) {
+		await deleteVideoAssets(videoDoc);
+		handledUrls.add(videoDoc.videoUrl);
+		await Video.findByIdAndDelete(videoDoc._id);
+	}
+
+	for (const embeddedVideo of embeddedVideos) {
+		if (!embeddedVideo) continue;
+		if (!handledUrls.has(embeddedVideo.url)) {
+			await deleteVideoAssets(embeddedVideo);
+		}
+	}
+
+	return matchingVideoDocs.length;
+};
+
+const getCourseVideoKeys = (moduleIndex, videoIndex, video) => {
+	if (!video) return [];
+	const keys = new Set();
+	if (video._id) keys.add(`id:${video._id.toString()}`);
+
+	const urlPart = video.url || "";
+	const orderPart = Number(video.order) || videoIndex + 1;
+	keys.add(`${moduleIndex}:${orderPart}:${urlPart || (video.title || "untitled")}`);
+
+	return [...keys];
+};
+
+const cleanupUserProgressForDeletedVideos = async (courseKeyMap) => {
+	const entries = Object.entries(courseKeyMap || {});
+	if (entries.length === 0) return 0;
+
+	let updatedUsers = 0;
+
+	for (const [courseId, keyList] of entries) {
+		const deletedKeys = new Set(keyList);
+		if (deletedKeys.size === 0) continue;
+
+		const course = await Course.findById(courseId).lean();
+		const totalVideos = (course?.modules || []).reduce((sum, moduleObj) => sum + (moduleObj.videos?.length || 0), 0);
+		const users = await User.find({ "enrolledCourses.courseId": courseId });
+
+		for (const user of users) {
+			let modified = false;
+
+			for (const enrollment of user.enrolledCourses || []) {
+				if (!enrollment.courseId || enrollment.courseId.toString() !== courseId) continue;
+
+				const beforeCount = enrollment.completedVideos?.length || 0;
+				enrollment.completedVideos = (enrollment.completedVideos || []).filter((key) => !deletedKeys.has(key));
+				if (enrollment.completedVideos.length !== beforeCount) {
+					modified = true;
+				}
+
+				if (enrollment.lastWatchedVideoId && deletedKeys.has(enrollment.lastWatchedVideoId)) {
+					enrollment.lastWatchedVideoId = "";
+					enrollment.lastWatchedTimestamp = 0;
+					enrollment.lastWatchedVideoTitle = "";
+					modified = true;
+				}
+
+				const completedCount = new Set(enrollment.completedVideos || []).size;
+				enrollment.progress = totalVideos > 0 ? Math.min(100, Math.round((completedCount / totalVideos) * 100)) : 0;
+				enrollment.completed = totalVideos > 0 && enrollment.progress >= 100;
+			}
+
+			if (modified) {
+				await user.save();
+				updatedUsers += 1;
+			}
+		}
+	}
+
+	return updatedUsers;
+};
+
+const removeEmbeddedVideosFromCourses = async (courseVideos = []) => {
+	const embeddedVideos = Array.isArray(courseVideos) ? courseVideos : [courseVideos];
+	const matchers = embeddedVideos
+		.filter(Boolean)
+		.map((video) => ({
+			id: video._id ? String(video._id) : "",
+			url: video.url || video.videoUrl || "",
+			title: video.title || "",
+		}));
+
+	if (matchers.length === 0) return 0;
+
+	const courses = await Course.find({});
+	let updatedCourses = 0;
+	const deletedKeysByCourse = {};
+
+	for (const course of courses) {
+		let modified = false;
+		for (let moduleIndex = (course.modules || []).length - 1; moduleIndex >= 0; moduleIndex -= 1) {
+			const moduleObj = course.modules[moduleIndex];
+			const initialLength = moduleObj.videos?.length || 0;
+
+			moduleObj.videos = (moduleObj.videos || []).filter((courseVideo, videoIndex) => {
+				const courseVideoId = courseVideo._id ? String(courseVideo._id) : "";
+				const shouldDelete = matchers.some((matcher) => (
+					(matcher.id && courseVideoId === matcher.id) ||
+					(matcher.url && courseVideo.url === matcher.url) ||
+					(matcher.title && courseVideo.title === matcher.title)
+				));
+
+				if (shouldDelete) {
+					const courseId = course._id.toString();
+					deletedKeysByCourse[courseId] = deletedKeysByCourse[courseId] || [];
+					deletedKeysByCourse[courseId].push(...getCourseVideoKeys(moduleIndex, videoIndex, courseVideo));
+				}
+
+				return !shouldDelete;
+			});
+
+			if ((moduleObj.videos?.length || 0) !== initialLength) {
+				modified = true;
+			}
+
+			if ((moduleObj.videos?.length || 0) === 0) {
+				course.modules.splice(moduleIndex, 1);
+				modified = true;
+			}
+		}
+
+		if (modified) {
+			await course.save();
+			updatedCourses += 1;
+		}
+	}
+
+	const updatedUsers = await cleanupUserProgressForDeletedVideos(deletedKeysByCourse);
+
+	return { updatedCourses, updatedUsers };
+};
 
 // Helper: sanitize modules/videos payload before saving to DB
 const sanitizeModules = (modules) => {
@@ -1021,13 +1210,33 @@ router.put("/courses/:id", verifyAdmin, async (req, res) => {
 router.delete("/courses/:id", verifyAdmin, async (req, res) => {
 	try {
 		const { id } = req.params;
-		const course = await Course.findByIdAndDelete(id);
+		const course = await Course.findById(id);
 
 		if (!course) {
 			return res.status(404).json({ message: "Course not found" });
 		}
 
-		res.json({ message: "Course deleted successfully", courseTitle: course.title });
+		const embeddedVideos = (course.modules || []).flatMap((moduleObj) => moduleObj.videos || []);
+		const deletedVideoRecords = await deleteCourseVideoRecordsAndAssets(embeddedVideos);
+		const cleanup = await removeEmbeddedVideosFromCourses(embeddedVideos);
+		const enrollmentCleanup = await User.updateMany(
+			{ "enrolledCourses.courseId": id },
+			{ $pull: { enrolledCourses: { courseId: id } } },
+		);
+
+		await deleteFromR2(course.thumbnail);
+		await deleteFromR2(course.image);
+		await deleteFromR2(course.videoUrl);
+		await deleteFromR2(course.brochureLink);
+		await Course.findByIdAndDelete(id);
+
+		res.json({
+			message: "Course, related video records, and associated storage assets deleted successfully",
+			courseTitle: course.title,
+			deletedVideoRecords,
+			updatedCourses: cleanup.updatedCourses,
+			updatedUsers: (cleanup.updatedUsers || 0) + (enrollmentCleanup.modifiedCount || 0),
+		});
 	} catch (error) {
 		console.error("Delete course error:", error);
 		res.status(500).json({ message: "Server error", details: error.message });
@@ -1094,7 +1303,7 @@ router.post("/upload-video", verifyAdmin, uploadVideoToR2, async (req, res) => {
 router.post("/courses/:courseId/modules/:moduleId/videos", verifyAdmin, async (req, res) => {
 	try {
 		const { courseId, moduleId } = req.params;
-		const { title, url, publicId, duration, description } = req.body;
+		const { title, url, publicId, duration, description, documents } = req.body;
 
 		// Validate Video URL
 		if (!validateVideoUrl(url)) {
@@ -1124,6 +1333,7 @@ router.post("/courses/:courseId/modules/:moduleId/videos", verifyAdmin, async (r
 			duration: duration || "",
 			description: description || "",
 			order: (course.modules[moduleIndex].videos?.length || 0) + 1,
+			documents: Array.isArray(documents) ? documents : [],
 		};
 
 		course.modules[moduleIndex].videos = course.modules[moduleIndex].videos || [];
@@ -1161,15 +1371,24 @@ router.delete("/courses/:courseId/modules/:moduleId/videos/:videoId", verifyAdmi
 			return res.status(404).json({ message: "Module not found" });
 		}
 
-		course.modules[moduleIndex].videos = (course.modules[moduleIndex].videos || []).filter(
-			v => v._id.toString() !== videoId
+		const videoToDelete = (course.modules[moduleIndex].videos || []).find(
+			v => v._id.toString() === videoId
 		);
 
-		await course.save();
+		if (!videoToDelete) {
+			return res.status(404).json({ message: "Video not found in module" });
+		}
+
+		const deletedVideoRecords = await deleteCourseVideoRecordsAndAssets(videoToDelete);
+		const cleanup = await removeEmbeddedVideosFromCourses(videoToDelete);
+		const updatedCourse = await Course.findById(courseId);
 
 		res.json({
-			message: "Video deleted successfully",
-			course,
+			message: "Video deleted from module, database, and storage successfully",
+			course: updatedCourse,
+			deletedVideoRecords,
+			updatedCourses: cleanup.updatedCourses,
+			updatedUsers: cleanup.updatedUsers,
 		});
 	} catch (error) {
 		console.error("Error deleting video:", error);

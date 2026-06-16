@@ -309,6 +309,11 @@ router.get("/enrolled", protect, async (req, res) => {
 		const filteredEnrolledCourses = user.enrolledCourses.filter(
 			(enrollment) => enrollment.courseId !== null
 		).sort((a, b) => new Date(b.enrolledAt) - new Date(a.enrolledAt));
+
+		if (filteredEnrolledCourses.length !== user.enrolledCourses.length) {
+			user.enrolledCourses = filteredEnrolledCourses;
+			await user.save();
+		}
 		
 		res.json(filteredEnrolledCourses);
 	} catch (error) {

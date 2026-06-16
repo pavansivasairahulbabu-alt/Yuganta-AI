@@ -28,6 +28,7 @@ import mentorshipSessionsRoutes from "./routes/mentorshipSessions.js";
 import leadRoutes from "./routes/leads.js";
 import contactRoutes from "./routes/contact.js";
 import jobRoutes from "./routes/jobs.js";
+import quizRoutes from "./routes/quizzes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -163,6 +164,8 @@ app.use("/api/mentorship-sessions", mentorshipSessionsRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api", quizRoutes);
+app.use("/api/quizzes", quizRoutes);
 
 // Health check
 app.get("/", (req, res) => {

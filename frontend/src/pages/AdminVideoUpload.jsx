@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { UploadCloud, Film, Image as ImageIcon, X, AlertTriangle, Loader2, Play, CheckCircle, GripVertical } from "lucide-react";
+import { UploadCloud, Film, Image as ImageIcon, FileText, X, AlertTriangle, Loader2, Play, CheckCircle, GripVertical } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import AdminNavbar from "../components/AdminNavbar";
@@ -38,19 +38,25 @@ export default function AdminVideoUpload() {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [thumbnailKey, setThumbnailKey] = useState("");
+  const [documentFiles, setDocumentFiles] = useState([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
 
   // Upload progress states
   const [videoProgress, setVideoProgress] = useState(0);
   const [thumbnailProgress, setThumbnailProgress] = useState(0);
+  const [documentProgress, setDocumentProgress] = useState(0);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
 
   // Drag and drop states
   const [isVideoDragActive, setIsVideoDragActive] = useState(false);
   const [isThumbDragActive, setIsThumbDragActive] = useState(false);
+  const [isDocDragActive, setIsDocDragActive] = useState(false);
 
   const videoInputRef = useRef(null);
   const thumbInputRef = useRef(null);
+  const docInputRef = useRef(null);
 
   useEffect(() => {
     const authed = localStorage.getItem("adminAuthed") === "true";
@@ -191,6 +197,46 @@ export default function AdminVideoUpload() {
     setThumbnailProgress(0);
   };
 
+  const allowedDocumentTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+  ];
+
+  const isAllowedDocument = (file) => {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    return allowedDocumentTypes.includes(file.type) || ["pdf", "doc", "docx", "txt"].includes(extension);
+  };
+
+  const handleDocumentSelection = (files) => {
+    const selected = Array.from(files || []);
+    if (selected.length === 0) return;
+
+    const validFiles = [];
+    selected.forEach((file) => {
+      if (!isAllowedDocument(file)) {
+        toast.error(`${file.name} is not a supported document`);
+        return;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        toast.error(`${file.name} exceeds the 25MB document limit`);
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    if (validFiles.length > 0) {
+      setDocumentFiles((prev) => [...prev, ...validFiles]);
+      setUploadedDocuments([]);
+      setDocumentProgress(0);
+    }
+  };
+
+  const removeDocumentFile = (indexToRemove) => {
+    setDocumentFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   // ==========================================
   // CLOUDFLARE R2 UPLOAD WORKFLOW (Backend Proxy)
   // ==========================================
@@ -222,10 +268,11 @@ export default function AdminVideoUpload() {
 
             const { downloadUrl, key, isMock } = uploadResponse.data;
 
+            const label = purpose === "video" ? "Video" : purpose === "thumbnail" ? "Thumbnail" : "Document";
             if (isMock) {
-              toast.success(`${purpose === "video" ? "Video" : "Thumbnail"} uploaded (Simulation Mode)`);
+              toast.success(`${label} uploaded (Simulation Mode)`);
             } else {
-              toast.success(`${purpose === "video" ? "Video" : "Thumbnail"} uploaded successfully to R2!`);
+              toast.success(`${label} uploaded successfully to R2!`);
             }
 
             setIsUploading(false);
@@ -288,6 +335,7 @@ export default function AdminVideoUpload() {
       let finalVideoKey = videoKey;
       let finalThumbnailUrl = thumbnailUrl;
       let finalThumbnailKey = thumbnailKey;
+      let finalDocuments = uploadedDocuments;
 
       // 1. Upload Video if a new file is chosen
       if (videoFile) {
@@ -307,7 +355,28 @@ export default function AdminVideoUpload() {
         setThumbnailKey(finalThumbnailKey);
       }
 
-      // 3. Save details to MongoDB
+      // 3. Upload supporting documents if selected
+      if (documentFiles.length > 0) {
+        setIsUploadingDocuments(true);
+        const uploaded = [];
+        for (let i = 0; i < documentFiles.length; i += 1) {
+          const file = documentFiles[i];
+          const docRes = await uploadAsset(file, "document", setDocumentProgress, setIsUploadingDocuments);
+          uploaded.push({
+            name: file.name,
+            url: docRes.downloadUrl,
+            key: docRes.key,
+            type: file.type,
+            size: file.size,
+          });
+          setDocumentProgress(Math.round(((i + 1) / documentFiles.length) * 100));
+        }
+        finalDocuments = uploaded;
+        setUploadedDocuments(uploaded);
+        setIsUploadingDocuments(false);
+      }
+
+      // 4. Save details to MongoDB
       const payload = {
         title: title.trim(),
         description: description.trim(),
@@ -317,6 +386,7 @@ export default function AdminVideoUpload() {
         videoUrl: finalVideoUrl,
         duration: Math.round(videoDuration),
         fileSize: videoSize,
+        documents: finalDocuments,
         courseId,
         moduleName: moduleName.trim(),
         videoOrder: Number(videoOrder),
@@ -680,6 +750,77 @@ export default function AdminVideoUpload() {
               )}
             </div>
 
+            {/* Supporting Documents Area */}
+            <div className="bg-[rgba(30,27,51,0.4)] border border-[rgba(139,92,246,0.15)] rounded-3xl p-6 shadow-xl space-y-4">
+              <h3 className="text-base font-bold text-white flex items-center gap-2 pb-2 border-b border-[rgba(139,92,246,0.1)]">
+                <FileText className="w-4 h-4 text-[#A855F7]" />
+                <span>Attach Documents</span>
+              </h3>
+
+              {documentFiles.length > 0 && (
+                <div className="space-y-2">
+                  {documentFiles.map((file, idx) => (
+                    <div key={`${file.name}-${idx}`} className="flex items-center justify-between gap-3 bg-[rgba(26,21,44,0.5)] border border-[rgba(139,92,246,0.2)] rounded-xl p-3">
+                      <div className="min-w-0">
+                        <p className="text-xs text-white font-semibold truncate">{file.name}</p>
+                        <p className="text-[10px] text-[#9A93B5]">{formatBytes(file.size)}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeDocumentFile(idx)}
+                        className="text-[#9A93B5] hover:text-white shrink-0"
+                        disabled={isUploadingDocuments}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div
+                onDragOver={(e) => { e.preventDefault(); setIsDocDragActive(true); }}
+                onDragLeave={() => setIsDocDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDocDragActive(false);
+                  handleDocumentSelection(e.dataTransfer.files);
+                }}
+                className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all cursor-pointer ${isDocDragActive
+                  ? "border-[#A855F7] bg-[rgba(139,92,246,0.1)]"
+                  : "border-[rgba(139,92,246,0.25)] hover:border-[#A855F7] hover:bg-[rgba(139,92,246,0.02)]"
+                  }`}
+                onClick={() => docInputRef.current?.click()}
+              >
+                <UploadCloud className="w-9 h-9 mx-auto text-[#9A93B5]" />
+                <p className="text-xs font-semibold text-white mt-3">Attach PDF, DOC, DOCX or TXT</p>
+                <p className="text-[10px] text-[#9A93B5] mt-1">Multiple files, up to 25MB each</p>
+                <input
+                  type="file"
+                  ref={docInputRef}
+                  accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  multiple
+                  onChange={(e) => handleDocumentSelection(e.target.files)}
+                  className="hidden"
+                />
+              </div>
+
+              {isUploadingDocuments && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="w-full bg-[rgba(139,92,246,0.1)] rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${documentProgress}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-[10px] text-[#C7C3D6]">
+                    <span>Uploading documents...</span>
+                    <span>{documentProgress}%</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Submission Block */}
             <div className="space-y-4 pt-2">
               <button
@@ -687,11 +828,12 @@ export default function AdminVideoUpload() {
                 disabled={
                   isUploadingVideo ||
                   isUploadingThumbnail ||
+                  isUploadingDocuments ||
                   saveMutation.isPending
                 }
                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] text-white hover:opacity-95 font-bold shadow-lg transition-transform active:scale-[0.98] duration-150"
               >
-                {(isUploadingVideo || isUploadingThumbnail || saveMutation.isPending) ? (
+                {(isUploadingVideo || isUploadingThumbnail || isUploadingDocuments || saveMutation.isPending) ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Processing & Uploading...</span>

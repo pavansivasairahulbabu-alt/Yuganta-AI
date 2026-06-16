@@ -115,6 +115,34 @@ const courseSchema = new mongoose.Schema({
 						type: Number,
 						required: true,
 					},
+					documents: [
+						{
+							name: {
+								type: String,
+								required: true,
+								trim: true,
+							},
+							url: {
+								type: String,
+								required: true,
+								trim: true,
+							},
+							key: {
+								type: String,
+								default: "",
+								trim: true,
+							},
+							type: {
+								type: String,
+								default: "",
+								trim: true,
+							},
+							size: {
+								type: Number,
+								default: 0,
+							},
+						},
+					],
 				},
 			],
 		},
