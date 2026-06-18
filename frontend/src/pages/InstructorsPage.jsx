@@ -70,7 +70,7 @@ export default function InstructorsPage() {
           const res = await fetch(`${API_URL}/api/courses/instructors/public`);
           if (res.ok) {
             const data = await res.json();
-            list = Array.isArray(data) ? data : [];
+            list = Array.isArray(data) ? data : Array.isArray(data?.instructors) ? data.instructors : [];
           }
         } catch { void 0; }
 
@@ -86,6 +86,7 @@ export default function InstructorsPage() {
             const key = c.instructorId || c.instructor;
             if (!key) continue;
             if (!byInstructor.has(key)) {
+              const coursePhoto = c.instructorPhoto || c.thumbnail || c.image || "";
               byInstructor.set(key, {
                 _id: c.instructorId || key,
                 name: c.instructor,
@@ -93,6 +94,7 @@ export default function InstructorsPage() {
                 email: "",
                 bio: "",
                 description: "",
+                photo: coursePhoto,
               });
             }
           }
@@ -102,7 +104,10 @@ export default function InstructorsPage() {
         const normalized = list.map((i) => ({
           ...i,
           photo: i.photo || i.photoUrl || i.photoURL || i.avatar || i.image || i.imageUrl || i.picture || "",
+          company: i.company || "",
+          expertise: i.expertise || i.designation || i.category || "Instructor",
           experience: i.experience || "",
+          active: i.active ?? true,
         }));
         setInstructors(normalized);
       } catch {
@@ -137,7 +142,7 @@ export default function InstructorsPage() {
             <div className="w-1 h-8 bg-gradient-to-b from-[#3B82F6] to-[#06B6D4] rounded-full"></div>
             <p className="text-sm font-semibold text-[#60A5FA] uppercase tracking-wider">Our Team</p>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold ins-text-primary">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight ins-text-primary">
             Meet the{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#06B6D4]">Instructors</span>
           </h1>
@@ -187,6 +192,37 @@ export default function InstructorsPage() {
             background: rgba(59,130,246,0.28);
             border-color: rgba(59,130,246,0.7);
             color: #e8f0fe;
+          }
+
+          @media (max-width: 1023px) {
+            .ins-flip-wrapper {
+              height: auto;
+              perspective: none;
+            }
+            .ins-flip-inner {
+              display: flex;
+              flex-direction: column;
+              gap: 14px;
+              height: auto;
+              transform: none !important;
+              transition: none;
+              cursor: default;
+            }
+            .ins-flip-wrapper:hover .ins-flip-inner {
+              transform: none;
+            }
+            .ins-flip-front,
+            .ins-flip-back {
+              position: relative;
+              inset: auto;
+              transform: none;
+              backface-visibility: visible;
+              -webkit-backface-visibility: visible;
+              min-height: 0;
+            }
+            .ins-flip-wrapper:hover {
+              filter: none;
+            }
           }
 
           /* Light mode */
@@ -281,7 +317,7 @@ export default function InstructorsPage() {
             <p className="ins-text-muted font-medium">No instructors available yet</p>
           </div>
         ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
           {instructors.map((ins, idx) => {
             const initials = (ins.name || "I").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
             const gradients = [
@@ -293,7 +329,6 @@ export default function InstructorsPage() {
               ["#0284C7","#3B82F6"],
             ];
             const [c1, c2] = gradients[idx % gradients.length];
-            const grad = `from-[${c1}] to-[${c2}]`;
             const expertiseTags = (ins.expertise || ins.designation || "Instructor").split(/[,/]/).map(s => s.trim()).filter(Boolean);
             return (
               <div key={ins._id || ins.email || ins.name} className="ins-flip-wrapper">

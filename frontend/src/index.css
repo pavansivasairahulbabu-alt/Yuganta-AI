@@ -29,11 +29,35 @@
 }
 
 /* Global base styles */
+html,
+body,
+#root {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
 body {
 	background: var(--bg-color);
 	min-height: 100vh;
 	color: var(--text-color);
 	transition: background-color 300ms ease, color 300ms ease, filter 300ms ease;
+	overflow-x: hidden;
+	-webkit-text-size-adjust: 100%;
+}
+
+img,
+video,
+canvas,
+svg {
+	max-width: 100%;
+	height: auto;
 }
 
 .dark-theme {

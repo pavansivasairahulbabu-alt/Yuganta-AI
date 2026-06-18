@@ -382,6 +382,12 @@ export default function CourseDetailPage() {
 		};
 	}, [isResizingLeftPanel]);
 
+	useEffect(() => {
+		if (isStudyMode && mobilePanelTab === "content") {
+			setMobilePanelTab("overview");
+		}
+	}, [isStudyMode, mobilePanelTab]);
+
 	if (loading) {
 		return (
 			<div className='min-h-screen bg-[var(--bg-primary)] flex items-center justify-center'>
@@ -587,12 +593,25 @@ export default function CourseDetailPage() {
 				{/* MOBILE CONTENT SHEET */}
 				<div className="lg:hidden px-4 pb-6 pt-4 space-y-4">
 					<div className="rounded-2xl border border-gray-500/20 bg-[var(--bg-card)] overflow-hidden">
-						<div className="grid grid-cols-3 border-b border-gray-500/20">
-							{[
-								{ id: "content", label: "Content" },
-								{ id: "overview", label: "Overview" },
-								{ id: "resources", label: "Resources" },
-							].map((tab) => (
+						{isStudyMode && (
+							<div className="px-4 pt-4">
+								<div className="inline-flex items-center gap-2 rounded-full border border-[#00BCD4]/30 bg-[#00BCD4]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#00BCD4]">
+									<span className="h-2 w-2 rounded-full bg-[#00BCD4]" />
+									Study mode
+								</div>
+							</div>
+						)}
+						<div className={`grid border-b border-gray-500/20 ${isStudyMode ? "grid-cols-2" : "grid-cols-3"}`}>
+							{(isStudyMode
+								? [
+										{ id: "overview", label: "Overview" },
+										{ id: "resources", label: "Resources" },
+									]
+								: [
+										{ id: "content", label: "Content" },
+										{ id: "overview", label: "Overview" },
+										{ id: "resources", label: "Resources" },
+									]).map((tab) => (
 								<button
 									key={tab.id}
 									onClick={() => setMobilePanelTab(tab.id)}
@@ -604,7 +623,7 @@ export default function CourseDetailPage() {
 						</div>
 
 						<div className="p-4 sm:p-5">
-							{mobilePanelTab === "content" && (
+							{!isStudyMode && mobilePanelTab === "content" && (
 								<div className="space-y-4">
 									<div>
 										<p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Course Content</p>

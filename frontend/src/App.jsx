@@ -81,7 +81,7 @@ function CoursesHomePage() {
 
 function HomeLayout({ children }) {
 	return (
-		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+		<div className="min-h-screen flex flex-col overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
 			<SideNavbar />
 			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
 				<main className="flex-grow">
@@ -95,7 +95,7 @@ function HomeLayout({ children }) {
 
 function MainLayout({ children }) {
 	return (
-		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+		<div className="min-h-screen flex flex-col overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
 			<SideNavbar />
 			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
 				<main className="flex-grow">
@@ -109,7 +109,7 @@ function MainLayout({ children }) {
 
 function CoursesLayout({ children }) {
 	return (
-		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+		<div className="min-h-screen flex flex-col overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
 			<SideNavbar />
 			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
 				<main className="flex-grow">
@@ -123,7 +123,7 @@ function CoursesLayout({ children }) {
 
 function NoFooterLayout({ children }) {
 	return (
-		<div className="min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
+		<div className="min-h-screen flex flex-col overflow-x-hidden bg-[var(--bg-primary)] text-[var(--text-color)] transition-colors duration-300">
 			<SideNavbar />
 			<div className="flex-grow flex flex-col min-h-screen w-full pt-16">
 				<main className="flex-grow">

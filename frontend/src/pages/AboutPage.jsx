@@ -73,13 +73,13 @@ export default function AboutPage() {
 						</div>
 						
 						<div className="max-w-5xl mx-auto">
-							<h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1] tracking-tight text-[var(--text-color)]">
+							<h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.05] tracking-tight text-[var(--text-color)]">
 								Architecting the <br className="hidden md:block" />
 								<span className={`text-transparent bg-clip-text bg-gradient-to-r ${isLight ? 'from-[#6D28D9] via-[#1D4ED8] to-[#0284C7]' : 'from-[#8B5CF6] via-[#2563EB] to-[#38BDF8]'} drop-shadow-sm`}>
 									AI-First Future
 								</span>
 							</h1>
-							<p className="text-xl md:text-2xl text-[var(--text-muted)] leading-relaxed mb-12 max-w-3xl mx-auto font-medium">
+							<p className="text-lg sm:text-xl md:text-2xl text-[var(--text-muted)] leading-relaxed mb-12 max-w-3xl mx-auto font-medium">
 								Yuganta AI is at the forefront of the intelligence revolution. We combine deep technical expertise with a passion for education to build products that matter.
 							</p>
 							<div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

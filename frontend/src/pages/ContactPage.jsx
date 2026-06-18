@@ -68,7 +68,7 @@ export default function ContactPage() {
 								<span className="text-[var(--text-color)]">Contact</span>
 							</div>
 						</div>
-						<h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-[var(--text-color)] mb-4">
+						<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-[var(--text-color)] mb-4">
 							Contact
 						</h1>
 						<p className="text-lg md:text-xl text-[var(--text-muted)] max-w-3xl">
@@ -112,7 +112,7 @@ export default function ContactPage() {
 
 						{/* Right Side - Contact Info */}
 						<div className="space-y-8">
-							<h2 className="text-4xl md:text-5xl font-bold text-[var(--text-color)] mb-8">
+							<h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[var(--text-color)] mb-8">
 								Keep In Touch
 							</h2>
 
@@ -172,7 +172,7 @@ export default function ContactPage() {
 							<p className="text-sm text-[#A855F7] font-semibold mb-2 uppercase tracking-wider">
 								Message
 							</p>
-							<h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-color)]">
+							<h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-[var(--text-color)]">
 								Leave A Message
 							</h2>
 						</div>

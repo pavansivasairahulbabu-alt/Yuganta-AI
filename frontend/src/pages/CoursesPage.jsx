@@ -173,13 +173,13 @@ export default function CoursesPage() {
 					<div className='flex flex-col lg:flex-row items-center justify-between gap-12'>
 						{/* Left Content */}
 						<div className='flex-1'>
-							<h1 className='text-4xl md:text-6xl font-bold mb-6'>
+							<h1 className='text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight'>
 								<span className='bg-gradient-to-r from-[#2373f3] via-[#549ffb] to-[#6caffb] bg-clip-text text-transparent'>
 									Courses
 								</span>
 							</h1>
 
-							<p className='text-gray-500 text-lg mb-12 max-w-xl'>
+							<p className='text-gray-500 text-base sm:text-lg mb-12 max-w-xl'>
 								Kickstart your AI career with foundational
 								tracks and skill-specific short courses, all
 								taught by leading experts in the field.
@@ -272,7 +272,7 @@ export default function CoursesPage() {
 					{/* Courses Grid with Sidebar */}
 					<div className='flex flex-col lg:flex-row gap-8'>
 						{/* Sidebar Filters */}
-						<aside className='lg:w-64 flex-shrink-0'>
+						<aside className='hidden lg:block lg:w-64 flex-shrink-0'>
 							<div className='bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--border-color)] rounded-lg p-4 md:p-6 transition-colors duration-300'>
 								<div className='flex justify-between items-center mb-6'>
 									<h3 className='font-semibold text-lg'>
@@ -338,13 +338,13 @@ export default function CoursesPage() {
 											</svg>
 										</div>
 									</div>
-									<h3 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-3">No Courses Found</h3>
-									<p className="text-gray-400 text-lg max-w-md mx-auto">
+									<h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-3">No Courses Found</h3>
+									<p className="text-gray-400 text-base sm:text-lg max-w-md mx-auto">
 										We are currently updating our course catalog. Please check back later for new exciting content!
 									</p>
 								</div>
 							) : (
-								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7'>
+								<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7'>
 									{filteredCourses.map((course) => (
 										(() => {
 											// Skip DSA courses completely

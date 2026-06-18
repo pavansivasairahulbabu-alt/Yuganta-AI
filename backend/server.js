@@ -84,12 +84,15 @@ const initializeServer = async () => {
 	}
 
 	// CORS configuration
-const envOrigins = (process.env.FRONTEND_URL || '')
-	.split(',')
-	.map(url => url.trim())
+const envOrigins = [process.env.FRONTEND_URL, process.env.CLIENT_URL]
+	.filter(Boolean)
+	.flatMap((value) => String(value).split(","))
+	.map((url) => url.trim())
 	.filter(Boolean);
-const defaultDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-const prodDefaultOrigins = ['https://yuganta-ai.vercel.app', 'https://yugantaai.com'];
+const defaultDevOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const prodDefaultOrigins = ["https://yuganta-ai.vercel.app", "https://yugantaai.com"];
+const localNetworkOrigin = /^https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(?::\d+)?$/i;
+const vercelPreviewOrigin = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
 
 const allowedOrigins = [
 	...(process.env.NODE_ENV === "production" ? prodDefaultOrigins : defaultDevOrigins),
@@ -100,15 +103,14 @@ const uniqueAllowedOrigins = [...new Set(allowedOrigins)];
 const corsOptions = {
 	origin: (origin, callback) => {
 		const isAllowedExact = !origin || uniqueAllowedOrigins.includes(origin);
-		const isVercelPreview =
-			typeof origin === "string" &&
-			/^https:\/\/yugantha-ai-[a-z0-9-]+\.vercel\.app$/i.test(origin);
+		const isVercelPreview = typeof origin === "string" && vercelPreviewOrigin.test(origin);
+		const isLocalNetwork = typeof origin === "string" && localNetworkOrigin.test(origin);
 
-		if (isAllowedExact || isVercelPreview) {
+		if (isAllowedExact || isVercelPreview || isLocalNetwork) {
 			return callback(null, true);
 		}
 
-		return callback(new Error("Not allowed by CORS"));
+		return callback(new Error(`Not allowed by CORS: ${origin}`));
 	},
 	credentials: true,
 	optionsSuccessStatus: 200
@@ -138,6 +140,7 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(helmet({
 	contentSecurityPolicy: false,
 	crossOriginResourcePolicy: false,

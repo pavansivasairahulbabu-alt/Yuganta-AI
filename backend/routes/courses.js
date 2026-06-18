@@ -182,11 +182,45 @@ const normalizeCourseModules = (modules) => {
 };
 
 // --- ROUTES ---
+router.get("/instructors/public", async (req, res) => {
+    try {
+        const instructors = await Instructor.find({})
+            .select("name email bio photo company expertise experience avatar active approved")
+            .lean()
+            .then((docs) =>
+                docs.map((instructor) => ({
+                    ...instructor,
+                    photo: instructor.photo || instructor.photoUrl || instructor.photoURL || instructor.avatar || "",
+                })),
+            );
 
+        res.json(instructors);
+    } catch (error) {
+        console.error("Error fetching instructors:", error);
+
+        res.status(500).json({
+            message: "Server error",
+            error: error.message,
+        });
+    }
+});
 router.get("/", async (req, res) => {
     try {
         const courses = await Course.find({}).sort({ createdAt: -1 }).lean();
         res.json(courses);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+router.get("/:id", async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id).lean();
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.json(course);
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
