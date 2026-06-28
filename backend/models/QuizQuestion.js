@@ -49,6 +49,7 @@ const quizQuestionSchema = new mongoose.Schema({
 		default: "",
 		trim: true,
 	},
+	code: { type: String, default: "", trim: true },
 	options: {
 		type: [optionSchema],
 		validate: {

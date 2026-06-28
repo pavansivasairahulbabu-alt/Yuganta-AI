@@ -3,8 +3,18 @@ import { useParams, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import API_URL from "../config/api";
 import { useAuth } from "../context/AuthContext";
-import { FileText, CheckCircle2, PlayCircle, LayoutDashboard, Loader2, AlertTriangle, ChevronDown, ChevronUp, BookOpen, ClipboardList } from "lucide-react";
+import { FileText, CheckCircle2, PlayCircle, LayoutDashboard, Loader2, AlertTriangle, ChevronDown, ChevronUp, BookOpen, ClipboardList, ChevronLeft, ChevronRight } from "lucide-react";
 import SecurePDFViewer from "../components/SecurePDFViewer";
+
+const sortByOrder = (items = []) =>
+	[...items].sort((left, right) => (Number(left?.order) || 0) - (Number(right?.order) || 0));
+
+const sortModulesWithVideos = (modules = []) =>
+	sortByOrder(modules).map((module) => ({
+		...module,
+		videos: sortByOrder(module?.videos || []),
+	}));
+
 export default function CourseDetailPage() {
 	const { id } = useParams();
 	const { token } = useAuth();
@@ -31,6 +41,7 @@ export default function CourseDetailPage() {
 
 	// New state for handling the secure PDF modal
 	const [viewingDocument, setViewingDocument] = useState(null);
+	const orderedModules = useMemo(() => sortModulesWithVideos(course?.modules || []), [course]);
 
 	const normalizeVideoUrl = (url) => {
 		if (!url || typeof url !== "string") return "";
@@ -63,23 +74,43 @@ export default function CourseDetailPage() {
 		return videos.every((video, videoIndex) => completedVideos.has(getVideoKey(moduleIndex, videoIndex, video)));
 	};
 
-	const selectedVideoIndex = useMemo(() => {
-		if (activeModule === null || !course?.modules?.[activeModule]?.videos || !selectedVideo) return -1;
-		if (selectedVideo._id) {
-			const index = course.modules[activeModule].videos.findIndex((v) => v._id === selectedVideo._id);
-			if (index !== -1) return index;
-		}
-		const selectedPublicId = typeof selectedVideo?.publicId === "string" ? selectedVideo.publicId.trim() : "";
-		return course.modules[activeModule].videos.findIndex((video) => {
-			if (selectedPublicId && video.publicId === selectedPublicId) return true;
-			return resolveVideoUrl(video) === normalizeVideoUrl(selectedVideo?.url || "") && (video?.title || "") === (selectedVideo?.title || "");
-		});
-	}, [course, activeModule, selectedVideo]);
+	const courseVideoSequence = useMemo(
+		() =>
+			orderedModules.flatMap((module, moduleIndex) =>
+				(module?.videos || []).map((video, videoIndex) => ({
+					module,
+					moduleIndex,
+					video,
+					videoIndex,
+					sequenceIndex: 0,
+				})),
+			).map((entry, sequenceIndex) => ({
+				...entry,
+				sequenceIndex,
+			})),
+		[orderedModules],
+	);
 
+	const selectedVideoLocation = useMemo(() => {
+		if (!selectedVideo || courseVideoSequence.length === 0) return null;
+		const selectedUrl = normalizeVideoUrl(selectedVideo?.url || "");
+		const selectedPublicId = typeof selectedVideo?.publicId === "string" ? selectedVideo.publicId.trim() : "";
+		return (
+			courseVideoSequence.find((entry) => {
+				const { video } = entry;
+				if (!video) return false;
+				if (selectedVideo._id && video._id && String(video._id) === String(selectedVideo._id)) return true;
+				if (selectedPublicId && video.publicId === selectedPublicId) return true;
+				return resolveVideoUrl(video) === selectedUrl && (video?.title || "") === (selectedVideo?.title || "");
+			}) || null
+		);
+	}, [courseVideoSequence, selectedVideo]);
+
+	const selectedVideoIndex = selectedVideoLocation?.videoIndex ?? -1;
 	const selectedVideoKey = useMemo(() => {
-		if (activeModule === null || selectedVideoIndex < 0 || !selectedVideo) return "";
-		return getVideoKey(activeModule, selectedVideoIndex, selectedVideo);
-	}, [activeModule, selectedVideoIndex, selectedVideo]);
+		if (!selectedVideoLocation || !selectedVideo) return "";
+		return getVideoKey(selectedVideoLocation.moduleIndex, selectedVideoLocation.videoIndex, selectedVideoLocation.video);
+	}, [selectedVideoLocation, selectedVideo]);
 
 	const selectedVideoWatched = selectedVideoKey ? (videoWatchPercent[selectedVideoKey] || 0) : 0;
 	const selectedVideoCanComplete = selectedVideoWatched >= 75;
@@ -115,7 +146,11 @@ export default function CourseDetailPage() {
 			}
 
 			const data = await response.json();
-			setCourse(data);
+			const orderedCourse = {
+				...data,
+				modules: sortModulesWithVideos(data.modules || []),
+			};
+			setCourse(orderedCourse);
 			setLoading(false);
 
 			let defaultVideo = null;
@@ -140,10 +175,10 @@ export default function CourseDetailPage() {
 				}
 			}
 
-			if (data.modules && data.modules.length > 0) {
+			if (orderedCourse.modules && orderedCourse.modules.length > 0) {
 				if (shouldResume && progressData && progressData.lastWatchedVideoId) {
-					for (let mIdx = 0; mIdx < data.modules.length; mIdx++) {
-						const module = data.modules[mIdx];
+					for (let mIdx = 0; mIdx < orderedCourse.modules.length; mIdx++) {
+						const module = orderedCourse.modules[mIdx];
 						if (module.videos) {
 							for (let vIdx = 0; vIdx < module.videos.length; vIdx++) {
 								const video = module.videos[vIdx];
@@ -162,7 +197,7 @@ export default function CourseDetailPage() {
 				}
 
 				if (!defaultVideo) {
-					const firstModule = data.modules[0];
+					const firstModule = orderedCourse.modules[0];
 					defaultModuleIndex = 0;
 					if (firstModule.videos && firstModule.videos.length > 0) {
 						defaultVideo = firstModule.videos[0];
@@ -206,6 +241,29 @@ export default function CourseDetailPage() {
 		lastSavedTimeRef.current = 0;
 		setSelectedVideo({ ...video, url: resolveVideoUrl(video) });
 		setActiveModule(moduleIndex);
+	};
+
+	const seekVideoBy = (seconds) => {
+		const player = selectedVideoElementRef.current;
+		if (!player) return;
+		const duration = Number(player.duration);
+		if (!Number.isFinite(duration) || duration <= 0) return;
+		const nextTime = Math.min(duration, Math.max(0, player.currentTime + seconds));
+		player.currentTime = nextTime;
+	};
+
+	const navigateVideoByOffset = (direction) => {
+		if (!selectedVideoLocation || courseVideoSequence.length === 0) return;
+		const nextSequenceIndex = selectedVideoLocation.sequenceIndex + direction;
+		if (nextSequenceIndex < 0 || nextSequenceIndex >= courseVideoSequence.length) {
+			toast.info(direction > 0 ? "You are already on the last video" : "You are already on the first video");
+			return;
+		}
+		const nextLocation = courseVideoSequence[nextSequenceIndex];
+		handleVideoSelect(nextLocation.video, nextLocation.moduleIndex);
+		if (direction > 0 && nextLocation.moduleIndex !== selectedVideoLocation.moduleIndex) {
+			toast.success(`Starting Next Module: ${nextLocation.module?.title || "Next Module"}`);
+		}
 	};
 
 	const markVideoCompleted = async () => {
@@ -291,10 +349,8 @@ export default function CourseDetailPage() {
 	};
 
 	const handleVideoSeeking = (event) => {
-		const player = event.target;
-		if (!player) return;
-		if (player.currentTime <= maxAllowedPlaybackTimeRef.current + 0.25) return;
-		player.currentTime = maxAllowedPlaybackTimeRef.current;
+		if (!event?.target) return;
+		// Seeking is allowed so learners can fast-forward, rewind, and review freely.
 	};
 
 	const handleVideoError = () => {
@@ -464,7 +520,7 @@ export default function CourseDetailPage() {
 						</div>
 
 						<div className='flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2'>
-							{course.modules.sort((a, b) => a.order - b.order).map((module, moduleIndex) => {
+							{course.modules.map((module, moduleIndex) => {
 								const isActiveModule = activeModule === moduleIndex;
 								return (
 									<div key={moduleIndex} className={`rounded-xl overflow-hidden transition-all duration-200 ${isActiveModule ? 'bg-[#00BCD4]/10 border border-[#00BCD4]/30' : 'bg-[var(--bg-card)] border border-gray-500/10 hover:border-gray-500/30'}`}>
@@ -481,7 +537,7 @@ export default function CourseDetailPage() {
 
 										{isActiveModule && (
 											<div className='flex flex-col pb-2 px-2'>
-												{module.videos && module.videos.length > 0 && module.videos.sort((a, b) => a.order - b.order).map((video, videoIndex) => {
+												{module.videos && module.videos.length > 0 && module.videos.map((video, videoIndex) => {
 													const videoKey = getVideoKey(moduleIndex, videoIndex, video);
 													const isCompleted = completedVideos.has(videoKey);
 													const isSelected = normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video);
@@ -545,6 +601,43 @@ export default function CourseDetailPage() {
 				<div className="flex flex-col h-full min-h-0 bg-black relative shadow-[0_0_30px_rgba(0,0,0,0.5)] z-10 w-full overflow-hidden">
 					{selectedVideo ? (
 						<>
+							<div className="flex flex-col gap-3 border-b border-white/10 bg-black/90 px-3 sm:px-4 py-3">
+								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+									<button
+										onClick={() => navigateVideoByOffset(-1)}
+										disabled={!selectedVideoLocation || selectedVideoLocation.sequenceIndex === 0}
+										className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+									>
+										<ChevronLeft className="w-4 h-4" />
+										Previous Video
+									</button>
+									<div className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-white/50 text-center sm:flex-1">
+										{selectedVideoLocation ? `Video ${selectedVideoLocation.sequenceIndex + 1} of ${courseVideoSequence.length}` : "Lesson Navigation"}
+									</div>
+									<button
+										onClick={() => navigateVideoByOffset(1)}
+										disabled={!selectedVideoLocation || selectedVideoLocation.sequenceIndex >= courseVideoSequence.length - 1}
+										className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#00BCD4]/30 bg-[#00BCD4]/10 px-4 py-2 text-xs sm:text-sm font-semibold text-[#00BCD4] transition hover:bg-[#00BCD4]/20 disabled:cursor-not-allowed disabled:opacity-40"
+									>
+										Next Video
+										<ChevronRight className="w-4 h-4" />
+									</button>
+								</div>
+								<div className="flex flex-wrap items-center justify-center gap-2">
+									<button
+										onClick={() => seekVideoBy(-10)}
+										className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-white/10"
+									>
+										-10s
+									</button>
+									<button
+										onClick={() => seekVideoBy(10)}
+										className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-white/10"
+									>
+										+10s
+									</button>
+								</div>
+							</div>
 							<video
 								key={activeVideoSource || selectedVideo.url}
 								controls
@@ -552,7 +645,7 @@ export default function CourseDetailPage() {
 								onContextMenu={(e) => e.preventDefault()}
 								playsInline
 								preload='metadata'
-								className='w-full aspect-video lg:aspect-auto lg:h-full max-h-full object-contain bg-black'
+								className='w-full aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0 object-contain bg-black'
 								src={activeVideoSource || selectedVideo.url}
 								ref={selectedVideoElementRef}
 								onError={handleVideoError}
@@ -632,7 +725,7 @@ export default function CourseDetailPage() {
 									</div>
 
 									<div className="space-y-2">
-										{course.modules.sort((a, b) => a.order - b.order).map((module, moduleIndex) => {
+										{course.modules.map((module, moduleIndex) => {
 											const isActiveModule = activeModule === moduleIndex;
 											return (
 												<div key={`mobile-${moduleIndex}`} className={`rounded-xl overflow-hidden border ${isActiveModule ? 'border-[#00BCD4]/40 bg-[#00BCD4]/10' : 'border-gray-500/10 bg-[var(--bg-primary)]'}`}>
@@ -649,7 +742,7 @@ export default function CourseDetailPage() {
 
 													{isActiveModule && (
 														<div className="px-2 pb-2">
-															{module.videos?.length > 0 && module.videos.sort((a, b) => a.order - b.order).map((video, videoIndex) => {
+															{module.videos?.length > 0 && module.videos.map((video, videoIndex) => {
 																const videoKey = getVideoKey(moduleIndex, videoIndex, video);
 																const isCompleted = completedVideos.has(videoKey);
 																const isSelected = normalizeVideoUrl(selectedVideo?.url || "") === resolveVideoUrl(video);

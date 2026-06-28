@@ -8,6 +8,7 @@ import api from "../config/axios";
 const emptyQuestionForm = {
 	title: "",
 	description: "",
+	code: "",
 	topic: "",
 	difficulty: "Easy",
 	options: { A: "", B: "", C: "", D: "" },
@@ -228,6 +229,7 @@ export default function AdminQuizManagement() {
 		setQuestionForm({
 			title: question.title || "",
 			description: question.description || "",
+			code: question.code || "",
 			topic: question.topic || "",
 			difficulty: question.difficulty || "Easy",
 			options: {
@@ -343,6 +345,37 @@ export default function AdminQuizManagement() {
 								{["A", "B", "C", "D"].map((key) => (
 									<input key={key} value={questionForm.options[key]} onChange={(e) => setQuestionForm({ ...questionForm, options: { ...questionForm.options, [key]: e.target.value } })} placeholder={`Option ${key}`} className="rounded-xl bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3" />
 								))}
+							</div>
+							<div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+								<div>
+									<div className="mb-2 flex items-center justify-between gap-3">
+										<label className="text-sm font-semibold">Code Snippet</label>
+										<span className="text-xs text-[var(--text-muted)]">Optional</span>
+									</div>
+									<textarea
+										value={questionForm.code}
+										onChange={(e) => setQuestionForm({ ...questionForm, code: e.target.value })}
+										placeholder="Paste code snippet here"
+										rows={10}
+										spellCheck={false}
+										className="w-full min-h-[220px] rounded-xl bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3 font-mono text-sm leading-relaxed whitespace-pre-wrap break-words"
+									/>
+								</div>
+								<div>
+									<div className="mb-2 flex items-center justify-between gap-3">
+										<label className="text-sm font-semibold">Code Preview</label>
+										<span className="text-xs text-[var(--text-muted)]">Responsive</span>
+									</div>
+									<div className="min-h-[220px] rounded-xl border border-[var(--border-primary)] bg-[var(--bg-primary)] p-4">
+										{questionForm.code.trim() ? (
+											<pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-sm leading-relaxed text-[var(--text-color)]">
+												<code>{questionForm.code}</code>
+											</pre>
+										) : (
+											<p className="text-sm text-[var(--text-muted)]">Your code snippet preview will appear here.</p>
+										)}
+									</div>
+								</div>
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 								<input value={questionForm.topic} onChange={(e) => setQuestionForm({ ...questionForm, topic: e.target.value })} placeholder="Topic" className="rounded-xl bg-[var(--bg-primary)] border border-[var(--border-primary)] px-4 py-3" />
@@ -492,6 +525,11 @@ function DifficultyPill({ label, value }) {
 function QuestionCard({ question, index, active = false, attached = false, onEdit, onAttach, onRemove, onDelete }) {
 	return (
 		<div className="rounded-xl border border-[var(--border-primary)] bg-[var(--bg-primary)] p-4">
+			{question.code && (
+				<pre className="mt-3 rounded-lg border border-[var(--border-primary)] bg-black/20 p-3 overflow-x-auto whitespace-pre-wrap break-words text-xs font-mono leading-relaxed">
+					<code>{question.code}</code>
+				</pre>
+			)}
 			<div className="flex items-start justify-between gap-3">
 				<div>
 					<p className="text-xs text-[var(--text-muted)]">Q{index + 1} • {question.difficulty} • {question.topic || "General"}</p>
@@ -499,6 +537,8 @@ function QuestionCard({ question, index, active = false, attached = false, onEdi
 				</div>
 				{active && <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />}
 			</div>
+
+
 			<div className="mt-3 flex flex-wrap gap-2">
 				<button onClick={() => onEdit(question)} className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border-primary)]">Edit</button>
 				{onAttach && <button onClick={onAttach} disabled={attached} className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#A855F7] text-white disabled:opacity-50">{attached ? "Attached" : "Reuse"}</button>}

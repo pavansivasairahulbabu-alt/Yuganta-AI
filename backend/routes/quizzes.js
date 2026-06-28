@@ -10,6 +10,7 @@ import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 const MAX_QUIZ_ATTEMPTS = 3;
+const normalizeAnswerKey = (value = "") => String(value).trim().toUpperCase();
 
 const summarizeAttempts = (attempts = []) => {
 	const sorted = [...attempts].sort((a, b) => new Date(b.attemptDate) - new Date(a.attemptDate));
@@ -85,6 +86,7 @@ const sanitizeQuiz = (quiz, attemptSummary = null) => ({
 		_id: question._id,
 		title: question.title,
 		description: question.description,
+		code: question.code || "",
 		options: question.options,
 		difficulty: question.difficulty,
 		topic: question.topic,
@@ -98,6 +100,7 @@ const normalizeQuestionPayload = (payload = {}) => ({
 	topic: String(payload.topic || "").trim(),
 	title: String(payload.title || "").trim(),
 	description: String(payload.description || "").trim(),
+	code: String(payload.code || "").trim(),
 	options: ["A", "B", "C", "D"].map((key) => ({
 		key,
 		text: String(payload.options?.[key] ?? payload.options?.find?.((opt) => opt.key === key)?.text ?? "").trim(),
@@ -472,21 +475,28 @@ router.post("/:quizId/submit", protect, async (req, res) => {
 			});
 		}
 
-		const answerMap = new Map((req.body.answers || []).map((answer) => [String(answer.questionId), String(answer.selectedAnswer || "").toUpperCase()]));
+		const answerMap = new Map(
+			(req.body.answers || []).map((answer) => [
+				String(answer.questionId),
+				normalizeAnswerKey(answer.selectedAnswer),
+			]),
+		);
 		let score = 0;
 		const reviewedAnswers = quiz.questionIds.map((question) => {
-			const selectedAnswer = answerMap.get(question._id.toString()) || "";
-			const selectedOption = question.options.find((option) => option.key === selectedAnswer);
-			const correctOption = question.options.find((option) => option.key === question.correctAnswer);
-			const isCorrect = selectedAnswer === question.correctAnswer;
+			const selectedAnswer = normalizeAnswerKey(answerMap.get(question._id.toString()));
+			const correctAnswer = normalizeAnswerKey(question.correctAnswer);
+			const selectedOption = question.options.find((option) => normalizeAnswerKey(option.key) === selectedAnswer);
+			const correctOption = question.options.find((option) => normalizeAnswerKey(option.key) === correctAnswer);
+			const isCorrect = selectedAnswer !== "" && selectedAnswer === correctAnswer;
 			if (isCorrect) score += 1;
 			return {
 				questionId: question._id,
 				questionTitle: question.title,
+				questionCode: question.code || "",
 				topic: question.topic || "General",
 				selectedAnswer,
 				selectedAnswerText: selectedOption?.text || "",
-				correctAnswer: question.correctAnswer,
+				correctAnswer,
 				correctAnswerText: correctOption?.text || "",
 				isCorrect,
 				explanation: question.explanation,
